@@ -1,0 +1,57 @@
+$ nmcli conn showw bridge-slave-enx645aedf3f6d5
+connection.id:                          bridge-slave-enx645aedf3f6d5
+connection.uuid:                        cf78f701-4cf8-4a5a-931e-6bd9bc7e158a
+connection.stable-id:                   --
+connection.type:                        802-3-ethernet
+connection.interface-name:              enx645aedf3f6d5
+connection.autoconnect:                 yes
+connection.autoconnect-priority:        0
+connection.autoconnect-retries:         -1 (default)
+connection.multi-connect:               0 (default)
+connection.auth-retries:                -1
+connection.timestamp:                   1737688187
+connection.read-only:                   no
+connection.permissions:                 --
+connection.zone:                        --
+connection.master:                      3a2e41a1-831b-4294-8885-a8184d161d23
+connection.slave-type:                  bridge
+connection.autoconnect-slaves:          -1 (default)
+connection.secondaries:                 --
+connection.gateway-ping-timeout:        0
+connection.metered:                     unknown
+connection.lldp:                        default
+connection.mdns:                        -1 (default)
+connection.llmnr:                       -1 (default)
+connection.wait-device-timeout:         -1
+802-3-ethernet.port:                    --
+802-3-ethernet.speed:                   0
+802-3-ethernet.duplex:                  --
+802-3-ethernet.auto-negotiate:          no
+802-3-ethernet.mac-address:             --
+802-3-ethernet.cloned-mac-address:      --
+802-3-ethernet.generate-mac-address-mask:--
+802-3-ethernet.mac-address-blacklist:   --
+802-3-ethernet.mtu:                     auto
+802-3-ethernet.s390-subchannels:        --
+802-3-ethernet.s390-nettype:            --
+802-3-ethernet.s390-options:            --
+802-3-ethernet.wake-on-lan:             default
+802-3-ethernet.wake-on-lan-password:    --
+bridge-port.priority:                   32
+bridge-port.path-cost:                  100
+bridge-port.hairpin-mode:               no
+bridge-port.vlans:                      --
+GENERAL.NAME:                           bridge-slave-enx645aedf3f6d5
+GENERAL.UUID:                           cf78f701-4cf8-4a5a-931e-6bd9bc7e158a
+GENERAL.DEVICES:                        enx645aedf3f6d5
+GENERAL.IP-IFACE:                       enx645aedf3f6d5
+GENERAL.STATE:                          activated
+GENERAL.DEFAULT:                        no
+GENERAL.DEFAULT6:                       no
+GENERAL.SPEC-OBJECT:                    --
+GENERAL.VPN:                            no
+GENERAL.DBUS-PATH:                      /org/freedesktop/NetworkManager/ActiveConnection/12
+GENERAL.CON-PATH:                       /org/freedesktop/NetworkManager/Settings/13
+GENERAL.ZONE:                           --
+GENERAL.MASTER-PATH:                    /org/freedesktop/NetworkManager/Devices/10
+IP4.GATEWAY:                            --

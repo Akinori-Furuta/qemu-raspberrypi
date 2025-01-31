@@ -1,0 +1,112 @@
+$ nmcli conn show bridge-brnm0connection.id:                          bridge-brnm0
+connection.uuid:                        3a2e41a1-831b-4294-8885-a8184d161d23
+connection.stable-id:                   --
+connection.type:                        bridge
+connection.interface-name:              brnm0
+connection.autoconnect:                 yes
+connection.autoconnect-priority:        0
+connection.autoconnect-retries:         -1 (default)
+connection.multi-connect:               0 (default)
+connection.auth-retries:                -1
+connection.timestamp:                   1737688192
+connection.read-only:                   no
+connection.permissions:                 --
+connection.zone:                        --
+connection.master:                      --
+connection.slave-type:                  --
+connection.autoconnect-slaves:          -1 (default)
+connection.secondaries:                 --
+connection.gateway-ping-timeout:        0
+connection.metered:                     unknown
+connection.lldp:                        default
+connection.mdns:                        -1 (default)
+connection.llmnr:                       -1 (default)
+connection.wait-device-timeout:         -1
+ipv4.method:                            disabled
+ipv4.dns:                               --
+ipv4.dns-search:                        --
+ipv4.dns-options:                       --
+ipv4.dns-priority:                      0
+ipv4.addresses:                         --
+ipv4.gateway:                           --
+ipv4.routes:                            --
+ipv4.route-metric:                      -1
+ipv4.route-table:                       0 (unspec)
+ipv4.routing-rules:                     --
+ipv4.ignore-auto-routes:                no
+ipv4.ignore-auto-dns:                   no
+ipv4.dhcp-client-id:                    --
+ipv4.dhcp-iaid:                         --
+ipv4.dhcp-timeout:                      0 (default)
+ipv4.dhcp-send-hostname:                yes
+ipv4.dhcp-hostname:                     --
+ipv4.dhcp-fqdn:                         --
+ipv4.dhcp-hostname-flags:               0x0 (none)
+ipv4.never-default:                     no
+ipv4.may-fail:                          yes
+ipv4.dad-timeout:                       -1 (default)
+ipv6.method:                            auto
+ipv6.dns:                               --
+ipv6.dns-search:                        --
+ipv6.dns-options:                       --
+ipv6.dns-priority:                      0
+ipv6.addresses:                         --
+ipv6.gateway:                           --
+ipv6.routes:                            --
+ipv6.route-metric:                      -1
+ipv6.route-table:                       0 (unspec)
+ipv6.routing-rules:                     --
+ipv6.ignore-auto-routes:                no
+ipv6.ignore-auto-dns:                   no
+ipv6.never-default:                     no
+ipv6.may-fail:                          yes
+ipv6.ip6-privacy:                       -1 (unknown)
+ipv6.addr-gen-mode:                     stable-privacy
+ipv6.ra-timeout:                        0 (default)
+ipv6.dhcp-duid:                         --
+ipv6.dhcp-iaid:                         --
+ipv6.dhcp-timeout:                      0 (default)
+ipv6.dhcp-send-hostname:                yes
+ipv6.dhcp-hostname:                     --
+ipv6.dhcp-hostname-flags:               0x0 (none)
+ipv6.token:                             --
+bridge.mac-address:                     --
+bridge.stp:                             no
+bridge.priority:                        32768
+bridge.forward-delay:                   15
+bridge.hello-time:                      2
+bridge.max-age:                         20
+bridge.ageing-time:                     300
+bridge.group-forward-mask:              0
+bridge.multicast-snooping:              yes
+bridge.vlan-filtering:                  no
+bridge.vlan-default-pvid:               1
+bridge.vlans:                           --
+proxy.method:                           none
+proxy.browser-only:                     no
+proxy.pac-url:                          --
+proxy.pac-script:                       --
+GENERAL.NAME:                           bridge-brnm0
+GENERAL.UUID:                           3a2e41a1-831b-4294-8885-a8184d161d23
+GENERAL.DEVICES:                        brnm0
+GENERAL.IP-IFACE:                       brnm0
+GENERAL.STATE:                          activated
+GENERAL.DEFAULT:                        no
+GENERAL.DEFAULT6:                       no
+GENERAL.SPEC-OBJECT:                    --
+GENERAL.VPN:                            no
+GENERAL.DBUS-PATH:                      /org/freedesktop/NetworkManager/ActiveConnection/11
+GENERAL.CON-PATH:                       /org/freedesktop/NetworkManager/Settings/12
+GENERAL.ZONE:                           --
+GENERAL.MASTER-PATH:                    --
+IP4.GATEWAY:                            --
+IP6.ADDRESS[1]:                         240f:6e:7f7:1:48f:e0ff:c140:b941/64
+IP6.ADDRESS[2]:                         240f:6e:7f7:1:679e:b78a:87cb:adec/64
+IP6.ADDRESS[3]:                         fe80::d3de:b762:470d:9666/64
+IP6.GATEWAY:                            fe80::9af1:99ff:fee2:7334
+IP6.ROUTE[1]:                           dst = 240f:6e:7f7:1::/64, nh = ::, mt = 425
+IP6.ROUTE[2]:                           dst = ::/0, nh = fe80::9af1:99ff:fee2:7334, mt = 425
+IP6.ROUTE[3]:                           dst = fe80::/64, nh = ::, mt = 425
+IP6.DNS[1]:                             2001:268:fd07:4::1
+IP6.DNS[2]:                             2001:268:fd08:4::1
+DHCP6.OPTION[1]:                        dhcp6_name_servers = 2001:268:fd07:4::1 2001:268:fd08:4::1
