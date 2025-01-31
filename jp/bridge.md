@@ -647,7 +647,7 @@ iface br0 inet manual
 sudo nmcli conn delete 'Wired connection 2'
 # Reload systemd settings.
 #  Modifying under /etc/network/* without daemon-reload
-#  may cause error when enable/restart networking service.
+#  may cause an error when enable/restart networking service.
 sudo systemctl deamon-reload
 # Enable networking service.
 sudo systemctl enable networking
@@ -728,7 +728,7 @@ iface br0 inet dhcp
 ```bash
 # Reload systemd settings.
 #  Modifying under /etc/network/* without daemon-reload
-#  may cause error when enable/restart networking service.
+#  may cause an error when enable/restart networking service.
 sudo systemctl deamon-reload
 # Enable networking service.
 sudo systemctl enable networking
