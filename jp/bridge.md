@@ -447,6 +447,7 @@ $*
 
 作成した bridge brnm0 に IP address を割り当てる使い方もできます。ここでは DHCP で IP address が自動的に付与される環境を想定しています。
 
+<a name="pros-cons-bridge-has-a-address"></a>
 ### bridge に IP address を割り当てる 利点・欠点
 
 bridge に IP address を割り当てる利点・欠点は次の通りです。
@@ -739,5 +740,5 @@ brctl show
 ifconfig -a
 ```
 
-host machine の内外通信に使っていた enp3s0 と同じセグメント内のアドレスが付与されます。このような状態でも通信は可能です。[利点・欠点は nmcli で設定した bridge と同様](#bridge-に-ip-address-を割り当てる-利点・欠点)です。interface を集約・分離どちらの運用もできます。
+host machine の内外通信に使っていた enp3s0 と同じセグメント内のアドレスが付与されます。このような状態でも通信は可能です。[利点・欠点は nmcli で設定した bridge と同様](#pros-cons-bridge-has-a-address)です。interface を集約・分離どちらの運用もできます。
 
