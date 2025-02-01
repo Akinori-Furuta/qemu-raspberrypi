@@ -654,7 +654,7 @@ sudo nmcli conn delete 'Wired connection 2'
 # Reload systemd settings.
 #  Modifying under /etc/network/* without daemon-reload
 #  may cause an error when enable/restart networking service.
-sudo systemctl deamon-reload
+sudo systemctl daemon-reload
 # Enable networking service.
 sudo systemctl enable networking
 # To reload /etc/network/interfaces.d/*, restart networking setvice.
