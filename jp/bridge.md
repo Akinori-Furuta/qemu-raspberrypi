@@ -77,6 +77,12 @@ eno1: connected to OnBoard
         route6 ::/0
         route6 fe80::/64
 
+lo: connected (externally) to lo
+        "lo"
+        loopback (unknown), 00:00:00:00:00:00, sw, mtu 65536
+        inet4 127.0.0.1/8
+        inet6 ::1/128
+
 enx645aedf3f6d5: connected to Wired connection 4
         "Apple A1277"
         ethernet (asix), 64:5A:ED:F3:F6:D5, hw, mtu 1500
