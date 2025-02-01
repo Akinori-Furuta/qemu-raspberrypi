@@ -117,8 +117,6 @@ bridge 接続で使用したい Network Interface を次の状態で接続しま
 
 ![device names and connection names will be configured by nmcli](../img/nmcli-config-overview.png)
 
-
-
 Network Manager によって接続した Network Interface は自動的に構成されます(自動的に構成されない状況も有る)。GUI で Start Icon → Preferences → Advanced Network Configuration にて次の様に確認できます。
 
 ![Show new network interface by GUI Advanced Network Configuration](../img/advanced-network-conf-1.png)
