@@ -479,8 +479,10 @@ bridge に IP address を割り当てる利点・欠点は次の通りです。
 ```bash
 # Enable DHCP IPv4 configuration on connection bridge-brnm0 (applies to brnm0)
 sudo nmcli conn modify bridge-brnm0 ipv4.method auto
-# Down and Up bridge device to reconfigure.
-sudo nmcli conn down bridge-brnm0; sleep 1; sudo nmcli conn up bridge-brnm0
+# Sync systemd with NetworkManger
+sudo systemctl daemon-reload
+# Restart NetworkManager
+sudo systemctl restart NetworkManager
 # Check configured network devices.
 nmcli
 ```
