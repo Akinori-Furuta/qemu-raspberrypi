@@ -373,7 +373,7 @@ qemu-bridge-helper が有るディレクトリ /lib/usr/qemu に移動、コピ�
 
 ``` bash
 # Change work directory to having qemu-bridge-helper
-cd /lib/usr/qemu
+cd /usr/lib/qemu
 # Check if qemu-bridge-helper exists
 ls -la
 ```
