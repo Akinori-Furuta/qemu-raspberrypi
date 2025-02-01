@@ -740,6 +740,8 @@ sudo systemctl deamon-reload
 sudo systemctl enable networking
 # To reload /etc/network/interfaces.d/*, restart networking setvice.
 sudo systemctl restart networking
+# Down and Up interface.
+sudo ifdown br0; sudo ifup br0
 # Check bridge configurations.
 brctl show
 # Check result.
