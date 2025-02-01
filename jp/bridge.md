@@ -61,7 +61,7 @@ BRIDGE-UTILS-INTERFACES(5)](https://manpages.debian.org/testing/bridge-utils/bri
 nmcli
 ```
 
-ネットワーク状態が一通り表示されれば使えます。以下は表示例です。
+ネットワーク状態が一通り表示されれば使えます。以下は表示例です(注目する部分だけ抜粋してあります)。
 
 ```text
 eno1: connected to OnBoard
