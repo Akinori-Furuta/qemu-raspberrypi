@@ -110,8 +110,10 @@ Error: NetworkManager is not running.
 
 bridge 接続で使用したい Network Interface を次の状態で接続します(接続した状態で起動します)。
 
++ ssh などでログインしてリモートで作業する場合は、可能であれば先にリモート接続を確立して下さい。
+  + PCIe 接続の Network Interface を使う場合は、増設後に起動する流れになります。起動後に `nmcli`, `ip link` コマンドなどで IP address を確認して控えておき、作業中に接続が切れた場合に再接続できる様に備えて下さい。 
 + USB あるいは PCI express bus 接続などの形態でマシンに Converter か Network Interface Card を接続します。
-+ Ethernet cable は可能であれば接続しない状態にして下さい。
++ Ethernet cable も接続した状態にして下さい。
 
 ここでは USB-Ethernet converter を接続した次の図のような状況で手順を進めます。
 
@@ -317,8 +319,6 @@ sudo nmcli conn down bridge-slave-enx645aedf3f6d5; sleep 1; sudo nmcli conn up b
 > 設定は /etc/netplan または /etc/NetworkManager/system-connections 以下に格納されます。root 権限で読むことができます。
 
 ここまで行った nmcli を使った設定は保存され、起動後も適用されます。
-
-QEMU 専用に追加した USB-Ethernet converter (あるいは PCIe Network Interface Card) に Ethernet cable を接続してください。
 
 ## QEMU のネットワーク設定 helper を root 権限昇格できる様にする
 
