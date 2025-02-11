@@ -430,7 +430,7 @@ qemu-system-arm \
 -dtb bootfs/bcm2709-rpi-2-b.dtb \
 -drive format=raw,file=rpi2vm32-3.img \
 -append "console=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait dwc_otg.fiq_fsm_enable=0 bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768" \
--serial stdio \
+-serial mon:stdio \
 -no-reboot \
 -device usb-kbd \
 -device usb-tablet \
