@@ -636,7 +636,7 @@ sudo nano /etc/network/interfaces.d/enx000ec6c150f4-br0
 <a name="file-enx000ec6c150f4">File: enx000ec6c150f4</a>
 ```text
 auto enx000ec6c150f4
-iface br0 inet manual
+iface enx000ec6c150f4 inet manual
 ```
 
 <a name="file-enx000ec6c150f4-br0">File: enx000ec6c150f4-br0</a>
