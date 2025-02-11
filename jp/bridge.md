@@ -619,18 +619,27 @@ source /etc/network/interfaces.d/*
 > [!TIP]
 > 非常に古い networking service だと /etc/network/interfaces に source 行を含めることができないかもしれません。作業環境にて manual page `man 5 interfaces` を確認してください。この場合は /etc/network/interfaces.d 以下に追加するファイル内容を直接 /etc/network/interfaces ファイルに追記して下さい。
 
-次の様に bridge br0 を設定するファイルを作ります。nano editor 以外で作業しても良いですし、ファイルを別に準備して copy にて配置する方法でも良いです。
+次の様に bridge br0 を設定するファイルを 2 個作ります。nano editor 以外で作業しても良いですし、ファイルを別に準備して copy にて配置する方法でも良いです。
 
 ```bash
 # Create interfaces.d directory.
 sudo mkdir -p /etc/network/interfaces.d
-# Create bridge br0 configuration file.
+# Create bridge slave network interface (bridge_ports) file.
 #  You can use your favorite editor other than nano.
+sudo nano /etc/network/interfaces.d/enx000ec6c150f4
+# Create bridge br0 configuration file.
 sudo nano /etc/network/interfaces.d/enx000ec6c150f4-br0
 ```
 
-ファイル名は enx000ec6c150f4-br0 としています。読み込み順を考慮する必要がある場合は、 /etc/network/interfaces.d 以下に配置されたファイル群と整合性がとれるようにして下さい。enx000ec6c150f4-br0 ファイルの内容は次の通りです。
-<a name="file-enx000ec6c150f4-br0"></a>
+ファイル名は enx000ec6c150f4, enx000ec6c150f4-br0 としています。読み込み順を考慮する必要がある場合は、 /etc/network/interfaces.d 以下に配置されたファイル群と整合性がとれるようにして下さい。enx000ec6c150f4 と enx000ec6c150f4-br0 ファイルの内容は次の通りです。
+
+<a name="file-enx000ec6c150f4">File: enx000ec6c150f4</a>
+```text
+auto enx000ec6c150f4
+iface br0 inet manual
+```
+
+<a name="file-enx000ec6c150f4-br0">File: enx000ec6c150f4-br0</a>
 ```text
 auto br0
 iface br0 inet manual
