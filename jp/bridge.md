@@ -61,6 +61,9 @@ BRIDGE-UTILS-INTERFACES(5)](https://manpages.debian.org/testing/bridge-utils/bri
 nmcli
 ```
 
+> [!TIP]
+> 古い `nmcli` だと、help message が表示されるだけになります。この場合は `nmcli dev show` を使って接続状態を確認して下さい。
+
 ネットワーク状態が一通り表示されれば使えます。以下は表示例です(注目する部分だけ抜粋してあります)。
 
 ```text
