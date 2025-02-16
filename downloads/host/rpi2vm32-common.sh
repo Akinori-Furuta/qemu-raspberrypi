@@ -115,23 +115,35 @@ function RaspiVncNumber() {
 
 	vnc_list=( $( ss -O -l -t -n | \
 		awk -F '[[:space:]]+' '{print $4}' | sed 's/^.*://' | \
-		awk "(\$1 >= ${vnc_port_min} ) && (\$1 <= ${vnc_port_max}) {print \$1}" | sort -n \
+		awk "(\$1 >= ${vnc_port_min} ) && (\$1 <= ${vnc_port_max}) {print \$1}" | sort -n -u \
 	) )
+
+	vnc_list_n=${#vnc_list[*]}
+	vnc_list_i=0
 
 	while (( ${vnc_num} <= ${vnc_num_max} ))
 	do
-		vnc_port=$(( ${vnc_num} + ${vnc_port_base} ))
-		if ! echo ${vnc_list[*]} | grep -q ${vnc_port}
+
+		if (( ${vnc_list_i} < ${vnc_list_n} ))
 		then
+			vnc_list_port=${vnc_list[${vnc_list_i}]}
+		else
+			# No more VNC port in use.
+			vnc_list_port=65536
+		fi
+
+		vnc_port=$(( ${vnc_num} + ${vnc_port_base} ))
+
+		if (( ${vnc_port} != ${vnc_list_port} ))
+		then
+			echo ${vnc_num}
+			result=0
 			break
 		fi
+
 		vnc_num=$(( ${vnc_num} + 1 ))
+		vnc_list_i=$(( ${vnc_list_i} + 1 ))
 	done
-	if (( ${vnc_num} <= ${vnc_num_max} ))
-	then
-		echo ${vnc_num}
-		result=0
-	fi
 
 	return ${result}
 }
