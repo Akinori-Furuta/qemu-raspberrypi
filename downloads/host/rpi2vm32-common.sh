@@ -155,7 +155,12 @@ function RaspiVncNumber() {
 [ -z "${NicBridge}"    ] && NicBridge="$( RaspiBridgeFind )"
 [ -z "${NicMacFile}"   ] && NicMacFile="net0_mac.txt"
 [ -z "${NicMacPrefix}" ] && NicMacPrefix="b8:27:eb"
-[ -z "${VncNumber}"    ] && VncNumber="$( RaspiVncNumber )"
+if  [ -z "${VncDisplay}"   ]
+then
+	_VncNumber=$( RaspiVncNumber )
+else
+	_VncNumber=""
+fi
 
 if [ -z "${NicMac}" ] && [ -f "${NicMacFile}" ]
 then
@@ -179,7 +184,7 @@ echo "$0: INFO: DtbFile=${DtbFile}"
 echo "$0: INFO: SdFile=${SdFile}"
 echo "$0: INFO: NicBridge=${NicBridge}"
 echo "$0: INFO: NicMac=${NicMac}"
-echo "$0: INFO: VncNumber=${VncNumber}"
+echo "$0: INFO: VncDisplay=${VncDisplay}"
 
 if [ ! -f "${KernelFile}" ]
 then
@@ -228,7 +233,7 @@ then
 	exit 1
 fi
 
-if [ -z "${VncNumber}" ]
+if [ -z "${VncDisplay}" ] && [ -z "${_VncNumber}" ]
 then
 	echo "$0: ERROR: There is no available VNC number." 1>&2
 	exit 1
