@@ -7,9 +7,10 @@ MyPath="$( readlink -f "${MyWhich}" )"
 MyDir="$( dirname "${MyPath}" )"
 MyBase="$( basename "$0" )"
 MyBody="${MyBase%.*}"
+MyBodyNoSuffix="${MyBody%%-*}"
 
 ConfigFile="${MyDir}/${MyBody%-*}.conf"
-CommonFile="${MyDir}/${MyBody%-*}-common.sh"
+CommonFile="${MyDir}/${MyBodyNoSuffix}-common.sh"
 
 if [ -f "${ConfigFile}" ]
 then
