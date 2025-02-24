@@ -201,6 +201,18 @@ then
 	exit 1
 fi
 
+_DriveParam="file=${SdFile}"
+
+if file "${SdFile}" | grep -q DOS/MBR
+then
+	_DriveParam="format=raw,file=${SdFile}"
+fi
+
+if file "${SdFile}" | grep -q QCOW2
+then
+	_DriveParam="format=qcow2,file=${SdFile}"
+fi
+
 if [ -z "${NicBridge}" ]
 then
 	echo "$0: ERROR: Need network bridge interface."
