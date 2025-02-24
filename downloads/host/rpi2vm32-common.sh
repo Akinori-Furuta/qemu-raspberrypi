@@ -155,11 +155,17 @@ function RaspiVncNumber() {
 [ -z "${NicBridge}"    ] && NicBridge="$( RaspiBridgeFind )"
 [ -z "${NicMacFile}"   ] && NicMacFile="net0_mac.txt"
 [ -z "${NicMacPrefix}" ] && NicMacPrefix="b8:27:eb"
-if  [ -z "${VncDisplay}"   ]
+if  [ -z "${VncDisplay}" ]
 then
 	_VncNumber=$( RaspiVncNumber )
 else
-	_VncNumber=""
+	if [[ "${VncDisplay}" == *:\* ]]
+	then
+		_VncNumber=$( RaspiVncNumber )
+		VncDisplay="${VncDisplay%\*}${_VncNumber}"
+	else
+		_VncNumber=""
+	fi
 fi
 
 if [ -z "${NicMac}" ] && [ -f "${NicMacFile}" ]

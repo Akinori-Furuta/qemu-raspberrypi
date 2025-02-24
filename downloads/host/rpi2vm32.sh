@@ -28,6 +28,11 @@ if [ -z "${VncDisplay}" ]
 then
 	VncDisplay=":${_VncNumber}"
 	echo "$0: INFO: VNC URI is vnc://localhost:${_VncNumber} or vnc://$(hostname).local:${_VncNumber}"
+else
+	if [ -n "${_VncNumber}" ]
+	then
+		echo "$0: INFO: VNC URI is vnc://${VncDisplay}"
+	fi
 fi
 
 qemu-system-arm \
