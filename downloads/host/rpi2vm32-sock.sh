@@ -33,7 +33,8 @@ fi
 if [[ "${VncDisplay}" == unix:/ ]]
 then
 	VncDisplay="unix:/${MyDir}/${MyBodyNoSuffix}.sock"
-	echo "$0: INFO: VNC URI is \"${VncDisplay}\""
+	echo "$0: INFO: VNC URI is \"vnc+unix://${MyDir}/${MyBodyNoSuffix}.sock\""
+	echo "$0: INFO: Some apps can't recognize above URI, you may arrange it."
 else
 	if [ -n "${_VncNumber}" ]
 	then
