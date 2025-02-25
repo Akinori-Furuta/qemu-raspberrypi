@@ -34,6 +34,11 @@ if [[ "${VncDisplay}" == unix:/ ]]
 then
 	VncDisplay="unix:/${MyDir}/${MyBodyNoSuffix}.sock"
 	echo "$0: INFO: VNC URI is \"${VncDisplay}\""
+else
+	if [ -n "${_VncNumber}" ]
+	then
+		echo "$0: INFO: VNC URI is vnc://${VncDisplay}"
+	fi
 fi
 
 qemu-system-arm \
