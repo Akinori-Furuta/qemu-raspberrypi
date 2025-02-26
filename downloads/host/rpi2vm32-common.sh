@@ -214,12 +214,12 @@ fi
 
 _DriveParam="file=${SdFile}"
 
-if file "${SdFile}" | grep -q DOS/MBR
+if file -L "${SdFile}" | grep -q DOS/MBR
 then
 	_DriveParam="format=raw,file=${SdFile}"
 fi
 
-if file "${SdFile}" | grep -q QCOW2
+if file -L "${SdFile}" | grep -q QCOW2
 then
 	_DriveParam="format=qcow2,file=${SdFile}"
 fi
