@@ -148,6 +148,18 @@ function RaspiVncNumber() {
 	return ${result}
 }
 
+# Get remote-viewer version
+function RemoteViewerVersion() {
+	remote_viewer_ver=$( remote-viewer --version | sed 's/^.*version[[:space:]]*\([0-9.]\+\).*/\1/' )
+	result=$?
+	if [ -z "${remote_viewer_ver}" ]
+	then
+		remote_viewer_ver="0.0"
+	fi
+	echo "${remote_viewer_ver}"
+	return ${result}
+}
+
 [ -z "${KernelFile}"   ] && KernelFile="bootfs/kernel7.img"
 [ -z "${InitrdFile}"   ] && InitrdFile="bootfs/initramfs7"
 [ -z "${DtbFile}"      ] && DtbFile="bootfs/bcm2709-rpi-2-b.dtb"
@@ -155,18 +167,6 @@ function RaspiVncNumber() {
 [ -z "${NicBridge}"    ] && NicBridge="$( RaspiBridgeFind )"
 [ -z "${NicMacFile}"   ] && NicMacFile="net0_mac.txt"
 [ -z "${NicMacPrefix}" ] && NicMacPrefix="b8:27:eb"
-if  [ -z "${VncDisplay}" ]
-then
-	_VncNumber=$( RaspiVncNumber )
-else
-	if [[ "${VncDisplay}" == *:\* ]]
-	then
-		_VncNumber=$( RaspiVncNumber )
-		VncDisplay="${VncDisplay%\*}${_VncNumber}"
-	else
-		_VncNumber=""
-	fi
-fi
 
 if [ -z "${NicMac}" ] && [ -f "${NicMacFile}" ]
 then
@@ -183,6 +183,16 @@ then
 	fi
 fi
 
+if [ -z "${DisplayOutput}" ]
+then
+	DisplayOutput="gtk"
+	RemoteViewerSpiceUnix=$( echo "$(RemoteViewerVersion) >= 8.0" | bc )
+	if [[ ${RemoteViewerSpiceUnix} == 1 ]]
+	then
+		DisplayOutput="spice-app"
+	fi
+fi
+
 echo "$0: INFO: MyDir=${MyDir}"
 echo "$0: INFO: KernFile=${KernelFile}"
 echo "$0: INFO: InitrdFile=${InitrdFile}"
@@ -190,7 +200,7 @@ echo "$0: INFO: DtbFile=${DtbFile}"
 echo "$0: INFO: SdFile=${SdFile}"
 echo "$0: INFO: NicBridge=${NicBridge}"
 echo "$0: INFO: NicMac=${NicMac}"
-echo "$0: INFO: VncDisplay=${VncDisplay}"
+echo "$0: INFO: DisplayOutput=${DisplayOutput}"
 
 if [ ! -f "${KernelFile}" ]
 then
@@ -236,11 +246,5 @@ if [ -z "${NicMac}" ]
 then
 	echo "$0: ERROR: Can not generate a new MAC address."
 	echo "$0: INFO: Specify an indentical MAC address via file ${NicMacFile}."
-	exit 1
-fi
-
-if [ -z "${VncDisplay}" ] && [ -z "${_VncNumber}" ]
-then
-	echo "$0: ERROR: There is no available VNC number." 1>&2
 	exit 1
 fi

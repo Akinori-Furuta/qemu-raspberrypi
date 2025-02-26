@@ -24,17 +24,6 @@ then
 	source "${CommonFile}"
 fi
 
-if [ -z "${VncDisplay}" ]
-then
-	VncDisplay=":${_VncNumber}"
-	echo "$0: INFO: VNC URI is vnc://localhost:${_VncNumber} or vnc://$(hostname).local:${_VncNumber}"
-else
-	if [ -n "${_VncNumber}" ]
-	then
-		echo "$0: INFO: VNC URI is vnc://${VncDisplay}"
-	fi
-fi
-
 qemu-system-arm \
 -machine raspi2b \
 -kernel "${KernelFile}" \
@@ -52,5 +41,5 @@ qemu-system-arm \
 -device usb-tablet \
 -netdev "tap,br=${NicBridge},helper=/usr/lib/qemu/qemu-bridge-helper-suid,id=net0" \
 -device "usb-net,netdev=net0,mac=${NicMac}" \
--vnc "${VncDisplay}" \
+-display "${DisplayOutput}" \
 "$@"
