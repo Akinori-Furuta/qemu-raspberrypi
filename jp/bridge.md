@@ -323,6 +323,8 @@ sudo nmcli conn down bridge-slave-enx645aedf3f6d5; sleep 1; sudo nmcli conn up b
 
 ここまで行った nmcli を使った設定は保存され、起動後も適用されます。
 
+<a name="setup-qemu-bridge-helper"></a>
+
 ## QEMU のネットワーク設定 helper を root 権限昇格できる様にする
 
 QEMU で動かす仮想マシンから利用する network bridge に対する操作は root 権限が必要です。一般ユーザーで network bridge を利用できる様にするため、qemu-bridge-helper が用意されています。[QEMU の wiki Features/HelperNetworking](https://wiki.qemu.org/Features/HelperNetworking) に参考になる記事があります。
