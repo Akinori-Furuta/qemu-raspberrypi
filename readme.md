@@ -9,18 +9,8 @@ Linux PC 上で QEMU を使って RaspberyPi のイメージを動かすこと�
 ## 目次
 
 + [Network Bridge を QEMU 向けに構成する](jp/bridge.md)
-
-予定している続きは次の通りです。
-
-+ QEMU 上で実行するための RaspberryPi イメージを取得する
-  + ダウンロードの初期設定
-+ RaspberryPi イメージを QEMU イメージに変換する
-  + イメージ変換
-  + イメージ修正
-    + 初回起動を成功させるのに必要な修正
-+ RaspberryPi を QEMU 上で動作させる
-  + 初回起動
-  + 通常起動
-  + より快適に動かすための追加設定
++ [QEMU で実行する Rasiberry Pi イメージファイルを作る](jp/rpi-image.md)
++ [Raspberry Pi OS の初期設定を行う](jp/config-rpi.md)
++ [apt upgrade をした後の対応](jp/follow-upgrade.md)
 
 github 上で文書を書いていく練習も兼ねています。物足りなさや記述の稚拙さがあると思います。
