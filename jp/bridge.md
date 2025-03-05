@@ -12,7 +12,7 @@ Linux PC 上で QEMU を使って仮想マシンを動かす場合に仮想マ�
 + Network Interface を 2 つ以上接続する
   + 1 つは普段の ssh 接続あるいは内部から外部に向かう接続に使います。今まで通りの運用を維持します。
   + もう一つは QEMU 用専用に使う
-    + kernel 内に Software で実装した Bridge (ほぼ L2 switch として働く HUB と見做せる機能) 専用に使います
+    + kernel 内にソフトウエアで実装した Bridge (ほぼ L2 switch として働く HUB と見做せる機能) 専用に使います
   + このように構成する理由は Network Interface の設定に失敗した場合に内外どちらに向かう方向ともアクセス不能になることを避けるためです
     + 正しく構成できれば Network Interface は 1 つで済みます(その方法も示します)
 + LAN 環境は DHCP service によって少なくとも IP address (IPv4 address) の振り出しが行われている
