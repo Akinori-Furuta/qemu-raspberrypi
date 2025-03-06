@@ -307,9 +307,11 @@ sudo resize2fs /dev/nbdNp2
 > [!NOTE]
 > Raspberry Pi OS 初回起動時に rootfs を拡張する処理が行われます。しかし、仮想マシン上でこれを行うと起動完了までの時間が長すぎて起動に失敗します。ホストマシン上で予め拡張処理を行い、初回起動に掛かる時間を短縮します。それでも fstrim を行うため 10 ～ 30 分掛かります。
 
+<a name="tar-target-kit"></a>
+
 ### 起動に必要なファイルを image file からコピーし image file を修正する
 
-<a name="tar-target-kit">QEMU で Raspberry Pi OS を動かすのに必要な第 1 パーティション (bootfs) ファイル群</a>をホストマシン上のディレクトリへコピーし、第 2 パーティション(rootfs) 以下のファイル修正をします。修正内容は「[参考 rootfs 修正内容について](#参考-rootfs-修正内容について)」を見て下さい。
+QEMU で Raspberry Pi OS を動かすのに必要な第 1 パーティション (bootfs) ファイル群をホストマシン上のディレクトリへコピーし、第 2 パーティション(rootfs) 以下のファイル修正をします。修正内容は「[参考 rootfs 修正内容について](#参考-rootfs-修正内容について)」を見て下さい。
 
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
