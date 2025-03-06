@@ -231,7 +231,7 @@ qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host
 
 1. スクリプトの \$0 (コマンドラインから呼び出した時に使った path あるいはコマンド名) から、配置されたディレクトリを探す
 2. スクリプトの basename 部分より接尾辞(拡張子部分) .sh を除く
-3. 上記で得た部分文字列から**最長**末尾一致で -\* を取り除く
+3. 上記で得た部分文字列から最長末尾一致で -\* を取り除く
 4. 1 で得た文字列と 3 で得た文字列を / で結合し、末尾に -common.sh を結合する
 
 カレントディレクトリが /PathTo/RpiVMFiles だった場合の例をいくつか示します。rpi2vm32.sh をリネームした場合の参考にして下さい。
@@ -250,10 +250,10 @@ qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host
 
 次の様な規則で [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) の配置場所を特定しています。
 
-1. スクリプトの \$0 (コマンドラインから呼び出した時に使った path あるいはコマンド名) から、配置されたディレクトリを探す
+1. スクリプトの \$0 引数 (コマンドラインから呼び出した時に使った path あるいはコマンド名) から、配置されたディレクトリを探す
 2. スクリプトの basename 部分より接尾辞(拡張子部分) .sh を除く
-3. 上記で得た部分文字列から**最短**末尾一致で -\* を取り除く
-4. 1 で得た文字列と 3 で得た文字列を / で結合し、末尾に -common.sh を結合する
+3. 2 で得た文字列から**最短**一致で末尾パターン -* を削除する
+4. 1 で得た文字列と 3 で得た文字列を / で結合し、末尾に .conf を結合する
 
 カレントディレクトリが /PathTo/RpiVMFiles だった場合の例をいくつか示します。rpi2vm32.sh をリネームした場合の参考にして下さい。
 
@@ -264,6 +264,24 @@ qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host
 |yes|./raspios32-1st.sh|/PathTo/RpiVMFiles/raspios32.conf|
 
 ### `rpi2vm32.sh` と `rpi2vm32-vnc.sh` の .conf ファイル読み取り
+
+[`rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) スクリプトは設定ファイル [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) を読み取って qemu-system-arm に渡す引数を決めています。
+
+次の様な規則で [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) の配置場所を特定しています。
+
+1. スクリプトの \$0 引数 (コマンドラインから呼び出した時に使った path あるいはコマンド名) から、配置されたディレクトリを探す
+2. スクリプトの basename 部分より接尾辞(拡張子部分) .sh を除く
+3. 1 で得た文字列と 2 で得た文字列を / で結合し、末尾に .conf を結合する
+
+カレントディレクトリが /PathTo/RpiVMFiles だった場合の例をいくつか示します。rpi2vm32.sh をリネームした場合の参考にして下さい。
+
+|renamed?|invoke|common file path|
+|------|-------|-----------|
+|no|[./rpi2vm32.sh](../downloads/host/rpi2vm32.sh)|/PathTo/RpiVMFiles/rpi2vm32.conf|
+|no|[./rpi2vm32-vnc.sh](../downloads/host/rpi2vm32-vnc.conf)|/PathTo/RpiVMFiles/rpi2vm32-vnc.conf|
+|yes|./rpi2vm32-with-swap.sh|/PathTo/RpiVMFiles/rpi2vm32-with-swap.conf|
+|yes|./raspios32.sh|/PathTo/RpiVMFiles/raspios32.conf|
+
 
 ### qemu-system-arm 起動
 
