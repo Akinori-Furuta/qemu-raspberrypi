@@ -30,15 +30,47 @@ then
 	source "${CommonFile}"
 fi
 
-if [[ "${VncDisplay}" == unix:/ ]]
+if [[ -z "${VncDisplay}" ]]
 then
-	VncDisplay="unix:/${MyDir}/${MyBodyNoSuffix}.sock"
-	echo "$0: INFO: VNC URI is \"vnc+unix://${MyDir}/${MyBodyNoSuffix}.sock\""
-	echo "$0: INFO: Some apps can't recognize above URI, you may arrange it."
+	# Accept connection from any host.
+	# Search available port.
+	_VncNumber=$( RaspiVncNumber )
+	echo "$0: INFO: VNC URI is vnc://$(hostname).local:${_VncNumber}"
 else
-	if [ -n "${_VncNumber}" ]
+	if [[ "${VncDisplay}" == unix:/ ]]
 	then
-		echo "$0: INFO: VNC URI is vnc://${VncDisplay}"
+		# Accept VNC connection on UNIX domain socket.
+		# Place socket beside this script.
+		VncDisplay="unix:/${MyDir}/${MyBody}.sock"
+		echo "$0: INFO: VNC URI is \"vnc+unix://${MyDir}/${MyBody}.sock\""
+		echo "$0: INFO: Some apps can't recognize above URI, you may arrange it."
+	else
+		if [[ "${VncDisplay}" == unix:/* ]]
+		then
+			# Accept VNC connection on UNIX domain socket.
+			# Configured path to socket.
+			echo "$0: INFO: VNC URI is \"vnc+${VncDisplay}\""
+			echo "$0: INFO: Some apps can't recognize above URI, you may arrange it."
+		else
+			# Accept VNC on network port.
+			if  [[ "${VncDisplay}" == *:\*   ]]
+			then
+				# Specified host and Search available port.
+				_VncNumber=$( RaspiVncNumber )
+				VncDisplay="${VncDisplay%:*}:${_VncNumber}"
+			fi
+			vnc_remote="${VncDisplay%:*}"
+			if echo "${vnc_remote}" | grep -q -i 'localhost'
+			then
+				echo "$0: INFO: VNC URI is vnc://${vnc_remote}:${VncDisplay##*:}"
+			else
+				echo "$0: INFO: VNC URI is vnc://$(hostname).local:${VncDisplay##*:}"
+			fi
+			if [ -n "${vnc_remote}" ]
+			then
+				echo "$0: INFO: Accept VNC connection from ${vnc_remote}"
+			fi
+		fi
 	fi
 fi
 
