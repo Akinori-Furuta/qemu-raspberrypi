@@ -29,13 +29,13 @@ Raspberry Pi OS の初期設定を次の様な流れで行います。
     + timezone 設定
 + 3 回目の初期設定起動
   + 起動中に rpi-first-boot-wizard ユーザーと(user name を変更しているのであれば) pi ユーザーを削除
-  + 以下 `/var/local/post-setup.sh` を使って設定します
+  + 以下 [`/var/local/post-setup.sh`](../downloads/target/var/local/post-setup.sh) を使って設定します
     + 念のため /boot/firmware/firstrun.sh を削除
     + 念のため rpi-first-boot-wizard アカウントをロック
     + hciuart.service (bluetooth 経由のシリアルポートサービス)を停止
     + ModemManager.service を停止
     + rpi-eeprom-update.service を停止
-  + 以下 `sudo raspi-config-qemu` を使って設定します
+  + 以下 `sudo `[`raspi-config-qemu.sh`](../downloads/target/var/local/raspi-config-qemu.sh) を使って設定します
     + GUI desktop にて user login を行う
     + Screen blanking をしない
     + Openbox window manager を X11 server で動作させる
@@ -50,7 +50,7 @@ Raspberry Pi OS の初期設定を次の様な流れで行います。
 
 current directory は /PathTo/RpiVMFiles です。[QEMU で実行する Rasiberry Pi image を作る](rpi-image.md) の続きの作業です。
 
-qemu-system-arm を Raspberry Pi model 2B の構成で起動する `./rpi2vm32-1st.sh`, `./rpi2vm32-1st.sh` を実行します。これらの script は自動的に script が配置されているディレクトリにある SD card image file *.img を見つけて qemu-system-arm に渡します。
+qemu-system-arm を Raspberry Pi model 2B の構成で起動する [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh), [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-2nd.sh) を実行します。これらの script は自動的に script が配置されているディレクトリにある SD card image file *.img を見つけて qemu-system-arm に渡します。
 
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
@@ -65,11 +65,11 @@ qemu-system-arm を Raspberry Pi model 2B の構成で起動する `./rpi2vm32-1
 # The virtual Raspberry Pi machine will terminate.
 ```
 
-`./rpi2vm32-1st.sh` を実行すると仮想 Raspberry Pi の画面ウインドウが表示されます。初期設定なので GUI 画面はでません。`./rpi2vm32-2nd.sh` も同様に GUI 画面はでません。
+[`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh) を実行すると仮想 Raspberry Pi の画面ウインドウが表示されます。初期設定なので GUI 画面はでません。[`./rpi2vm32-2nd.sh`](../downloads/host/rpi2vm32-2nd.sh) も同様に GUI 画面はでません。
 
 ![Booting Raspberyy Pi OS](../img/booting-raspberrypi-s.png)
 
-`./rpi2vm32-1st.sh` を実行して 30 秒 ～ 2 分程度経過すると次の様な表示で止まったように見えます。空き領域の trim 処理をしています。20 ～ 30 分程度掛かります。
+[`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh) を実行して 30 秒 ～ 2 分程度経過すると次の様な表示で止まったように見えます。空き領域の trim 処理をしています。20 ～ 30 分程度掛かります。
 
 ```text
 Begin: Running /scripts/local-bottom ... Begin: Running fstrim... ... 
@@ -77,11 +77,11 @@ Begin: Running /scripts/local-bottom ... Begin: Running fstrim... ...
 
 ![fstrim at 1st boot](../img/1st-boot-fstrim.png)
 
-`./rpi2vm32-2nd.sh` 実行中に Raspberry Pi OS の shell prompt が出ますが、操作する必要はありません。QEMU が終了するまで待って下さい。
+[`./rpi2vm32-2nd.sh`](../downloads/host/rpi2vm32-2nd.sh) 実行中に Raspberry Pi OS の shell prompt が出ますが、操作する必要はありません。QEMU が終了するまで待って下さい。
 
 ## 3 回目の初期設定起動
 
-3 回目の初期設定起動は通常起動で使う script `./rpi2vm32.sh` で起動します。
+3 回目の初期設定起動は通常起動で使う script [`./rpi2vm32.sh`](../downloads/host/rpi2vm32.conf) で起動します。
 
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
@@ -106,7 +106,7 @@ sudo /sbin/init 0
 
 ![black screen at 3rd boot](../img/black-screen.png)
 
-`./rpi2vm32.sh` を起動したコンソール画面でログインします。PiUserName は Raspberry Pi OS の SD card image を作成したときの user 名です。組みで設定した password を入力してログインします。続けて `sudo /var/local/post-setup.sh` と `sudo /var/local/raspi-config-qemu.sh` を実行します。それぞれ 10 分程度掛かります。
+[`./rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) を起動したコンソール画面でログインします。PiUserName は Raspberry Pi OS の SD card image を作成したときの user 名です。組みで設定した password を入力してログインします。続けて `sudo `[`/var/local/post-setup.sh`](../downloads/target/var/local/post-setup.sh) と `sudo `[`/var/local/raspi-config-qemu.sh`](../downloads/target/var/local/raspi-config-qemu.sh) を実行します。それぞれ 10 分程度掛かります。
 
 途中次の様な systemd (DBUS) に関係するエラーが出ることがあります。処理は済んでいるので無視して下さい。
 
@@ -119,7 +119,7 @@ Failed to disable unit: Transport endpoint is not connected
 
 ## 4 回目の初期設定起動
 
-4 回目の初期設定起動は `./rpi2vm32.sh` を使います。3 回目の初期設定起動と同じ通常起動で使うスクリプトです。
+4 回目の初期設定起動は [`./rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) を使います。3 回目の初期設定起動と同じ通常起動で使うスクリプトです。
 
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
@@ -171,7 +171,7 @@ SSH server を有効にしているので `ssh PiUserName@PiHostName.local` で�
 
 ### QEMU monitor 機能
 
-QEMU 起動スクリプト `./rpi2vm32-1st.sh`, `./rpi2vm32-2nd.sh`, `./rpi2vm32.sh`, `./rpi2vm32-vnc.sh` のいずれも仮想 Raspberry Pi のシリアルポートを標準入出力に割り当てています。この標準入出力は QEMU の monitor 入出力も兼用しています。詳細は [Keys in the character backend multiplexer](https://www.qemu.org/docs/master/system/mux-chardev.html) と [QEMU monitor](https://qemu-project.gitlab.io/qemu/system/monitor.html) を参考にして下さい。次のキー入力は特殊な扱いになります。
+QEMU 起動スクリプト [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh), [`./rpi2vm32-2nd.sh`](../downloads/host/rpi2vm32-2nd.sh), [`./rpi2vm32.sh`](../downloads/host/rpi2vm32.sh), [`./rpi2vm32-vnc.sh`](../downloads/host/rpi2vm32-vnc.sh) のいずれも仮想 Raspberry Pi のシリアルポートを標準入出力に割り当てています。この標準入出力は QEMU の monitor 入出力も兼用しています。詳細は [Keys in the character backend multiplexer (QEMU documents)](https://www.qemu.org/docs/master/system/mux-chardev.html) と [QEMU monitor (QEMU documents)](https://qemu-project.gitlab.io/qemu/system/monitor.html) を参考にして下さい。次のキー入力は特殊な扱いになります。
 
 |Type In|function|
 |-------|--------|
@@ -199,7 +199,7 @@ ssh でログインすると煩わしさはありません。
 
 ## (参考) rpi2vm32.conf を設定する
 
-rpi2vm32.conf は qemu-system-arm コマンドに渡すパラメータを設定するファイルです。修正しなくてもある程度動作する様にしてあります。自動的なパラメータ設定で上手くいかない場合は修正して下さい。
+[`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) は qemu-system-arm コマンドに渡すパラメータを設定するファイルです。修正しなくてもある程度動作する様にしてあります。自動的なパラメータ設定で上手くいかない場合は修正して下さい。
 
 > [!TIP]
 > qemu 起動スクリプトが rpi2vm32-vnc.sh の場合は拡張子 .sh の部分を .conf に置き換えたファイル rpivm32-vnc.conf が読み込まれます。
@@ -221,7 +221,7 @@ rpi2vm32.conf は qemu-system-arm コマンドに渡すパラメータを設定�
 
 ## (参考) rpi2vm32.sh 概要
 
-qemu-system-arm を呼び出すスクリプト `rpi2vm32.sh` と初期設定用スクリプト群の概要を説明します。修正して様々な起動形態を派生させる参考にして下さい。
+qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) と初期設定用スクリプト群の概要を説明します。修正して様々な起動形態を派生させる参考にして下さい。
 
 ### 共通部分 rpi2vm32-common.sh 取り込み
 
@@ -236,19 +236,19 @@ qemu-system-arm を呼び出すスクリプト `rpi2vm32.sh` と初期設定用�
 
 カレントディレクトリが /PathTo/RpiVMFiles だった場合の例をいくつか示します。rpi2vm32.sh をリネームした場合の参考にして下さい。
 
-|invoke|renamed|common file path|
+|renamed?|invoke|common file path|
 |------|-------|-----------|
-|./rpi2vm32-1st.sh|no|/PathTo/RpiVMFiles/rpi2vm32-common.sh|
-|./rpi2vm32.sh|no|/PathTo/RpiVMFiles/rpi2vm32-common.sh|
-|./rpi2vm32-1280x1024.sh|yes|/PathTo/RpiVMFiles/rpi2vm32-common.sh|
-|./rpi2vm32-with-swap.sh|yes|/PathTo/RpiVMFiles/rpi2vm32-common.sh|
-|./raspios32.sh|yes|/PathTo/RpiVMFiles/raspios32-common.sh|
+|no|[./rpi2vm32-1st.sh](../downloads/host/rpi2vm32-1st.sh)|/PathTo/RpiVMFiles/rpi2vm32-common.sh|
+|no|[./rpi2vm32.sh](../downloads/host/rpi2vm32-2nd.sh)|/PathTo/RpiVMFiles/rpi2vm32-common.sh|
+|yes|./rpi2vm32-1280x1024.sh|/PathTo/RpiVMFiles/rpi2vm32-common.sh|
+|yes|./rpi2vm32-with-swap.sh|/PathTo/RpiVMFiles/rpi2vm32-common.sh|
+|yes|./raspios32.sh|/PathTo/RpiVMFiles/raspios32-common.sh|
 
-### rpi2vm32.conf 読み取り
+### `rpi2vm32-1st.sh` と `rpi2vm32-2nd.sh` の .conf ファイル読み取り
 
-`rpi2vm32-1st.sh`, `rpi2vm32-2nd.sh`, `rpi2vm32.sh`, `rpi2vm32-vnc.sh` スクリプトは設定ファイル `rpi2vm32.conf` を読み込みます。
+[`rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh), [`rpi2vm32-2nd.sh`](../downloads/host/rpi2vm32-2nd.sh) スクリプトは設定ファイル [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) を読み取って qemu-system-arm に渡す引数を決めています。
 
-次の様な規則で `rpi2vm32.conf` の配置場所を特定しています。
+次の様な規則で [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) の配置場所を特定しています。
 
 1. スクリプトの \$0 (コマンドラインから呼び出した時に使った path あるいはコマンド名) から、配置されたディレクトリを探す
 2. スクリプトの basename 部分より接尾辞(拡張子部分) .sh を除く
@@ -257,13 +257,13 @@ qemu-system-arm を呼び出すスクリプト `rpi2vm32.sh` と初期設定用�
 
 カレントディレクトリが /PathTo/RpiVMFiles だった場合の例をいくつか示します。rpi2vm32.sh をリネームした場合の参考にして下さい。
 
-|invoke|renamed|common file path|
+|renamed?|invoke|common file path|
 |------|-------|-----------|
-|./rpi2vm32-1st.sh|no|/PathTo/RpiVMFiles/rpi2vm32.conf|
-|./rpi2vm32.sh|no|/PathTo/RpiVMFiles/rpi2vm32.conf|
-|./rpi2vm32-1280x1024.sh|yes|/PathTo/RpiVMFiles/rpi2vm32.conf|
-|./rpi2vm32-with-swap.sh|yes|/PathTo/RpiVMFiles/rpi2vm32-with.conf|
-|./raspios32.sh|yes|/PathTo/RpiVMFiles/raspios32.conf|
+|no|[./rpi2vm32-1st.sh](../downloads/host/rpi2vm32-1st.sh)|/PathTo/RpiVMFiles/rpi2vm32.conf|
+|yes|./rpi2vm32-1280x1024-1st.sh|/PathTo/RpiVMFiles/rpi2vm32-1280x1024.conf|
+|yes|./raspios32-1st.sh|/PathTo/RpiVMFiles/raspios32.conf|
+
+### `rpi2vm32.sh` と `rpi2vm32-vnc.sh` の .conf ファイル読み取り
 
 ### qemu-system-arm 起動
 
