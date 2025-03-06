@@ -59,16 +59,13 @@ else
 				_VncNumber=$( RaspiVncNumber )
 				VncDisplay="${VncDisplay%:*}:${_VncNumber}"
 			fi
-			vnc_remote="${VncDisplay%:*}"
-			if echo "${vnc_remote}" | grep -q -i 'localhost'
+			vnc_address="${VncDisplay%:*}"
+			if [ -n "${vnc_address}" ]
 			then
-				echo "$0: INFO: VNC URI is vnc://${vnc_remote}:${VncDisplay##*:}"
+				echo "$0: INFO: VNC URI is vnc://${vnc_address}:${VncDisplay##*:}"
+				echo "$0: INFO: Accept VNC connection on ${vnc_address}"
 			else
 				echo "$0: INFO: VNC URI is vnc://$(hostname).local:${VncDisplay##*:}"
-			fi
-			if [ -n "${vnc_remote}" ]
-			then
-				echo "$0: INFO: Accept VNC connection from ${vnc_remote}"
 			fi
 		fi
 	fi
