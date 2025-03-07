@@ -209,7 +209,7 @@ ssh でログインすると煩わしさはありません。
 |KernelFile|bootfs/kernel7.img|-kernel オプションに渡すパラメータです。kernel image file を指定します。|
 |InitrdFile|bootfs/initramfs7|-initrd オプションに渡すパラメータです。initrd image file を指定します。<sup>*1</sup>|
 |DtbFile|bootfs/bcm2709-rpi-2-b.dtb|-dtb オプションに渡すパラメータです。Device Tree Blob file を指定します。|
-|SdFile|\*.img|-drive オプションに渡すパラメータです。省略した場合は、スクリプトを配置してあるディレクトリから \*.img ファイルを探して設定値にします。<br>複数ある場合は昇順に並べて先に来る方を選択します。ただし、大文字・小文字を無視して swap\*.img は対象外にします。SdFile を設定する場合は *.qcow2 形式も設定できる様にしてあります。|
+|SdFile|\*.img|-drive オプションに渡すパラメータです。省略した場合は、スクリプトを配置してあるディレクトリから \*.img ファイルを探して設定値にします。<br>複数ある場合は昇順に並べて先に来る方を選択します。<br>ただし、大文字・小文字を無視して swap\*.img は対象外にします。SdFile を設定する場合は *.qcow2 形式も設定できる様にしてあります。|
 |NicBridge|pickup one from bridges|-netdev オプションの br= に指定するパラメータです。<br>省略した場合は network bridge の中から一つ選びます。複数ある場合は NicBridge を設定して望ましい network bridge を指定して下さい。|
 |NicMac||仮想 Raspberry Pi マシンに接続する USB Ether network デバイスの MAC address を指定します。省略した場合は \${NicMacFile} から読み取るか、\${NicMacPrefix} から自動生成します。|
 |NicMacFile|net0_mac.txt|仮想 Raspberry Pi マシンに接続する USB network デバイスの MAC address を保存する(保存してある)ファイルを指定します。<br>ファイルが存在しない場合は NicMacPrefix を OUI (上位 3 octed) として自動生成を試み、生成した結果が格納されます。 |
