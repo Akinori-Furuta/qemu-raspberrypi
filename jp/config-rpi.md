@@ -197,9 +197,9 @@ ssh でログインすると煩わしさはありません。
 
 <a name="rpi2vm32-conf"></a>
 
-## (参考) rpi2vm32.conf を設定する
+## (参考) rpi2vm32.conf, rpi2vm32-vnc.conf を設定する
 
-[`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) は qemu-system-arm コマンドに渡すパラメータを設定するファイルです。修正しなくてもある程度動作する様にしてあります。自動的なパラメータ設定で上手くいかない場合は修正して下さい。
+[`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) と [`rpi2vm32-vnc.conf`](../downloads/host/rpi2vm32.conf) は qemu-system-arm コマンドに渡すパラメータを設定するファイルです。修正しなくてもある程度動作する様にしてあります。自動的なパラメータ設定で上手くいかない場合は修正して下さい。
 
 > [!TIP]
 > qemu 起動スクリプトが rpi2vm32-vnc.sh の場合は拡張子 .sh の部分を .conf に置き換えたファイル rpivm32-vnc.conf が読み込まれます。
