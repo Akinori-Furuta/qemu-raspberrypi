@@ -285,7 +285,7 @@ qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host
 
 ### qemu-system-arm 起動
 
-`rpi2vm32.sh` から `qemu-system-arm` を実行している次の部分について概要を説明します。
+[`rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) から [`qemu-system-arm`](https://qemu-project.gitlab.io/qemu/system/invocation.html) を実行している次の部分について概要を説明します。
 
 ```bash
 qemu-system-arm \
