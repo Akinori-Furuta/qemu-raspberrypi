@@ -342,7 +342,7 @@ qemu-system-arm \
   + mon:stdio<br>
     仮想 Raspberry Pi のシリアルポート入出力を標準入出力に繋げます。同時に QEMU monitor と多重化します。
 + -no-reboot<br>
-  仮想マシン内から reboot を行った場合、QEMU emulator を終了します。 
+  仮想マシン内から reboot を行った場合、QEMU emulator を終了します。-no-reboot は必須ではありません。
 + -device
   + usb-kbd<br>
     USB keyboard (HID) を接続します。
