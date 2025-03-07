@@ -265,9 +265,9 @@ qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host
 
 ### `rpi2vm32.sh` と `rpi2vm32-vnc.sh` の .conf ファイル読み取り
 
-[`rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) スクリプトは設定ファイル [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) を読み取って qemu-system-arm に渡す引数を決めています。
+[`rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) ([`rpi2vm32-vnc.sh`](../downloads/host/rpi2vm32-vnc.sh)) スクリプトは設定ファイル [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) ([`rpi2vm32-vnc.conf`](../downloads/host/rpi2vm32-vnc.conf)) を読み取って qemu-system-arm に渡す引数を決めています。
 
-次の様な規則で [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) の配置場所を特定しています。
+次の様な規則で [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) ([`rpi2vm32-vnc.conf`](../downloads/host/rpi2vm32-vnc.conf)) の配置場所を特定しています。
 
 1. スクリプトの \$0 引数 (コマンドラインから呼び出した時に使った path あるいはコマンド名) から、配置されたディレクトリを探す
 2. スクリプトの basename 部分より接尾辞(拡張子部分) .sh を除く
