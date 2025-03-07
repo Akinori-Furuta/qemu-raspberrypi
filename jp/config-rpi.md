@@ -209,13 +209,13 @@ ssh でログインすると煩わしさはありません。
 |KernelFile|bootfs/kernel7.img|-kernel オプションに渡すパラメータです。kernel image file を指定します。|
 |InitrdFile|bootfs/initramfs7|-initrd オプションに渡すパラメータです。initrd image file を指定します。<sup>*1</sup>|
 |DtbFile|bootfs/bcm2709-rpi-2-b.dtb|-dtb オプションに渡すパラメータです。Device Tree Blob file を指定します。|
-|SdFile|\*.img|-drive オプションに渡すパラメータです。省略した場合は、スクリプトを配置してあるディレクトリから \*.img ファイルを探して設定値にします。複数ある場合は昇順に並べて先に来る方を選択します。ただし、大文字・小文字を無視して swap\*.img は対象外にします。SdFile を設定する場合は *.qcow2 形式も設定できる様にしてあります。|
-|NicBridge|pickup one from bridges|-netdev オプションの br= に指定するパラメータです。省略した場合は network bridge の中から一つ選びます。複数ある場合は NicBridge を設定して望ましい network bridge を指定して下さい。|
+|SdFile|\*.img|-drive オプションに渡すパラメータです。省略した場合は、スクリプトを配置してあるディレクトリから \*.img ファイルを探して設定値にします。<br>複数ある場合は昇順に並べて先に来る方を選択します。ただし、大文字・小文字を無視して swap\*.img は対象外にします。SdFile を設定する場合は *.qcow2 形式も設定できる様にしてあります。|
+|NicBridge|pickup one from bridges|-netdev オプションの br= に指定するパラメータです。<br>省略した場合は network bridge の中から一つ選びます。複数ある場合は NicBridge を設定して望ましい network bridge を指定して下さい。|
 |NicMac||仮想 Raspberry Pi マシンに接続する USB Ether network デバイスの MAC address を指定します。省略した場合は \${NicMacFile} から読み取るか、\${NicMacPrefix} から自動生成します。|
-|NicMacFile|net0_mac.txt|仮想 Raspberry Pi マシンに接続する USB network デバイスの MAC address を保存する(保存してある)ファイルを指定します。ファイルが存在しない場合は NicMacPrefix を OUI (上位 3 octed) として自動生成を試み、生成した結果が格納されます。 |
+|NicMacFile|net0_mac.txt|仮想 Raspberry Pi マシンに接続する USB network デバイスの MAC address を保存する(保存してある)ファイルを指定します。<br>ファイルが存在しない場合は NicMacPrefix を OUI (上位 3 octed) として自動生成を試み、生成した結果が格納されます。 |
 |NicMacPrefix|b8:27:eb|仮想 Raspberry Pi マシンに接続する USB Ether network デバイスの MAC address を自動生成する場合に OUI (上位 3 octed) として使う値を指定します。b8:27:eb は Raspberry Pi に使われる値です。|
-|DisplayOutput|spice-app|仮想 Raspberry Pi マシンの画面を表示する方法を指定します。既定の spice-app は remote-viewer アプリケーションでウインドウ表示する方法です。他の選択は gtk: 操作メニュー付きウインドウで表示、sdl: 単に表示だけするウインドウで表示があります。spice-app は独立したプロセスで表示する動作になっているのでウインドウを閉じても仮想マシンは動き続けます。gtk, sdl はウインドウを閉じると仮想マシンは終了します。|
-|VncDisplay||rpi2vm32-vnc.sh で使われるパラメータです。QEMU エミュレータで画面表示を見るため VNC server を動かす場合に接続を受け付けるクライアントアドレスとポートを "client_address:port" という形式で指定します。単に ":10" の様な形式は全てのクライアントからポート 5910 に向かう接続を許可します。 "localhost:11" は自分の所からポート 5911 に向かう接続だけ許可します。指定がない場合は全てのクライアントからの接続を受け付ける空きポートを 5910 ～ 5999 から探します。ポートを "client:*" の様に指定した場合は空きポートを 5910 ～ 5999 から探します。|
+|DisplayOutput|spice-app|仮想 Raspberry Pi マシンの画面を表示する方法を指定します。<br>"spice-app" : remote-viewer アプリケーションでウインドウ表示(既定)<br>"gtk" : 操作メニュー付きウインドウで表示<br>"sdl" : 単に表示だけするウインドウで表示<br>spice-app は独立したプロセスで表示する動作になっているのでウインドウを閉じても仮想マシンは動き続けます。gtk, sdl はウインドウを閉じると仮想マシンは終了します。|
+|VncDisplay||rpi2vm32-vnc.sh で使われるパラメータです。QEMU エミュレータで画面表示を見るため VNC server を動かす場合に接続を受け付ける socket interface を指定します。<br>"unix:/" または指定無し : UNIX domain socket 接続を受け付けます。スクリプトの拡張子を .sock に変えた path が node になります。<br>"unix:/path/to/socket" : /path/to/socket ノードで UNIX domain socket 接続を受け付けます。<br>":\*" : 空きポートを 5910 .. 5999 の間で探し、そのポートに対する接続を受け付けます。<br>":port" : port+5900 に対する接続を受け付けます。<br>"interface_address:port" : interface_address で指定した network interface で port+5900 に対する接続を受け付けます。例えば "localhost:10" は localhost 内でポート 5910 に対する接続を受け付けます。
 
 > <sup>*1</sup> QEMU 上で Raspberry Pi OS を動かす他の例では initrd file を指定しない方法が見られます。initrd file 指定無しでも動作しますが、指定した場合と違った動作をします。
 
