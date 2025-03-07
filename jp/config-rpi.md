@@ -225,9 +225,9 @@ qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host
 
 ### 共通部分 rpi2vm32-common.sh 取り込み
 
-`rpi2vm32-1st.sh`, `rpi2vm32-2nd.sh`, `rpi2vm32.sh`, `rpi2vm32-vnc.sh` スクリプトの共通部分を `rpi2vm32-common.sh` にまとめてあります。
+[`rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh), [`rpi2vm32-2nd.sh`](../downloads/host/rpi2vm32-2nd.sh), [`rpi2vm32.sh`](../downloads/host/rpi2vm32.sh), [`rpi2vm32-vnc.sh`](../downloads/host/rpi2vm32-vnc.sh) スクリプトの共通部分を [`rpi2vm32-common.sh`](../downloads/host/rpi2vm32-common.sh) にまとめてあります。
 
-次の様な規則で `rpi2vm32-common.sh` の配置場所を特定しています。
+次の様な規則で [`rpi2vm32-common.sh`](../downloads/host/rpi2vm32-common.sh) の配置場所を特定しています。
 
 1. スクリプトの \$0 (コマンドラインから呼び出した時に使った path あるいはコマンド名) から、配置されたディレクトリを探す
 2. スクリプトの basename 部分より接尾辞(拡張子部分) .sh を除く
