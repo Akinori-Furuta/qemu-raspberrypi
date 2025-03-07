@@ -318,7 +318,7 @@ qemu-system-arm \
     kernel image ファイルを指定します。bootfs/kernel7 は Raspberry Pi OS 32bit の kernel です。
 + -initrd
   + "\${InitrdFile}"<br>
-    initrd image ファイルを指定します。bootfs/initramfs7 は Raspberry Pi OS 32bit の initrd です。このオプションを指定しない例を多く見掛けます。指定しなくても動作しますが、動作に差異が見られます。実機通り initrd の実行を経た動作にします。|
+    initrd image ファイルを指定します。bootfs/initramfs7 は Raspberry Pi OS 32bit の initrd です。<br>このオプションを指定しない例を多く見掛けます。指定しなくても動作しますが、動作に差異が見られます。実機通り initrd の実行を経た動作にします。
 + -dtb
   + "\${DtbFile}"<br>
     Device Tree Blob ファイルを指定します。bootfs/bcm2709-rpi-2-b.dtb は Raspberry Pi Model 2B の Device Tree です。
