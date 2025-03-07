@@ -324,7 +324,7 @@ qemu-system-arm \
     Device Tree Blob ファイルを指定します。bootfs/bcm2709-rpi-2-b.dtb は Raspberry Pi Model 2B の Device Tree です。
 + -drive
   + "\${\_DriveParam}"<br>
-    \${\_DriveParam} は \${SdFile} に format= パラメータを補った文字列です。file コマンドで FDISK 形式であれば format=raw、QCOW2 形式であれば format=qcow2 を付けます。
+    \${\_DriveParam} は \${SdFile} に format= パラメータを補った文字列です。file コマンドでファイルを調べて FDISK 形式であれば format=raw、QCOW2 形式であれば format=qcow2 を付けます。<br>SD card イメージファイルに QCOW2 形式を使う場合は SdFile 変数を設定して下さい。
 + -append
   + console=ttyAMA0,115200 console=tty1<br>
     シリアルポート(ホストマシンの標準入出力)と仮想端末画面 tty1 に kernel log を出力します。
