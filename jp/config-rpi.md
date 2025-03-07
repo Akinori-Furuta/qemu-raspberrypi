@@ -361,9 +361,9 @@ qemu-system-arm \
     一連の設定に net0 という名前を付けます。
 + -device
   + usb-net<br>
-    上記の -netdev で構成した network 接続を USB-Ethernet で接続します。 
+    上記の -netdev で構成した network 接続を USB-Ethernet で接続します。
   + netdev=net0<br>
-    上記の -netdev で構成した network 接続を net0 で指定します。 
+    上記の -netdev で構成した network 接続を net0 で指定します。
   + mac=\${NicMac}<br>
     MAC address を指定します。[(参考) rpi2vm32.sh 概要](#rpi2vm32-conf)を参照して下さい。
 + -display
