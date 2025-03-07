@@ -33,6 +33,7 @@ Linux の QEMU で実行する Raspberry Pi イメージファイルを次の様
 |OS|Ubuntu 24.04|QEMU 7.2.0 以上をパッケージリポジトリから提供するディストリビューションを必要とします。|
 
 ![Run Raspberry Pi OS 32bit on linux QEMU](../img/rpi2-rpios-32bit-on-linux-s.jpg)
+
 [上記の等倍イメージ](../img/rpi2-rpios-32bit-on-linux.png)
 
 スクリプト化できそうですが、このページでは手作業で進めます。
@@ -49,6 +50,8 @@ Raspberry Pi image を次の設定で作ります。
 
 > [!NOTE]
 > この先 8Gbyte, 16Gbyte, または 32Gbyte どの媒体を使っても、仮想 SD card イメージファイルのサイズを拡張します。進んだ先でイメージファイルの拡張方法とサイズについて詳細を説明します。
+
+[Raspberry Pi Imager](https://www.raspberrypi.com/software/) をダウンロード・インストール・実行して下さい。詳細なやり方はのリンク先を参照して下さい。
 
 ![Create Raspberry Pi OS 32bit image](../img/select-rpi2-32bit.png)
 
@@ -88,7 +91,10 @@ Linux PC で QEMU を使えるように準備します。
 #  Partition manipulation tools, Network Block Device tools,
 #  ExtX File System resizer tools, ExtX check tools,
 #  VNC viewer, and Device Tree Compiler
-sudo apt install bridge-utils uml-utilities qemu-system-common qemu-system qemu-system-arm qemu-utils parted nbd-client cloud-guest-utils e2fsprogs virt-viewer device-tree-compiler
+sudo apt install bridge-utils uml-utilities \
+ qemu-system-common qemu-system qemu-system-arm qemu-utils \
+ parted nbd-client cloud-guest-utils e2fsprogs virt-viewer \
+ device-tree-compiler
 ```
 
 > [!NOTE]
@@ -96,9 +102,11 @@ sudo apt install bridge-utils uml-utilities qemu-system-common qemu-system qemu-
 
 ## Raspberry Pi OS SD card image を file image に変換する
 
+<a name="meta-symbols"></a>
+
 ### 手順中の読み換え内容
 
-<a name="meta-symbols">書き終わった SD card を Linux PC に接続して、SD card イメージファイルを作成し、内容を修正します。以下次の様に実際の環境に応じた読み換えをして下さい</a>。
+書き終わった SD card を Linux PC に接続して、SD card イメージファイルを作成し、内容を修正します。以下次の様に実際の環境に応じた読み換えをして下さい。
 
 |symbol|example|description|
 |------|-------|-----------|

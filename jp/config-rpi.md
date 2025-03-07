@@ -41,7 +41,7 @@ Raspberry Pi OS の初期設定を次の様な流れで行います。
     + Openbox window manager を X11 server で動作させる
       + frame buffer device を使うための設定
     + VNC server でリモートから GUI を操作できるようにする
-      + QEMU の virtual machine display は SDL, GTK, spice, VNC いずれも keybind が合わない問題がでます
+      + QEMU の virtual machine display は SDL, GTK, spice, VNC いずれも keybind が合わない問題が出ます
 + 4 回目の初期設定起動
   + X11 server を使う設定
   + 以降そのまま利用できます
@@ -50,7 +50,7 @@ Raspberry Pi OS の初期設定を次の様な流れで行います。
 
 current directory は /PathTo/RpiVMFiles です。[QEMU で実行する Rasiberry Pi image を作る](rpi-image.md) の続きの作業です。
 
-qemu-system-arm を Raspberry Pi model 2B の構成で起動する [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh), [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-2nd.sh) を実行します。これらの script は自動的に script が配置されているディレクトリにある SD card image file *.img を見つけて qemu-system-arm に渡します。
+qemu-system-arm を Raspberry Pi model 2B の構成で起動する [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh), [`./rpi2vm32-2nd.sh`](../downloads/host/rpi2vm32-2nd.sh) を実行します。これらの script は自動的に script が配置されているディレクトリにある SD card image file *.img を見つけて qemu-system-arm に渡します。
 
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
@@ -81,7 +81,7 @@ Begin: Running /scripts/local-bottom ... Begin: Running fstrim... ...
 
 ## 3 回目の初期設定起動
 
-3 回目の初期設定起動は通常起動で使う script [`./rpi2vm32.sh`](../downloads/host/rpi2vm32.conf) で起動します。
+3 回目の初期設定起動は通常起動で使う script [`./rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) で起動します。
 
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
@@ -134,7 +134,7 @@ Failed to disable unit: Transport endpoint is not connected
 
 仮想 Raspberry Pi の画面ウインドウでログインします。ログインに使う User と Password は SD card image を作るときに設定した PiUserName とその password です。 
 
-![Click Keep X](../img/login-on-qemu-gui.png)
+![Login Raspberry Pi OS on QEMU Virtual Machine Display Window](../img/login-on-qemu-gui.png)
 
 1 ～ 2 分程度待つと次の様な X11 window 環境を維持するか訪ねてくるダイアログがでます。[Keep X] をクリックします。これで frame buffer device を使うことを確定します(以降この質問は表示されなくなります)。
 
@@ -143,6 +143,8 @@ Failed to disable unit: Transport endpoint is not connected
 以降はキーボードレイアウトが正しくない問題がありますが GUI で操作できるようになります。正しいキーボードレイアウトで使う場合は [VNC で接続します](#vnc-connection)。
 
 ![Raspberry Pi OS desktop on QEMU emulator](../img/raspberrypi-os-desktop.jpg)
+
+Raspberry Pi OS を更新すると _/PathTo/RpiVMFiles_/bootfs 以下の更新も必要になる場合があります。[apt upgrade をした後の対応](./follow-upgrade.md) で更新に追従する方法を説明します。
 
 ## 各種接続について
 
@@ -187,7 +189,7 @@ QEMU 起動スクリプト [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.
 
 ### スクロール範囲・折り返しを整える
 
-標準入出力に割り当てられたシリアルポートから仮想 Raspberry Pi を操作していると、スクロール範囲、折り返しに乱れが生じる場合があります。この場合は、シリアルポートからログインしている状態で、reset command を実行して下さい。
+標準入出力に割り当てられたシリアルポートから仮想 Raspberry Pi を操作していると、スクロール範囲、折り返しに乱れが生じる場合があります。この場合は、シリアルポートからログインしている状態で、reset コマンドを実行して下さい。
 
 ```bash
 reset
@@ -199,7 +201,7 @@ ssh でログインすると煩わしさはありません。
 
 ## (参考) rpi2vm32.conf, rpi2vm32-vnc.conf を設定する
 
-[`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) と [`rpi2vm32-vnc.conf`](../downloads/host/rpi2vm32.conf) は qemu-system-arm コマンドに渡すパラメータを設定するファイルです。修正しなくてもある程度動作する様にしてあります。自動的なパラメータ設定で上手くいかない場合は修正して下さい。
+[`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) と [`rpi2vm32-vnc.conf`](../downloads/host/rpi2vm32-vnc.conf) は qemu-system-arm コマンドに渡すパラメータを設定するファイルです。修正しなくてもある程度動作する様にしてあります。自動的なパラメータ設定で上手くいかない場合は修正して下さい。
 
 > [!TIP]
 > qemu 起動スクリプトが rpi2vm32-vnc.sh の場合は拡張子 .sh の部分を .conf に置き換えたファイル rpivm32-vnc.conf が読み込まれます。
@@ -364,10 +366,10 @@ qemu-system-arm \
   + netdev=net0<br>
     上記の -netdev で構成した network 接続を net0 で指定します。
   + mac=\${NicMac}<br>
-    MAC address を指定します。[(参考) rpi2vm32.sh 概要](#rpi2vm32-conf)を参照して下さい。
+    MAC address を指定します。[(参考) rpi2vm32.conf を設定する - rpi2vm32.sh 概要](#rpi2vm32-conf)を参照して下さい。
 + -display
   + \${DisplayOutput}<br>
     仮想 Raspberry Pi マシンの画面出力ウインドウ表示方式を指定します。
 + -vnc
   + \${VncDisplay}<br>
-    rpi2vm32-vnc.sh で qemu-system-arm に渡している引数です。[(参考) rpi2vm32.sh 概要](#rpi2vm32-conf)を参照して下さい。
+    rpi2vm32-vnc.sh で qemu-system-arm に渡している引数です。[(参考) rpi2vm32.conf を設定する - rpi2vm32.sh 概要](#rpi2vm32-conf)を参照して下さい。
