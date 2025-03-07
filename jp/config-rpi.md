@@ -282,7 +282,6 @@ qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host
 |yes|./rpi2vm32-with-swap.sh|/PathTo/RpiVMFiles/rpi2vm32-with-swap.conf|
 |yes|./raspios32.sh|/PathTo/RpiVMFiles/raspios32.conf|
 
-
 ### qemu-system-arm 起動
 
 [`rpi2vm32.sh`](../downloads/host/rpi2vm32.sh) から [`qemu-system-arm`](https://qemu-project.gitlab.io/qemu/system/invocation.html) を実行している次の部分について概要を説明します。
