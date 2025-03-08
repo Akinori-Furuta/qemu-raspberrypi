@@ -14,3 +14,5 @@ Linux PC 上で QEMU を使って RaspberyPi のイメージを動かすこと�
 + [apt upgrade をした後の対応](jp/follow-upgrade.md)
 
 github 上で文書を書いていく練習も兼ねています。物足りなさや記述の稚拙さがあると思います。
+
+![Raspberry pi OS 32bit on QEMU](img/raspberrypi-os-desktop.jpg)
