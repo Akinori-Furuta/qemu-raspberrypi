@@ -123,7 +123,7 @@ sudo apt install bridge-utils uml-utilities \
 |PiUserName|furuta|Raspberry Pi OS に作ったアカウントのユーザー名です。[Raspberry Pi OS の初期設定を行う](config-rpi.md)で参照します。|
 |/PathTo/RpiVMFiles|/home/UserName/qemu-vms/rpi2vm|仮想 Raspberry Pi 2 を動かすために必要なファイル群を配置するディレクトリです。NVMe, SATA 接続など直結していて安定したアクセスが可能なストレージ上に配置することを推奨します。|
 |Rpi2VM32.img|rpi2vm32.img|SD card から変換した Raspberry Pi OS 32bit イメージファイルです。|
-|/DownLoaded|/home/furuta/git/qemu-raspberrypi/downloads|rpios32bit-target-kit.tar.gz, rpios32bit-host-kit.tar.gz をダウンロードしたディレクトリです。この git repository を clone した場合は _git_cloned_base_/downloads になります。|
+|/DownLoaded|/home/furuta/git/qemu-raspberrypi/downloads|[rpios32bit-target-kit.tar.gz](../downloads/rpios32bit-target-kit.tar.gz), [rpios32bit-host-kit.tar.gz](../downloads/rpios32bit-host-kit.tar.gz) をダウンロードしたディレクトリです。この git repository を clone した場合は _git_cloned_base_/downloads になります。|
 
 > [!WARNING]
 > 作業中のファイル、仮想マシン実行でセキュリティが弱い状態が生じます。厳格な保護はしないで進めます。警戒が必要であれば手順を見直す必要があります。
@@ -321,6 +321,8 @@ sudo resize2fs /dev/nbdNp2
 
 QEMU で Raspberry Pi OS を動かすのに必要な第 1 パーティション (bootfs) ファイル群をホストマシン上のディレクトリへコピーし、第 2 パーティション(rootfs) 以下のファイル修正をします。修正内容は「[参考 rootfs 修正内容について](#参考-rootfs-修正内容について)」を見て下さい。
 
+> 下記スクリプトにある [rpios32bit-target-kit.tar.gz のダウンロード](../downloads/rpios32bit-target-kit.tar.gz)
+
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
 # Make mount points.
@@ -349,6 +351,8 @@ sudo qemu-nbd -d /dev/nbdN
 ### QEMU 起動 script を配置する
 
 ホストマシンに Raspberry Pi 2B 仮想マシンを起動するスクリプトを配置します。
+
+> 下記スクリプトにある [rpios32bit-host-kit.tar.gz のダウンロード](../downloads/rpios32bit-host-kit.tar.gz)
 
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
