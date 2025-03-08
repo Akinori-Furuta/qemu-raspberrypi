@@ -365,7 +365,7 @@ tar --no-same-owner -xvf /DownLoaded/rpios32bit-host-kit.tar.gz
 |[rpi2vm32-2nd.sh](../downloads/host/rpi2vm32-2nd.sh)|2 回目の初期設定起動をするスクリプトです。|
 |[rpi2vm32.sh](../downloads/host/rpi2vm32.sh)|通常起動をするスクリプトです。注: 3, 4 回目の初期設定起動も兼ねています。|
 |[rpi2vm32-vnc.sh](../downloads/host/rpi2vm32-vnc.sh)|QEMU の VNC server を有効にして通常起動をするスクリプトです。|
-|[rpi2vm32-vnc.conf](../downloads/host/rpi2vm32-vnc.conf)|QEMU の VNC server を有効にして通常起動をするスクリプトの設定ファイルです。
+|[rpi2vm32-vnc.conf](../downloads/host/rpi2vm32-vnc.conf)|QEMU の VNC server を有効にして通常起動をするスクリプトの設定ファイルです。|
 |[rpi2vm32-common.sh](../downloads/host/rpi2vm32-common.sh)|スクリプトの共通機能部分です。|
 
 次は [Raspberry Pi OS の初期設定を行う](config-rpi.md) に進んで下さい。

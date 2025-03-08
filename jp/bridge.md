@@ -39,8 +39,7 @@ Linux PC 上で QEMU を使って仮想マシンを動かす場合に仮想マ�
   + [manpage nmcli(1)](https://manpages.org/nmcli)
     + [manpage nmcli-examples(7)](https://manpages.org/nmcli-examples/7)
 + [manpage interfaces(5)](https://manpages.debian.org/bookworm/ifupdown/interfaces.5.en.html)
-  + [manpage 
-BRIDGE-UTILS-INTERFACES(5)](https://manpages.debian.org/testing/bridge-utils/bridge-utils-interfaces.5.en.html)
+  + [manpage BRIDGE-UTILS-INTERFACES(5)](https://manpages.debian.org/testing/bridge-utils/bridge-utils-interfaces.5.en.html)
   + [manpage ifdown(8) ifdown(8)](https://manpages.debian.org/bookworm/ifupdown2/ifup.8.en.html)
 + [QEMU User Documentation](https://www.qemu.org/docs/master/system/qemu-manpage.html)
   + [QEMU Networking](https://wiki.qemu.org/Documentation/Networking)
@@ -114,7 +113,7 @@ Error: NetworkManager is not running.
 bridge 接続で使用したい Network Interface を次の状態で接続します(接続した状態で起動します)。
 
 + ssh などでログインしてリモートで作業する場合は、可能であれば先にリモート接続を確立して下さい。
-  + PCIe 接続の Network Interface を使う場合は、増設後に起動する流れになります。起動後に `nmcli`, `ip link` コマンドなどで IP address を確認して控えておき、作業中に接続が切れた場合に再接続できる様に備えて下さい。 
+  + PCIe 接続の Network Interface を使う場合は、増設後に起動する流れになります。起動後に `nmcli`, `ip link` コマンドなどで IP address を確認して控えておき、作業中に接続が切れた場合に再接続できる様に備えて下さい。
 + USB あるいは PCI express bus 接続などの形態でマシンに Converter か Network Interface Card を接続します。
 + Ethernet cable も接続した状態にして下さい。
 
@@ -194,6 +193,7 @@ sudo nmcli conn modify bridge-brnm0 ipv4.method disabled
 ```
 
 <A name="Recover-nmcli-message-recipient-disconnected"></a>
+
 ### nmcli エラー connection: Message recipient disconnected from message bus without replying が出た場合の対応
 
 もし、nmcli が次の様なエラーで終了したら、設定結果は中途な状態になっています。
@@ -451,12 +451,12 @@ $*
 
 `-netdevice` で bridge brnm0 に tap を設定するときに helper として qemu-bridge-helper-suid を使用します。`-device` にて仮想マシンに仮想的な USB-Ethernet converter usb-net を接続、tap を識別子 net0 を通して使用します(qemu-system-arm 実行中は network device tapN が追加されます)。
 
-
 ## nmcli を使った場合で bridge に IP address を割り当てる (任意)
 
 作成した bridge brnm0 に IP address を割り当てる使い方もできます。ここでは DHCP で IP address が自動的に付与される環境を想定しています。
 
 <a name="pros-cons-bridge-has-a-address"></a>
+
 ### bridge に IP address を割り当てる 利点・欠点
 
 bridge に IP address を割り当てる利点・欠点は次の通りです。
@@ -636,12 +636,14 @@ sudo nano /etc/network/interfaces.d/enx000ec6c150f4-br0
 ファイル名は enx000ec6c150f4, enx000ec6c150f4-br0 としています。読み込み順を考慮する必要がある場合は、 /etc/network/interfaces.d 以下に配置されたファイル群と整合性がとれるようにして下さい。enx000ec6c150f4 と enx000ec6c150f4-br0 ファイルの内容は次の通りです。
 
 <a name="file-enx000ec6c150f4">File: enx000ec6c150f4</a>
+
 ```text
 auto enx000ec6c150f4
 iface enx000ec6c150f4 inet manual
 ```
 
 <a name="file-enx000ec6c150f4-br0">File: enx000ec6c150f4-br0</a>
+
 ```text
 auto br0
 iface br0 inet manual
@@ -658,7 +660,6 @@ iface br0 inet manual
 |bridge_ports|enx000ec6c150f4|bridge の外部接続に使う USB-Ethernet converter の interface 名です。|
 |bridge_stp|off|Spanning Tree Protocol を使わない設定です。外部内部ともループを構成する様なネットワークにしないので off にしておきます。|
 |bridge_maxwait|10|networking service load 時から bridge_ports に指定した interface enx000ec6c150f4 が kernel で初期化処理されて利用可能になるまで待つ時間を 10 秒にしています。主に linux 起動時に関係します。kernel の probe 処理が大量の device の存在により遅れたり、module load などで遅延するなどの場合に待つ時間になります。|
-
 
 設定を反映します。
 
@@ -681,7 +682,6 @@ ifconfig -a
 
 > [!TIP]
 > [nmcli がエラーになってしまった場合の対応](#Recover-nmcli-message-recipient-disconnected)
-
 
 `brctl show` の出力結果は次の様になっているはずです(注目が必要な部分のみ抜粋)。
 
@@ -763,4 +763,3 @@ ifconfig -a
 ```
 
 host machine の内外通信に使っていた enp3s0 と同じセグメント内のアドレスが付与されます。このような状態でも通信は可能です。[利点・欠点は nmcli で設定した bridge と同様](#pros-cons-bridge-has-a-address)です。interface を集約・分離どちらの運用もできます。
-

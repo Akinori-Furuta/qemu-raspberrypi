@@ -132,7 +132,7 @@ Failed to disable unit: Transport endpoint is not connected
 
 5 ～ 8 分ほど待つと仮想 Raspberry Pi の画面ウインドウに GUI のログイン画面が現れます。途中半分くらいの時間は画面ウインドウは真っ黒なままです。
 
-仮想 Raspberry Pi の画面ウインドウでログインします。ログインに使う User と Password は SD card image を作るときに設定した PiUserName とその password です。 
+仮想 Raspberry Pi の画面ウインドウでログインします。ログインに使う User と Password は SD card image を作るときに設定した PiUserName とその password です。
 
 ![Login Raspberry Pi OS on QEMU Virtual Machine Display Window](../img/login-on-qemu-gui.png)
 
