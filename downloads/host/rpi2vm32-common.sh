@@ -229,9 +229,10 @@ then
 	_DriveParam="format=raw,file=${SdFile}"
 fi
 
-if file -L "${SdFile}" | grep -q QCOW2
+if file -L "${SdFile}" | grep -q QCOW
 then
-	_DriveParam="format=qcow2,file=${SdFile}"
+	_DriveFormat=$( qemu-img info "${SdFile}"  | grep -i 'file[[:space:]]\+format' | sed  's/^.*:[[:space:]]*//' )
+	_DriveParam="format=${_DriveFormat},file=${SdFile}"
 fi
 
 if [ -z "${NicBridge}" ]
