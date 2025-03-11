@@ -76,7 +76,7 @@ qemu-system-arm \
 -kernel "${KernelFile}" \
 -initrd "${InitrdFile}" \
 -dtb "${DtbFile}" \
--drive "format=raw,file=${SdFile}" \
+-drive "${_DriveParam}" \
 -append "console=ttyAMA0,115200 console=tty1\
  root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\
  dwc_otg.fiq_fsm_enable=0\
