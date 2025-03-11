@@ -9,7 +9,7 @@ rpios32bit-host-kit.tar.gz: host/rpi2vm32-1st.sh \
 	host/rpi2vm32.conf \
 	host/rpi2vm32-vnc.sh \
 	host/rpi2vm32-vnc.conf
-	tar -C host -zcvf rpios32bit-host-kit.tar.gz .
+	( cd host; tar -zcvf ../$@ $(notdir $?) ) || rm $@
 
 rpios32bit-target-kit.tar.gz: target/etc/systemd/system.conf \
 	target/etc/systemd/system.conf.diff \
