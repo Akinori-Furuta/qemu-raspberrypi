@@ -17,8 +17,14 @@ trap ExitProc EXIT
 
 # Find Temporary Directory.
 function TempDirectoryFind() {
-	for Temp in /run/user/$(id -u) /dev/shm /ramdisk ${TMP} ${TEMP} /tmp
+	local Temp
+
+	for Temp in /run/user/$(id -u) /dev/shm /ramdisk "${TMP}" "${TEMP}" /tmp
 	do
+		if [ -z "${Temp}" ]
+		then
+			continue
+		fi
 		if [ -d "${Temp}" ] && \
 		   [ -r "${Temp}" ] && [ -w "${Temp}" ] && [ -x "${Temp}" ]
 		then
