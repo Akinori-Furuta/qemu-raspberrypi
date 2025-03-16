@@ -753,6 +753,8 @@ then
 	exit 1
 fi
 
+[ -n "${debug}" ] && echo "$0: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"" 1>&2
+
 RaspiOSImagePreview="${Pwd}/RaspiOS-$$-$( HashedRamdom ).img"
 
 # convert Raspberry Pi OS image media to file.
