@@ -749,7 +749,7 @@ done
 
 if [[ -z "${TargetKit}" ]]
 then
-	echo "$0: Can not found target kit tar.gz, rpios32bit-target-kit.tar.gz or rpios64bit-target-kit.tar.gz" 1>&2
+	echo "$0: ERROR: Can not found target kit tar.gz, rpios32bit-target-kit.tar.gz or rpios64bit-target-kit.tar.gz" 1>&2
 	exit 1
 fi
 
