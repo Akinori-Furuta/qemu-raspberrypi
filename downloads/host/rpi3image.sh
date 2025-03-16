@@ -559,10 +559,10 @@ function ShowBlockDevice() {
 		model=$( cat "${sys_dev_path}/model" )
 	fi
 
-	echo "$0: INFO: DEV_PATH=\"$1\""
-	echo "$0: INFO: VENDOR=\"${vendor}\""
-	echo "$0: INFO: MODEL=\"${model}\""
-	echo "$0: INFO: SIZE=${size_iu}/${size_du} bytes"
+	echo "$0: INFO: DEV_PATH=\"$1\"" 1>&2
+	echo "$0: INFO: VENDOR=\"${vendor}\"" 1>&2
+	echo "$0: INFO: MODEL=\"${model}\"" 1>&2
+	echo "$0: INFO: SIZE=${size_iu}/${size_du} bytes" 1>&2
 	return 0
 }
 
@@ -714,7 +714,7 @@ then
 		fi
 		if BlockDeviceIsRaspiOS "${blk}"
 		then
-			echo "$0: INFO: Found Raspberry Pi OS image media at \"${blk}\""
+			echo "$0: INFO: Found Raspberry Pi OS image media at \"${blk}\"" 1>&2
 			found=0
 			ShowBlockDevice "${blk}"
 		fi
