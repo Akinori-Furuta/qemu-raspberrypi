@@ -753,8 +753,9 @@ then
 	exit 1
 fi
 
-RaspiOSImagePrev="${Pwd}/RaspiOS-$$-$( HashedRamdom ).img"
+RaspiOSImagePreview="${Pwd}/RaspiOS-$$-$( HashedRamdom ).img"
 
 # convert Raspberry Pi OS image media to file.
 
-# sudo "${QEMU_IMG}" convert -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePrev}"
+echo "$0: INFO: Copy Raspberry Pi OS image media into \"{RaspiOSImagePreview}\"" 1>&2
+sudo "${QEMU_IMG}" convert -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
