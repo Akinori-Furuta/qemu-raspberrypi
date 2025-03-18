@@ -638,10 +638,7 @@ function FsckVolume() {
 		echo "$0.FsckVolume().loop=$i: INFO: fsck -f -y \"${1}\"" 1>&2
 		sudo "${FSCK}" -f -y "${1}" 1>&2
 		result=$?
-		if (( ${result} == 0 ))
-		then
-			break
-		fi
+		(( ${result} == 0 )) && break
 		i=$(( ${i} + 1 ))
 	done
 	return ${result}
@@ -674,19 +671,11 @@ function FsckRaspiOSMedia() {
 
 	FsckPart "$1" 1
 	result=$?
-
-	if (( ${result} != 0 ))
-	then
-		return $?
-	fi
+	(( ${result} != 0 )) && return ${result}
 
 	FsckPart "$1" 2
 	result=$?
-
-	if (( ${result} != 0 ))
-	then
-		return $?
-	fi
+	(( ${result} != 0 )) && return ${result}
 
 	return 0
 }
@@ -700,10 +689,7 @@ function GrowPartRaspiOSMedia() {
 	# Expand rootfs partition
 	sudo "${GROWPART}" "$1" 2
 	result=$?
-	if (( ${result} ! = 0 ))
-	then
-		return ${result}
-	fi
+	(( ${result} != 0 )) && return ${result}
 
 	part_path="${1}2"
 	if [[ -b "${part_path}" ]]
