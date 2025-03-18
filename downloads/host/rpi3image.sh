@@ -591,12 +591,14 @@ function UmountBlockDevicePart() {
 	if PathIsMountPoint "${part_path}"
 	then
 		sudo "${UMOUNT}" "${part_path}"
+		return $?
 	fi
 
 	part_path="${1}p${2}"
 	if PathIsMountPoint "${part_path}"
 	then
 		sudo "${UMOUNT}" "${part_path}"
+		return $?
 	fi
 
 	return 0
@@ -607,8 +609,15 @@ function UmountBlockDevicePart() {
 # exit   no
 # return 0
 function UmountRaspiOSMedia() {
+	local	result
+
 	UmountBlockDevicePart "${1}" 1
+	result=$?
+	(( ${result} != 0 )) && return ${result}
+
 	UmountBlockDevicePart "${1}" 2
+	result=$?
+	(( ${result} != 0 )) && return ${result}
 
 	return 0
 }
