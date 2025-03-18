@@ -228,7 +228,7 @@ function NbdFindAvailableNode() {
 		return 1
 	fi
 	i=0
-	pushd /sys/block
+	pushd /sys/block 1>&2
 	while (( ${i} < ${n} ))
 	do
 		nbd="nbd${i}"
@@ -240,7 +240,7 @@ function NbdFindAvailableNode() {
 		fi
 		i=$(( ${i} + 1 ))
 	done
-	popd
+	popd 1>&2
 	return 1
 }
 
