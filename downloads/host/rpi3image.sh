@@ -18,7 +18,9 @@ RaspiMedia="$1"
 
 if [[ -z "${RaspiMedia}" ]]
 then
-	echo "$0: Specify Raspberry Pi OS image media path." 1>&2
+	echo "$0: ERROR: Specify Raspberry Pi OS image media path." 1>&2
+	echo "$0: INFO: To find Raspberry Pi OS image media path, invoke as follows." 1>&2
+	echo "$0: INFO:   $0 find" 1>&2
 	exit 1
 fi
 
