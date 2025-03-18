@@ -506,28 +506,28 @@ function BlockDeviceIsRaspiOS() {
 	part_label="$( BlkPartIdLabel "${dev_path}" 1 )"
 	if [[ ! "${part_label}"  == "bootfs" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is \"${part_label}\", not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is labeled \"${part_label}\", not a Raspberry Pi OS image media $1" 1>&2
 		return 1
 	fi
 
 	part_type="$( BlkPartIdType "${dev_path}" 1 )"
 	if [[ ! "${part_type}"  == "vfat" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is ${part_type}, not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is \"${part_type}\" file system, not a Raspberry Pi OS image media $1" 1>&2
 		return 1
 	fi
 
 	part_label="$(BlkPartIdLabel "${dev_path}" 2)"
 	if [[ ! "${part_label}"  == "rootfs" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is \"${part_label}\", not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is labeled \"${part_label}\", not a Raspberry Pi OS image media $1" 1>&2
 		return 1
 	fi
 
 	part_type="$(BlkPartIdType "${dev_path}" 2)"
 	if [[ ! "${part_type}"  == "ext4" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is ${part_type}, not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is \"${part_type}\" file system, not a Raspberry Pi OS image media $1" 1>&2
 		return 1
 	fi
 
@@ -535,7 +535,7 @@ function BlockDeviceIsRaspiOS() {
 
 	if (( ${part_num} != 2 ))
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: There is ${part_num} partitions, not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media $1" 1>&2
 		return 1
 	fi
 
