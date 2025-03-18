@@ -26,6 +26,8 @@ fi
 
 BootFsFatPoint=""
 RootFsExt4Point=""
+NbdNode=""
+NbdDev=""
 
 for MODPROBE in /usr/sbin/modprobe /sbin/modprobe
 do
@@ -122,6 +124,11 @@ function ExitProc() {
 	if PathIsMountPoint "${RootFsExt4Point}"
 	then
 		${UMOUNT} "${RootFsExt4Point}"
+	fi
+
+	if [ -n "${NbdDev}" ]
+	then
+		sudo "${QEMU_NBD}" -d "${NbdDev}"
 	fi
 
 	if [ -n "${MyTemp}" ] && [ -d "${MyTemp}" ]
@@ -731,9 +738,30 @@ then
 	exit ${found}
 fi
 
-if [[ ! -b "${RaspiMedia}" ]]
+if [ ! -d "/sys/module/nbd" ]
 then
-	
+	echo "$0: INFO: Probe nbd kernel module." 2>&1
+	sudo "${MODPROBE}" nbd
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		exit ${result}
+	fi
+	# note: The udev daemon will prepare /dev/nbd* nodes.
+	#       While the udev is creating /dev/nbd*,  do some process.
+fi
+
+RaspiMediaDev="$( readlink -f "${RaspiMedia}" )"
+
+if [[ ! -b "${RaspiMediaDev}" ]]
+then
+	echo "$0: INFO: Not a block device \"${RaspiMedia}\"" 1>&2
+	exit 1
+fi
+
+if ! BlockDeviceIsRaspiOS "${RaspiMedia}"
+then
+	echo "$0: INFO: Not a Raspberry Pi OS media \"${RaspiMedia}\"" 1>&2
 	exit 1
 fi
 
@@ -765,9 +793,65 @@ fi
 
 [ -n "${debug}" ] && echo "$0: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"" 1>&2
 
+echo "$0: INFO: Unmount \"${RaspiMedia}\""
+
+while ! UmountRaspiOSMedia "${RaspiMediaDev}"
+do
+	echo "$0: NOTICE: Retry umount \"${RaspiMedia}\""
+	sleep 5
+done
+
 RaspiOSImagePreview="${Pwd}/RaspiOS-$$-$( HashedRamdom ).img"
+
+touch "${RaspiOSImagePreview}"
+chmod 600 "${RaspiOSImagePreview}"
 
 # convert Raspberry Pi OS image media to file.
 
-echo "$0: INFO: Copy Raspberry Pi OS image media into \"{RaspiOSImagePreview}\"" 1>&2
-sudo "${QEMU_IMG}" convert -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
+echo "$0: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"" 1>&2
+sudo "${QEMU_IMG}" convert -p -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
+
+
+NbdNum=$( cat /sys/module/nbd/parameters/nbds_max )
+i=0
+
+while (( ${i} <= ${NbdNum} ))
+do
+	NbdNode=$( NbdFindAvailableNode )
+	NbdDev="/dev/${NbdNode}"
+
+	if sudo "${QEMU_NBD}" -f raw -c "${NbdDev}" "${RaspiOSImagePreview}"
+	then
+		break
+	fi
+	i=$(( ${i} + 1 ))
+done
+
+if (( ${i} > ${NbdNum} ))
+then
+	echo "$0: ERROR: Can not connect image file to NBD."
+	exit 1
+fi
+
+echo "$0: INFO: Connect image \"${RaspiOSImagePreview}\" file to NBD \"${NbdDev}\""
+
+if ! sudo "${PARTPROBE}" "${NbdDev}"
+then
+	echo "$0: ERROR: Can not probe partition NBD \"${NbdDev}\""
+	exit 1
+fi
+
+i=0
+
+while [[ ! -b "${NbdDev}p1" ]] || [[ ! -b "${NbdDev}p2" ]]
+do
+	if (( ${i} >= 120 ))
+	then
+		echo "$0: ERROR: Partitions do not become ready NBD \"${NbdDev}\""
+		exit 1
+	fi
+
+	echo "$0: NOTICE: Waiting partitions become ready NBD \"${NbdDev}\""
+	i=$(( ${i} + 1 ))
+	sleep 1
+done
