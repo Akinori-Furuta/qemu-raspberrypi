@@ -734,15 +734,16 @@ fi
 
 TargetKit=""
 
-# note: Currently We use target kit tar.gz to both 32bit and 64bit.
+# note: Currently We use one target kit rpios32bit-target-kit.tar.gz
+#       to both 32bit and 64bit.
 
 # search target kit tar.gz from current directory 
 # and git cloned repository.
 
-for target_kit in "${Pwd}/rpios32bit-target-kit.tar.gz" \
-                  "${Pwd}/rpios64bit-target-kit.tar.gz" \
-                  "${MyDir}/../downloads/rpios32bit-target-kit.tar.gz" \
-                  "${MyDir}/../downloads/rpios64bit-target-kit.tar.gz"
+for target_kit in "${Pwd}/rpios64bit-target-kit.tar.gz" \
+		  "${MyDir}/../downloads/rpios64bit-target-kit.tar.gz" \
+		  "${Pwd}/rpios32bit-target-kit.tar.gz" \
+		  "${MyDir}/../downloads/rpios32bit-target-kit.tar.gz"
 do
 	if [[ -f "${target_kit}" ]]
 	then
