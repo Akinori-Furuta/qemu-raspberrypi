@@ -1,6 +1,8 @@
 #!/bin/bash
 
 Pwd="$( pwd )"
+IdUser="$( id -u )"
+IdGroup="$( id -g )"
 
 MyWhich="$( which "$0" )"
 MyPath="$( readlink -f "${MyWhich}" )"
@@ -134,7 +136,7 @@ trap ExitProc EXIT
 function TempDirectoryFind() {
 	local Temp
 
-	for Temp in /run/user/$( id -u ) /dev/shm /ramdisk "${TMP}" "${TEMP}" /tmp
+	for Temp in /run/user/${IdUser} /dev/shm /ramdisk "${TMP}" "${TEMP}" /tmp
 	do
 		if echo -n "${Temp}" | grep -q '[[:space:]]'
 		then
