@@ -201,8 +201,18 @@ TempDirectoryPrepare
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
 
-mkdir "${BootFsFatPoint}"
-mkdir "${RootFsExt4Point}"
+if ! mkdir "${BootFsFatPoint}"
+then
+	echo "$0: ERROR: Can not create bootfs mount point. BootFsFatPoint=\"${BootFsFatPoint}\""
+	exit 1
+fi
+
+if ! mkdir "${RootFsExt4Point}"
+then
+	echo "$0: ERROR: Can not create rootfs mount point. RootFsExt4Point=\"${RootFsExt4Point}\""
+	exit 1
+fi
+
 
 # Find available nbd node
 # echo nbdN
