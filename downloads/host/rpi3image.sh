@@ -49,10 +49,13 @@ done
 
 [ ! -x "${SUDO}" ] && ReqPackageListAdd sudo
 
+# modeprobe to link nbd module to kernel
 for MODPROBE in /usr/sbin/modprobe /sbin/modprobe
 do
 	[ -x "${MODPROBE}" ] && break
 done
+
+[ ! -x "${MODPROBE}" ] && ReqPackageListAdd kmod
 
 # blkid to read partition label
 for BLKID in /usr/sbin/blkid /sbin/blkid
@@ -70,56 +73,85 @@ done
 
 [ ! -x "${NBD_CLIENT}" ] && ReqPackageListAdd nbd-client
 
+# qemu-nbd to run NBD server to provide image file as block device
 for QEMU_NBD in /usr/bin/qemu-nbd /bin/qemu-nbd
 do
 	[ -x "${QEMU_NBD}" ] && break
 done
 
+[ ! -x "${QEMU_NBD}" ] && ReqPackageListAdd qemu-utils
+
+# qemu-img to convert Raspberry Pi OS Storage device to file
 for QEMU_IMG in /usr/bin/qemu-img /bin/qemu-img
 do
 	[ -x "${QEMU_IMG}" ] && break
 done
 
+[ ! -x "${QEMU_IMG}" ] && ReqPackageListAdd qemu-utils
+
+# partprobe to rescan NBD connected block device.
 for PARTPROBE in /usr/sbin/partprobe /sbin/partprobe
 do
 	[ -x "${PARTPROBE}" ] && break
 done
 
+[ ! -x "${PARTPROBE}" ] && ReqPackageListAdd parted
+
+# file to check file type. If file is suitable for QEMU image file.
 for FILE in /usr/bin/file /bin/file
 do
 	[ -x "${FILE}" ] && break
 done
 
+[ ! -x "${FILE}" ] && ReqPackageListAdd file
+
+# count partitions on a storage
 for SFDISK in /usr/sbin/sfdisk /sbin/sfdisk
 do
 	[ -x "${SFDISK}" ] && break
 done
 
+[ ! -x "${SFDISK}" ] && ReqPackageListAdd fdisk
+
+# check a ext4 volume before resize.
 for FSCK in /usr/sbin/fsck /sbin/fsck
 do
 	[ -x "${FSCK}" ] && break
 done
 
+[ ! -x "${FSCK}" ] && ReqPackageListAdd e2fsprogs util-linux
+
+# grow the rootfs partiton
 for GROWPART in /usr/bin/growpart /usr/sbin/growpart /sbin/growpart /bin/growpart
 do
 	[ -x "${GROWPART}" ] && break
 done
 
+# grow the rootfs ext4 volume
 for RESIZE2FS in /usr/sbin/resize2fs /sbin/resize2fs
 do
 	[ -x "${RESIZE2FS}" ] && break
 done
 
+[ ! -x "${RESIZE2FS}" ] && ReqPackageListAdd e2fsprogs
+
+# mount volume on ${BootFsFatPoint}, and ${RootFsExt4Point}
 for MOUNT in /usr/bin/mount /sbin/mount /bin/mount
 do
 	[ -x "${MOUNT}" ] && break
 done
 
+[ ! -x "${MOUNT}" ] && ReqPackageListAdd mount
+
+# unmount volume from /media/${USER}, ${BootFsFatPoint}, and ${RootFsExt4Point}
 for UMOUNT in /usr/bin/umount /sbin/umount /bin/umount
 do
 	[ -x "${UMOUNT}" ] && break
 done
 
+[ ! -x "${UMOUNT}" ] && ReqPackageListAdd mount
+
+# extract files to place rootfs.
 for TAR in /usr/bin/tar /bin/tar
 do
 	[ -x "${TAR}" ] && break
