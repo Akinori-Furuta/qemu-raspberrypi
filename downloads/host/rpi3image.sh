@@ -1174,7 +1174,7 @@ mv -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can rename \"${RaspiOSImagePreview}\" to \"${RaspiOSImage}\" Raspberry Pi OS image file." 1>&2
+	echo "$0: ERROR: Can not rename \"${RaspiOSImagePreview}\" to \"${RaspiOSImage}\" Raspberry Pi OS image file." 1>&2
 	exit ${result}
 fi
 
