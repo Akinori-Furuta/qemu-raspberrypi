@@ -762,7 +762,7 @@ function FsckVolume() {
 	while (( ${i} < ${FSCK_TRIES} ))
 	do
 		echo "$0.FsckVolume().loop=$i: INFO: fsck -f -y \"${1}\"" 1>&2
-		sudo "${FSCK}" -f -y "${1}" 1>&2
+		"${SUDO}" "${FSCK}" -f -y "${1}" 1>&2
 		result=$?
 		(( ${result} == 0 )) && break
 		i=$(( ${i} + 1 ))
@@ -813,21 +813,21 @@ function GrowPartRaspiOSMedia() {
 	result=1
 
 	# Expand rootfs partition
-	sudo "${GROWPART}" "$1" 2
+	"${SUDO}" "${GROWPART}" "$1" 2
 	result=$?
 	(( ${result} != 0 )) && return ${result}
 
 	part_path="${1}2"
 	if [[ -b "${part_path}" ]]
 	then
-		sudo "${RESIZE2FS}" "${part_path}"
+		"${SUDO}" "${RESIZE2FS}" "${part_path}"
 		return $?
 	fi
 
 	part_path="${1}p2"
 	if [[ -b "${part_path}" ]]
 	then
-		sudo "${RESIZE2FS}" "${part_path}"
+		"${SUDO}" "${RESIZE2FS}" "${part_path}"
 		return $?
 	fi
 
@@ -860,7 +860,7 @@ fi
 if [ ! -d "/sys/module/nbd" ]
 then
 	echo "$0: INFO: Probe nbd kernel module." 2>&1
-	sudo "${MODPROBE}" nbd
+	"${SUDO}" "${MODPROBE}" nbd
 	result=$?
 	if (( ${result} != 0 ))
 	then
@@ -939,7 +939,7 @@ do
 	NbdNode=$( NbdFindAvailableNode )
 	NbdDev="/dev/${NbdNode}"
 
-	if sudo "${QEMU_NBD}" -f raw -c "${NbdDev}" "${RaspiOSImagePreview}"
+	if "${SUDO}" "${QEMU_NBD}" -f raw -c "${NbdDev}" "${RaspiOSImagePreview}" 1>&2
 	then
 		break
 	fi
