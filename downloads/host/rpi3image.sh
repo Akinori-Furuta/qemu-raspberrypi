@@ -614,7 +614,7 @@ function BlockDeviceIsRaspiOS() {
 
 	if [[ ! -b "${dev_path}" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): ERROR: Not a block device $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): ERROR: Not a block device \"$1\"." 1>&2
 		return 1
 	fi
 
@@ -623,35 +623,35 @@ function BlockDeviceIsRaspiOS() {
 	if ! sudo "${FILE}" -s "${dev_path}" | \
 	   grep -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_label="$( BlkPartIdLabel "${dev_path}" 1 )"
 	if [[ ! "${part_label}"  == "bootfs" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is labeled \"${part_label}\", not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_type="$( BlkPartIdType "${dev_path}" 1 )"
 	if [[ ! "${part_type}"  == "vfat" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is \"${part_type}\" file system, not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_label="$(BlkPartIdLabel "${dev_path}" 2)"
 	if [[ ! "${part_label}"  == "rootfs" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is labeled \"${part_label}\", not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_type="$(BlkPartIdType "${dev_path}" 2)"
 	if [[ ! "${part_type}"  == "ext4" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is \"${part_type}\" file system, not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
@@ -659,7 +659,7 @@ function BlockDeviceIsRaspiOS() {
 
 	if (( ${part_num} != 2 ))
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media $1" 1>&2
+		echo "$0.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
