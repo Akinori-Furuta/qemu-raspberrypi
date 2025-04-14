@@ -620,7 +620,7 @@ function BlockDeviceIsRaspiOS() {
 
 	dev_base="$( basename "${dev_path}" )"
 
-	if ! sudo "${FILE}" -s "${dev_path}" | \
+	if ! "${SUDO}" "${FILE}" -s "${dev_path}" | \
 	   grep -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
 	then
 		echo "$0.BlockDeviceIsRaspiOS(): INFO: Not a Raspberry Pi OS image media \"$1\"." 1>&2
@@ -655,7 +655,7 @@ function BlockDeviceIsRaspiOS() {
 		return 1
 	fi
 
-	part_num=$( sudo "${SFDISK}" -d "${dev_path}" | grep '^/dev/' | wc -l )
+	part_num=$( "${SUDO}" "${SFDISK}" -d "${dev_path}" | grep '^/dev/' | wc -l )
 
 	if (( ${part_num} != 2 ))
 	then
@@ -714,14 +714,14 @@ function UmountBlockDevicePart() {
 	part_path="${1}${2}"
 	if PathIsMountPoint "${part_path}"
 	then
-		sudo "${UMOUNT}" "${part_path}"
+		"${SUDO}" "${UMOUNT}" "${part_path}"
 		return $?
 	fi
 
 	part_path="${1}p${2}"
 	if PathIsMountPoint "${part_path}"
 	then
-		sudo "${UMOUNT}" "${part_path}"
+		"${SUDO}" "${UMOUNT}" "${part_path}"
 		return $?
 	fi
 
