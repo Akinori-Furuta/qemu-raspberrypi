@@ -29,6 +29,18 @@ RootFsExt4Point=""
 NbdNode=""
 NbdDev=""
 
+ReqPackageList=""
+
+function ReqPackageListAdd() {
+	for pkg in "$@"
+	do
+		if ! echo "${ReqPackageList}" | grep -q "${pkg}"
+		then
+			ReqPackageList="${ReqPackageList} ${pkg}"
+		fi
+	done
+}
+
 for MODPROBE in /usr/sbin/modprobe /sbin/modprobe
 do
 	[ -x "${MODPROBE}" ] && break
@@ -89,6 +101,13 @@ do
 	[ -x "${TAR}" ] && break
 done
 
+if [ -n "${ReqPackageList}" ]
+then
+	echo "$0: ERROR: Need following package(s)." 1>&2
+	echo "$0: INFO: ${ReqPackageList}" 1>&2
+	echo "$0: INFO: sudo apt install ${ReqPackageList}" 1>&2
+	exit 1
+fi
 
 # Check Path is used as mount point
 # args path
