@@ -1176,6 +1176,8 @@ then
 	exit ${result}
 fi
 
+"${SUDO}" "${CHOWN}" "${IdUser}:${IdGroup}" "${RaspiOSImage}"
+
 echo "$0: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
 if [[ "${RaspiOSArch}" == "aarch64" ]]
 then
