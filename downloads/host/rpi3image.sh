@@ -182,8 +182,6 @@ fi
 # echo none
 # return code 0: mount point, 1: is not mount point.
 function PathIsMountPoint() {
-	local	point
-
 	if [ -z "$1" ]
 	then
 		return 1
