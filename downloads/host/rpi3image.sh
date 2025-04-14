@@ -712,14 +712,14 @@ function UmountBlockDevicePart() {
 	local	part_path
 
 	part_path="${1}${2}"
-	if PathIsMountPoint "${part_path}"
+	if DeviceIsMounted "${part_path}"
 	then
 		"${SUDO}" "${UMOUNT}" "${part_path}"
 		return $?
 	fi
 
 	part_path="${1}p${2}"
-	if PathIsMountPoint "${part_path}"
+	if DeviceIsMounted "${part_path}"
 	then
 		"${SUDO}" "${UMOUNT}" "${part_path}"
 		return $?
