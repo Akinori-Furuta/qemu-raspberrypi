@@ -321,16 +321,20 @@ TempDirectoryPrepare
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
 
-if ! mkdir "${BootFsFatPoint}"
+mkdir "${BootFsFatPoint}"
+result=$?
+if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not create bootfs mount point. BootFsFatPoint=\"${BootFsFatPoint}\""
-	exit 1
+	echo "$0: ERROR: Can not create bootfs mount point. BootFsFatPoint=\"${BootFsFatPoint}\"." 1>&2
+	exit ${result}
 fi
 
-if ! mkdir "${RootFsExt4Point}"
+mkdir "${RootFsExt4Point}"
+result=$?
+if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not create rootfs mount point. RootFsExt4Point=\"${RootFsExt4Point}\""
-	exit 1
+	echo "$0: ERROR: Can not create rootfs mount point. RootFsExt4Point=\"${RootFsExt4Point}\"." 1>&2
+	exit ${result}
 fi
 
 
