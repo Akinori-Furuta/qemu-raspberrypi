@@ -949,7 +949,7 @@ done
 
 if (( ${i} > ${NbdNum} ))
 then
-	echo "$0: ERROR: Can not connect image file to NBD."
+	echo "$0: ERROR: Can not connect image file to NBD." 1>&2
 	exit 1
 fi
 
@@ -957,7 +957,7 @@ echo "$0: INFO: Connect image \"${RaspiOSImagePreview}\" file to NBD \"${NbdDev}
 
 if ! sudo "${PARTPROBE}" "${NbdDev}"
 then
-	echo "$0: ERROR: Can not probe partition NBD \"${NbdDev}\""
+	echo "$0: ERROR: Can not probe partition NBD \"${NbdDev}\"." 1>&2
 	exit 1
 fi
 
