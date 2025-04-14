@@ -95,7 +95,7 @@ function ExitProc() {
 
 	if [ -n "${NbdDev}" ]
 	then
-		nbd-client -c "${NbdDev}" && "${SUDO}" "${QEMU_NBD}" -d "${NbdDev}"
+		"${NBD_CLIENT}" -c "${NbdDev}" && "${SUDO}" "${QEMU_NBD}" -d "${NbdDev}"
 	fi
 
 	if [ -n "${RaspiOSImageTemp}" ]
