@@ -83,12 +83,12 @@ function DeviceIsMounted() {
 function ExitProc() {
 	cd "${Pwd}"
 
-	if PathIsMountPoint "${BootFsFatPoint}"
+	if [[ -n "${BootFsFatPoint}" ]] && PathIsMountPoint "${BootFsFatPoint}"
 	then
 		"${SUDO}" ${UMOUNT} "${BootFsFatPoint}"
 	fi
 
-	if PathIsMountPoint "${RootFsExt4Point}"
+	if [[ -n "${RootFsExt4Point}" ]] && PathIsMountPoint "${RootFsExt4Point}"
 	then
 		"${SUDO}" ${UMOUNT} "${RootFsExt4Point}"
 	fi
