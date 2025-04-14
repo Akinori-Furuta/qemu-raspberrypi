@@ -12,9 +12,13 @@ MyBody="${MyBase%.*}"
 MyBodyNoSpace="$( echo -n ${MyBody} | tr -s '\000-\040' '_')"
 MyBodyNoSuffix="${MyBody%%-*}"
 
+RaspiOSImagePrefix="raspios"
+
 MyTemp=""
+RaspiOSImageTemp=""
 
 RaspiMedia="$1"
+DtRpi3BName="bcm2710-rpi-3-b"
 
 if [[ -z "${RaspiMedia}" ]]
 then
@@ -748,6 +752,26 @@ function UmountRaspiOSMedia() {
 	return 0
 }
 
+function WaitNbdRaspiOSMedia() {
+	local	i
+
+	i=0
+
+	while [[ ! -b "${1}p1" ]] || [[ ! -b "${1}p2" ]]
+	do
+		if (( ${i} >= 120 ))
+		then
+			return 1
+		fi
+
+		echo "$0: NOTICE: Waiting partitions become ready NBD \"${1}\"." 1>&2
+		i=$(( ${i} + 1 ))
+		sleep 1
+	done
+
+	return 0
+}
+
 if [[ -z "${FSCK_TRIES}" ]]
 then
 	FSCK_TRIES=10
@@ -792,6 +816,9 @@ function FsckPart() {
 	return 1
 }
 
+# args device_path
+# echo Not specified
+# return 0: Success, !=0: Failed
 function FsckRaspiOSMedia() {
 	local	result
 
@@ -832,6 +859,51 @@ function GrowPartRaspiOSMedia() {
 	fi
 
 	return 1
+}
+
+function MountRaspiOSMedia() {
+	local	result
+	local	part_path
+
+	result=0
+
+	part_path="${1}1"
+	if [[ -b "${part_path}" ]]
+	then
+		if ! "${SUDO}" "${MOUNT}" "${part_path}" "${BootFsFatPoint}"
+		then
+			result=$?
+		fi
+	fi
+
+	part_path="${1}p1"
+	if [[ -b "${part_path}" ]]
+	then
+		if ! "${SUDO}" "${MOUNT}" "${part_path}" "${BootFsFatPoint}"
+		then
+			result=$?
+		fi
+	fi
+
+	part_path="${1}2"
+	if [[ -b "${part_path}" ]]
+	then
+		if ! "${SUDO}" "${MOUNT}" "${part_path}" "${RootFsExt4Point}"
+		then
+			result=$?
+		fi
+	fi
+
+	part_path="${1}p2"
+	if [[ -b "${part_path}" ]]
+	then
+		if ! "${SUDO}" "${MOUNT}" "${part_path}" "${RootFsExt4Point}"
+		then
+			result=$?
+		fi
+	fi
+
+	return ${result}
 }
 
 if [[ "${RaspiMedia}" == "?" ]] || \
@@ -914,6 +986,7 @@ fi
 
 echo "$0: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
+sync
 
 while ! UmountRaspiOSMedia "${RaspiMediaDev}"
 do
@@ -921,23 +994,33 @@ do
 	sleep 5
 done
 
-RaspiOSImagePreview="${Pwd}/RaspiOS-$$-$( HashedRamdom ).img"
+RaspiOSImagePreview="${Pwd}/${RaspiOSImagePrefix}-$$-$( HashedRamdom ).img"
 
 touch "${RaspiOSImagePreview}"
 chmod 600 "${RaspiOSImagePreview}"
 
 # convert Raspberry Pi OS image media to file.
 
-echo "$0: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"" 1>&2
-sudo "${QEMU_IMG}" convert -p -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
-
+echo "$0: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"." 1>&2
+"${SUDO}" "${QEMU_IMG}" convert -p -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
 
 NbdNum=$( cat /sys/module/nbd/parameters/nbds_max )
+if [[ -z "${NbdNum}" ]]
+then
+	echo "$0: ERROR: The kernel NBD module is not ready." 1>&2
+	exit 1
+fi
+
 i=0
 
 while (( ${i} <= ${NbdNum} ))
 do
-	NbdNode=$( NbdFindAvailableNode )
+	if ! NbdNode=$( NbdFindAvailableNode )
+	then
+		echo "$0: ERROR: All NBDs are in use. NbdNum=${NbdNum}" 1>&2
+		exit 1
+	fi
+
 	NbdDev="/dev/${NbdNode}"
 
 	if "${SUDO}" "${QEMU_NBD}" -f raw -c "${NbdDev}" "${RaspiOSImagePreview}" 1>&2
@@ -955,23 +1038,208 @@ fi
 
 echo "$0: INFO: Connect image \"${RaspiOSImagePreview}\" file to NBD \"${NbdDev}\"." 1>&2
 
-if ! sudo "${PARTPROBE}" "${NbdDev}"
+"${SUDO}" "${PARTPROBE}" "${NbdDev}"
+result=$?
+if (( ${result} != 0 ))
 then
 	echo "$0: ERROR: Can not probe partition NBD \"${NbdDev}\"." 1>&2
+	exit ${result}
+fi
+
+if ! WaitNbdRaspiOSMedia "${NbdDev}"
+then
+	echo "$0: ERROR: Partitions do not become ready NBD \"${NbdDev}\"." 1>&2
 	exit 1
 fi
 
-i=0
+FsckRaspiOSMedia "${NbdDev}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not finish fsck \"${NbdDev}\" partitions." 1>&2
+	exit ${result}
+fi
 
-while [[ ! -b "${NbdDev}p1" ]] || [[ ! -b "${NbdDev}p2" ]]
+echo "$0: INFO: Grow rootfs partition (device \"${NbdDev}\" partition 2)." 1>&2
+
+GrowPartRaspiOSMedia "${NbdDev}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not grow rootfs partition." 1>&2
+	exit ${result}
+fi
+
+echo "$0: INFO: Mount partitions in Raspberry Pi OS image." 1>&2
+
+MountRaspiOSMedia "${NbdDev}"
+result=$?
+if (( ${result} != 0))
+then
+	echo "$0: ERROR: Can not mount partition(s)." 1>&2
+	exit ${result}
+fi
+
+RaspiOSArch=$( "${FILE}" "${RootFsExt4Point}/usr/bin/[" | sed 's!^.*ld-linux-\(.*\)[.]so[.].*$!\1!' )
+
+echo "$0: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
+
+RaspiOSImageTemp=$( mktemp -p "${Pwd}" ${RaspiOSImagePrefix}-XXXXXXXXXX.img )
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not create temporary file \"${RaspiOSImageTemp}\"." 1>&2
+	exit ${result}
+fi
+RaspiOSImage="${Pwd}/rpios-0000.img"
+RaspiOSImageSn=0
+
+while (( ${RaspiOSImageSn} <= 9999 ))
 do
-	if (( ${i} >= 120 ))
+	case "${RaspiOSArch}" in
+	(aarch64)
+		RaspiOSImage="${Pwd}/${RaspiOSImagePrefix}-64-$(printf "%04d" ${RaspiOSImageSn}).img"
+		;;
+	(*)
+		RaspiOSImage="${Pwd}/${RaspiOSImagePrefix}-32-$(printf "%04d" ${RaspiOSImageSn}).img"
+		;;
+	esac
+	if [ ! -f "${RaspiOSImage}" ]
 	then
-		echo "$0: ERROR: Partitions do not become ready NBD \"${NbdDev}\""
-		exit 1
+		mv -n "${RaspiOSImageTemp}" "${RaspiOSImage}"
+		result=$?
+		if (( ${result} == 0 ))
+		then
+			if [ ! -f "${RaspiOSImageTemp}" ]
+			then
+				break
+			fi
+		fi
 	fi
-
-	echo "$0: NOTICE: Waiting partitions become ready NBD \"${NbdDev}\""
-	i=$(( ${i} + 1 ))
-	sleep 1
+	if (( ( ${RaspiOSImageSn} % 100 ) == 0 ))
+	then
+		echo "$0: INFO: Search new Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
+	fi
+	RaspiOSImageSn=$(( ${RaspiOSImageSn} + 1 ))
 done
+
+if (( ${RaspiOSImageSn} > 9999 ))
+then
+	echo "$0: ERROR: There are many Raspberry Pi OS image files upto \"${RaspiOSImage}\"." 1>&2
+	exit 1
+fi
+
+echo "$0: INFO: Copy bootfs files." 1>&2
+
+"${SUDO}" cp -r "${BootFsFatPoint}" "${Pwd}/"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not copy bootfs partition." 1>&2
+	exit ${result}
+fi
+
+echo "$0: INFO: Set bootfs/firstrun.sh permission." 1>&2
+
+chmod 600 "${Pwd}/bootfs/firstrun.sh"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not change mode bootfs/firstrun.sh." 1>&2
+	exit ${result}
+fi
+
+echo "$0: INFO: Modify device tree." 1>&2
+
+dtc -I dtb -O dts -o "${Pwd}/bootfs/${DtRpi3BName}.dts" "${Pwd}/bootfs/${DtRpi3BName}.dtb"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not disassemble device tree blob \"${Pwd}/bootfs/${DtRpi3BName}.dtb\"." 1>&2
+	exit ${result}
+fi
+
+
+cp -p "${Pwd}/bootfs/${DtRpi3BName}.dts" "${Pwd}/bootfs/${DtRpi3BName}-qemu.dts"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not copy device tree blob \"${Pwd}/bootfs/${DtRpi3BName}.dts\"." 1>&2
+	exit ${result}
+fi
+
+patch "${Pwd}/bootfs/${DtRpi3BName}-qemu.dts" << EOF
+--- bcm2710-rpi-3-b.dts	2025-03-10 02:10:31.929049869 +0900
++++ bcm2710-rpi-3-b-qemu.dts	2025-03-10 02:10:31.931049840 +0900
+@@ -567,7 +567,7 @@
+ 				shutdown-gpios = <0x0b 0x00 0x00>;
+ 				local-bd-address = [00 00 00 00 00 00];
+ 				fallback-bd-address;
+-				status = "okay";
++				status = "disabled";
+ 				phandle = <0x3a>;
+ 			};
+ 		};
+EOF
+
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not patch device tree source \"${Pwd}/bootfs/${DtRpi3BName}-qemu.dts\"." 1>&2
+	exit ${result}
+fi
+
+dtc -I dts -O dtb -o "${Pwd}/bootfs/${DtRpi3BName}-qemu.dtb" "${Pwd}/bootfs/${DtRpi3BName}-qemu.dts"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not compile device tree source \"${Pwd}/bootfs/${DtRpi3BName}-qemu.dts\"." 1>&2
+	exit ${result}
+fi
+
+echo "$0: INFO: Apply target kit to rootfs." 1>&2
+
+"${SUDO}" tar -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not apply target kit to rootfs." 1>&2
+	exit ${result}
+fi
+
+echo "$0: INFO: Unmount Raspberry Pi OS image." 1>&2
+
+sync
+
+UmountRaspiOSMedia
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not unmount Raspberry Pi OS image." 1>&2
+	exit ${result}
+fi
+
+echo "$0: INFO: Disconnect Raspberry Pi OS image from NBD." 1>&2
+
+sync
+
+"${SUDO}" "${QEMU_NBD}" -d "${NbdDev}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not disconnect Raspberry Pi OS image." 1>&2
+	exit ${result}
+fi
+
+echo "$0: INFO: Rename Raspberry Pi OS image file." 1>&2
+
+mv -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can rename \"${RaspiOSImagePreview}\" to \"${RaspiOSImage}\" Raspberry Pi OS image file." 1>&2
+	exit ${result}
+fi
+
+echo "$0: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
+exit 0
