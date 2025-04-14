@@ -184,6 +184,7 @@ fi
 function PathIsMountPoint() {
 	if [ -z "$1" ]
 	then
+		echo "$0.PathIsMountPoint(): WARNING: No argument." 1>&2
 		return 1
 	fi
 	cat /proc/mounts | awk '{print $2}' | while read
