@@ -18,6 +18,7 @@ RaspiOSImagePrefix="raspios"
 
 RaspiMedia="$1"
 DtRpi3BName="bcm2710-rpi-3-b"
+DtRpi3BNameQemu="bcm2710-rpi-3-b-qemu"
 
 # Set dummy command before ready to use.
 
@@ -1091,8 +1092,10 @@ then
 	exit ${result}
 fi
 
+DtRpi3BNameQemuSource="${Pwd}/bootfs/${DtRpi3BNameQemu}.dts"
+DtRpi3BNameQemuBlob="${Pwd}/bootfs/${DtRpi3BNameQemu}.dtb"
 
-cp -p "${Pwd}/bootfs/${DtRpi3BName}.dts" "${Pwd}/bootfs/${DtRpi3BName}-qemu.dts"
+"${CP}" -p "${Pwd}/bootfs/${DtRpi3BName}.dts" "${DtRpi3BNameQemuSource}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1100,7 +1103,7 @@ then
 	exit ${result}
 fi
 
-patch "${Pwd}/bootfs/${DtRpi3BName}-qemu.dts" << EOF
+patch "${DtRpi3BNameQemuSource}" << EOF
 --- bcm2710-rpi-3-b.dts	2025-03-10 02:10:31.929049869 +0900
 +++ bcm2710-rpi-3-b-qemu.dts	2025-03-10 02:10:31.931049840 +0900
 @@ -567,7 +567,7 @@
@@ -1117,15 +1120,15 @@ EOF
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not patch device tree source \"${Pwd}/bootfs/${DtRpi3BName}-qemu.dts\"." 1>&2
+	echo "$0: ERROR: Can not patch device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
 	exit ${result}
 fi
 
-dtc -I dts -O dtb -o "${Pwd}/bootfs/${DtRpi3BName}-qemu.dtb" "${Pwd}/bootfs/${DtRpi3BName}-qemu.dts"
+dtc -I dts -O dtb -o "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not compile device tree source \"${Pwd}/bootfs/${DtRpi3BName}-qemu.dts\"." 1>&2
+	echo "$0: ERROR: Can not compile device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
 	exit ${result}
 fi
 
@@ -1174,4 +1177,8 @@ then
 fi
 
 echo "$0: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
+if [[ "${RaspiOSArch}" == "aarch64" ]]
+then
+	echo "$0: INFO: Created Raspberry Pi Model 3B device tree file \"${DtRpi3BNameQemuBlob}\"." 1>&2
+fi
 exit 0
