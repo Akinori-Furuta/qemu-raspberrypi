@@ -262,7 +262,7 @@ function TempDirectoryFind() {
 	do
 		if echo -n "${Temp}" | grep -q '[[:space:]]'
 		then
-			echo "$0.TempDirectoryFind(): NOTICE: Skip using temporary directory which has space \"${Temp}\"" 1>&2
+			echo "$0.TempDirectoryFind(): NOTICE: Skip using temporary directory which has space \"${Temp}\"." 1>&2
 			continue
 		fi
 
