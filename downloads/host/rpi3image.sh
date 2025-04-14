@@ -1072,6 +1072,14 @@ then
 	exit ${result}
 fi
 
+"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${Pwd}/bootfs"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not change owner bootfs directory and files." 1>&2
+	exit ${result}
+fi
+
 echo "$0: INFO: Set bootfs/firstrun.sh permission." 1>&2
 
 ${CHMOD} 600 "${Pwd}/bootfs/firstrun.sh"
