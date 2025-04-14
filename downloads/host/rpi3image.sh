@@ -737,10 +737,12 @@ function UmountRaspiOSMedia() {
 
 	UmountBlockDevicePart "${1}" 1
 	result=$?
+	[ -n "${debug}" ] && echo "$0.UmountRaspiOSMedia().1: DEBUG: umount \"${1}\" partition 1, result=${result}" 1>&2
 	(( ${result} != 0 )) && return ${result}
 
 	UmountBlockDevicePart "${1}" 2
 	result=$?
+	[ -n "${debug}" ] && echo "$0.UmountRaspiOSMedia().2: DEBUG: umount \"${1}\" partition 2, result=${result}" 1>&2
 	(( ${result} != 0 )) && return ${result}
 
 	return 0
