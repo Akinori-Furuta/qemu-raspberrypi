@@ -198,23 +198,50 @@ function PathIsMountPoint() {
 	return $?
 }
 
+# Check device is used as mount point
+# args path
+# echo none
+# return code 0: mount point, 1: is not mount point.
+function DeviceIsMounted() {
+	if [ -z "$1" ]
+	then
+		echo "$0.DeviceIsMounted(): WARNING: No argument." 1>&2
+		return 1
+	fi
+	cat /proc/mounts | awk '{print $1}' | while read
+	do
+		if [ "${REPLY}" == "$1" ]
+		then
+			echo yes
+			break
+		fi
+	done | grep -q 'yes'
+	return $?
+}
+
+
 # At exit procedure
 function ExitProc() {
 	cd "${Pwd}"
 
 	if PathIsMountPoint "${BootFsFatPoint}"
 	then
-		${UMOUNT} "${BootFsFatPoint}"
+		"${SUDO}" ${UMOUNT} "${BootFsFatPoint}"
 	fi
 
 	if PathIsMountPoint "${RootFsExt4Point}"
 	then
-		${UMOUNT} "${RootFsExt4Point}"
+		"${SUDO}" ${UMOUNT} "${RootFsExt4Point}"
 	fi
 
 	if [ -n "${NbdDev}" ]
 	then
-		sudo "${QEMU_NBD}" -d "${NbdDev}"
+		nbd-client -c "${NbdDev}" && "${SUDO}" "${QEMU_NBD}" -d "${NbdDev}"
+	fi
+
+	if [ -n "${RaspiOSImageTemp}" ]
+	then
+		rm -f "${RaspiOSImageTemp}"
 	fi
 
 	if [ -n "${MyTemp}" ] && [ -d "${MyTemp}" ]
