@@ -849,7 +849,7 @@ then
 		fi
 		if BlockDeviceIsRaspiOS "${blk}"
 		then
-			echo "$0: INFO: Found Raspberry Pi OS image media at \"${blk}\"" 1>&2
+			echo "$0: INFO: Found Raspberry Pi OS image media at \"${blk}\"." 1>&2
 			found=0
 			ShowBlockDevice "${blk}"
 		fi
@@ -874,13 +874,13 @@ RaspiMediaDev="$( readlink -f "${RaspiMedia}" )"
 
 if [[ ! -b "${RaspiMediaDev}" ]]
 then
-	echo "$0: INFO: Not a block device \"${RaspiMedia}\"" 1>&2
+	echo "$0: ERROR: Not a block device \"${RaspiMedia}\"." 1>&2
 	exit 1
 fi
 
 if ! BlockDeviceIsRaspiOS "${RaspiMedia}"
 then
-	echo "$0: INFO: Not a Raspberry Pi OS media \"${RaspiMedia}\"" 1>&2
+	echo "$0: ERROR: Not a Raspberry Pi OS media \"${RaspiMedia}\"." 1>&2
 	exit 1
 fi
 
@@ -910,13 +910,14 @@ then
 	exit 1
 fi
 
-[ -n "${debug}" ] && echo "$0: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"" 1>&2
+[ -n "${debug}" ] && echo "$0: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
 
-echo "$0: INFO: Unmount \"${RaspiMedia}\""
+echo "$0: INFO: Unmount \"${RaspiMedia}\"." 1>&2
+
 
 while ! UmountRaspiOSMedia "${RaspiMediaDev}"
 do
-	echo "$0: NOTICE: Retry umount \"${RaspiMedia}\""
+	echo "$0: NOTICE: Retry umount \"${RaspiMedia}\"." 1>&2
 	sleep 5
 done
 
@@ -952,7 +953,7 @@ then
 	exit 1
 fi
 
-echo "$0: INFO: Connect image \"${RaspiOSImagePreview}\" file to NBD \"${NbdDev}\""
+echo "$0: INFO: Connect image \"${RaspiOSImagePreview}\" file to NBD \"${NbdDev}\"." 1>&2
 
 if ! sudo "${PARTPROBE}" "${NbdDev}"
 then
