@@ -929,7 +929,7 @@ done
 RaspiOSImagePreview="${Pwd}/${RaspiOSImagePrefix}-$$-$( HashedRamdom ).img"
 
 touch "${RaspiOSImagePreview}"
-chmod 600 "${RaspiOSImagePreview}"
+${CHMOD} 600 "${RaspiOSImagePreview}"
 
 # convert Raspberry Pi OS image media to file.
 
@@ -1063,7 +1063,7 @@ fi
 
 echo "$0: INFO: Copy bootfs files." 1>&2
 
-"${SUDO}" cp -r "${BootFsFatPoint}" "${Pwd}/"
+"${SUDO}" "${CP}" -r "${BootFsFatPoint}" "${Pwd}/"
 result=$?
 if (( ${result} != 0 ))
 then
