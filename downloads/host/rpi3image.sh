@@ -515,7 +515,7 @@ function BlkIdLabel() {
 	local	label
 	local	result
 
-	label="$( blkid -o export "$1" | grep '^LABEL=' | sed 's/^[[:alnum:]_]\+=//' )"
+	label="$( "${SUDO}" "${BLKID}" -o export "$1" | grep '^LABEL=' | sed 's/^[[:alnum:]_]\+=//' )"
 	result=$?
 
 	echo -n "${label}"
@@ -556,7 +556,7 @@ function BlkIdType() {
 	local	type
 	local	result
 
-	type="$( blkid -o export "$1" | grep '^TYPE=' | sed 's/^[[:alnum:]_]\+=//' )"
+	type="$( "${SUDO}" "${BLKID}" -o export "$1" | grep '^TYPE=' | sed 's/^[[:alnum:]_]\+=//' )"
 	result=$?
 
 	echo -n "${type}"
