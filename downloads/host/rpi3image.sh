@@ -58,28 +58,6 @@ function PathIsMountPoint() {
 	return $?
 }
 
-# Check device is used as mount point
-# args path
-# echo none
-# return code 0: mount point, 1: is not mount point.
-function DeviceIsMounted() {
-	if [ -z "$1" ]
-	then
-		echo "$0.DeviceIsMounted(): WARNING: No argument." 1>&2
-		return 1
-	fi
-	cat /proc/mounts | awk '{print $1}' | while read
-	do
-		if [ "${REPLY}" == "$1" ]
-		then
-			echo yes
-			break
-		fi
-	done | grep -q 'yes'
-	return $?
-}
-
-
 # At exit procedure
 function ExitProc() {
 	cd "${Pwd}"
@@ -135,31 +113,36 @@ function TempDirectoryFind() {
 	echo "${Temp}"
 }
 
-# Generate random value.
-# args none
-# echo Random value in hex.
-function HashedRamdom() {
-	( cat /proc/sys/kernel/random/uuid; date +%s.%N ) | sha256sum | cut -f 1 -d ' '
-}
-
 # Generate Tepm path.
 # args none
 # echo Private Temporary Directory
 function TempPathGen() {
 	local	my_body="${MyBodyNoSpace}"
+	local	my_temp
 
 	if [ -z "${my_body}" ]
 	then
 		my_body="rpi3image"
 	fi
-	echo "$( TempDirectoryFind )/${my_body}-$$-$( HashedRamdom )"
+	if ! my_temp=$( mktemp -d -p "$( TempDirectoryFind )" "${my_body}-$$-XXXXXXXXXX" )
+	then
+		return $?
+	fi
+	"${CHMOD}" 700 "${my_temp}"
+	echo "${my_temp}"
+	return 0
 }
 
 MyTemp="$( TempPathGen )"
-MyTempReady=
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not create temporary directory."
+	exit ${result}
+fi
 
-# Prepare Temporal directory.
-# args none
+echo "$0: INFO: Use temporary directory \"${MyTemp}\"." 1>&2
+
 ReqPackageList=""
 
 function ReqPackageListAdd() {
@@ -237,24 +220,35 @@ then
 	exit 1
 fi
 
+# Check device is used as mount point
+# args path
 # echo none
-function TempDirectoryPrepare() {
-	if [ -n "${MyTempReady}" ]
+# return code 0: mount point, 1: is not mount point.
+function DeviceIsMounted() {
+	if [ -z "$1" ]
 	then
-		return 0
+		echo "$0.DeviceIsMounted(): WARNING: No argument." 1>&2
+		return 1
 	fi
-	while ! mkdir "${MyTemp}"
+	cat /proc/mounts | awk '{print $1}' | while read
 	do
-		MyTemp="$( TempPathGen )"
-	done
-
-	chmod 700 "${MyTemp}"
-	[ -n "${debug}" ] && echo "$0.TempDirectoryPrepare(): DEBUG: Create temporal directory. MyTemp=\"${MyTemp}\"" 1>&2
-	MyTempReady=yes
-	return 0
+		if [ "${REPLY}" == "$1" ]
+		then
+			echo yes
+			break
+		fi
+	done | grep -q 'yes'
+	return $?
 }
 
-TempDirectoryPrepare
+
+# Generate random value.
+# args none
+# echo Random value in hex.
+function HashedRamdom() {
+	( cat /proc/sys/kernel/random/uuid; date +%s.%N ) | sha256sum | cut -f 1 -d ' '
+}
+
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
 
