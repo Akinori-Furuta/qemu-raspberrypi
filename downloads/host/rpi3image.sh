@@ -1179,6 +1179,12 @@ then
 fi
 
 "${SUDO}" "${CHOWN}" "${IdUser}:${IdGroup}" "${RaspiOSImage}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not change file \"${RaspiOSImage}\" owner to ${IdUser}:${IdGroup}." 1>&2
+	exit ${result}
+fi
 
 echo "$0: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
 if [[ "${RaspiOSArch}" == "aarch64" ]]
