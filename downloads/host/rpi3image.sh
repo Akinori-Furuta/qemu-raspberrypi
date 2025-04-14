@@ -41,14 +41,14 @@ MyTemp=""
 # echo none
 # return code 0: mount point, 1: is not mount point.
 function PathIsMountPoint() {
-	if [ -z "$1" ]
+	if [[ -z "$1" ]]
 	then
 		echo "$0.PathIsMountPoint(): WARNING: No argument." 1>&2
 		return 1
 	fi
 	cat /proc/mounts | awk '{print $2}' | while read
 	do
-		if [ "${REPLY}" == "$1" ]
+		if [[ "${REPLY}" == "$1" ]]
 		then
 			echo yes
 			break
@@ -93,17 +93,17 @@ function ExitProc() {
 		"${SUDO}" ${UMOUNT} "${RootFsExt4Point}"
 	fi
 
-	if [ -n "${NbdDev}" ]
+	if [[ -n "${NbdDev}" ]]
 	then
 		"${NBD_CLIENT}" -c "${NbdDev}" && "${SUDO}" "${QEMU_NBD}" -d "${NbdDev}"
 	fi
 
-	if [ -n "${RaspiOSImageTemp}" ]
+	if [[ -n "${RaspiOSImageTemp}" ]]
 	then
 		rm -f "${RaspiOSImageTemp}"
 	fi
 
-	if [ -n "${MyTemp}" ] && [ -d "${MyTemp}" ]
+	if [[ -n "${MyTemp}" ]] && [[ -d "${MyTemp}" ]]
 	then
 		rm -rf "${MyTemp}"
 	fi
@@ -125,8 +125,8 @@ function TempDirectoryFind() {
 			continue
 		fi
 
-		if [ -d "${Temp}" ] && \
-		   [ -r "${Temp}" ] && [ -w "${Temp}" ] && [ -x "${Temp}" ]
+		if [[ -d "${Temp}" ]] && \
+		   [[ -r "${Temp}" ]] && [[ -w "${Temp}" ]] && [[ -x "${Temp}" ]]
 		then
 			break
 		fi
