@@ -41,10 +41,34 @@ function ReqPackageListAdd() {
 	done
 }
 
+# sudo
+for SUDO in /usr/bin/sudo /bin/sudo
+do
+	[ -x "${SUDO}" ] && break
+done
+
+[ ! -x "${SUDO}" ] && ReqPackageListAdd sudo
+
 for MODPROBE in /usr/sbin/modprobe /sbin/modprobe
 do
 	[ -x "${MODPROBE}" ] && break
 done
+
+# blkid to read partition label
+for BLKID in /usr/sbin/blkid /sbin/blkid
+do
+	[ -x "${BLKID}" ] && break
+done
+
+[ ! -x "${BLKID}" ] && ReqPackageListAdd util-linux
+
+# nbd-client to check nbd node is in use
+for NBD_CLIENT in /usr/sbin/nbd-client /sbin/nbd-client
+do
+	[ -x "${NBD_CLIENT}" ] && break
+done
+
+[ ! -x "${NBD_CLIENT}" ] && ReqPackageListAdd nbd-client
 
 for QEMU_NBD in /usr/bin/qemu-nbd /bin/qemu-nbd
 do
@@ -100,6 +124,18 @@ for TAR in /usr/bin/tar /bin/tar
 do
 	[ -x "${TAR}" ] && break
 done
+
+[ ! -x "${TAR}" ] && ReqPackageListAdd tar
+
+
+# dtc to touchup device tree binary blob.
+for DTC in /usr/bin/dtc /bin/dtc
+do
+	[ -x "${DTC}" ] && break
+done
+
+[ ! -x "${DTC}" ] && ReqPackageListAdd device-tree-compiler
+
 
 if [ -n "${ReqPackageList}" ]
 then
