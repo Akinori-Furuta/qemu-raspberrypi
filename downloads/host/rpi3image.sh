@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
+
 Pwd="$( pwd )"
 IdUser="$( id -u )"
 IdGroup="$( id -g )"
