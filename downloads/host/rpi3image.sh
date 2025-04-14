@@ -16,172 +16,25 @@ MyBodyNoSuffix="${MyBody%%-*}"
 
 RaspiOSImagePrefix="raspios"
 
-MyTemp=""
-RaspiOSImageTemp=""
-
 RaspiMedia="$1"
 DtRpi3BName="bcm2710-rpi-3-b"
 
-if [[ -z "${RaspiMedia}" ]]
-then
-	echo "$0: ERROR: Specify Raspberry Pi OS image media path." 1>&2
-	echo "$0: INFO: To find Raspberry Pi OS image media path, invoke as follows." 1>&2
-	echo "$0: INFO:   $0 find" 1>&2
-	exit 1
-fi
+# Set dummy command before ready to use.
+
+SUDO=":"
+UMOUNT=":"
+NBD_CLIENT=":"
+QEMU_NBD=":"
+CHMOD="chmod"
+
+# Set dummy value before ready to use.
 
 BootFsFatPoint=""
 RootFsExt4Point=""
 NbdNode=""
 NbdDev=""
-
-ReqPackageList=""
-
-function ReqPackageListAdd() {
-	for pkg in "$@"
-	do
-		if ! echo "${ReqPackageList}" | grep -q "${pkg}"
-		then
-			ReqPackageList="${ReqPackageList} ${pkg}"
-		fi
-	done
-}
-
-# sudo
-for SUDO in /usr/bin/sudo /bin/sudo
-do
-	[ -x "${SUDO}" ] && break
-done
-
-[ ! -x "${SUDO}" ] && ReqPackageListAdd sudo
-
-# modeprobe to link nbd module to kernel
-for MODPROBE in /usr/sbin/modprobe /sbin/modprobe
-do
-	[ -x "${MODPROBE}" ] && break
-done
-
-[ ! -x "${MODPROBE}" ] && ReqPackageListAdd kmod
-
-# blkid to read partition label
-for BLKID in /usr/sbin/blkid /sbin/blkid
-do
-	[ -x "${BLKID}" ] && break
-done
-
-[ ! -x "${BLKID}" ] && ReqPackageListAdd util-linux
-
-# nbd-client to check nbd node is in use
-for NBD_CLIENT in /usr/sbin/nbd-client /sbin/nbd-client
-do
-	[ -x "${NBD_CLIENT}" ] && break
-done
-
-[ ! -x "${NBD_CLIENT}" ] && ReqPackageListAdd nbd-client
-
-# qemu-nbd to run NBD server to provide image file as block device
-for QEMU_NBD in /usr/bin/qemu-nbd /bin/qemu-nbd
-do
-	[ -x "${QEMU_NBD}" ] && break
-done
-
-[ ! -x "${QEMU_NBD}" ] && ReqPackageListAdd qemu-utils
-
-# qemu-img to convert Raspberry Pi OS Storage device to file
-for QEMU_IMG in /usr/bin/qemu-img /bin/qemu-img
-do
-	[ -x "${QEMU_IMG}" ] && break
-done
-
-[ ! -x "${QEMU_IMG}" ] && ReqPackageListAdd qemu-utils
-
-# partprobe to rescan NBD connected block device.
-for PARTPROBE in /usr/sbin/partprobe /sbin/partprobe
-do
-	[ -x "${PARTPROBE}" ] && break
-done
-
-[ ! -x "${PARTPROBE}" ] && ReqPackageListAdd parted
-
-# file to check file type. If file is suitable for QEMU image file.
-for FILE in /usr/bin/file /bin/file
-do
-	[ -x "${FILE}" ] && break
-done
-
-[ ! -x "${FILE}" ] && ReqPackageListAdd file
-
-# count partitions on a storage
-for SFDISK in /usr/sbin/sfdisk /sbin/sfdisk
-do
-	[ -x "${SFDISK}" ] && break
-done
-
-[ ! -x "${SFDISK}" ] && ReqPackageListAdd fdisk
-
-# check a ext4 volume before resize.
-for FSCK in /usr/sbin/fsck /sbin/fsck
-do
-	[ -x "${FSCK}" ] && break
-done
-
-[ ! -x "${FSCK}" ] && ReqPackageListAdd e2fsprogs util-linux
-
-# grow the rootfs partiton
-for GROWPART in /usr/bin/growpart /usr/sbin/growpart /sbin/growpart /bin/growpart
-do
-	[ -x "${GROWPART}" ] && break
-done
-
-# grow the rootfs ext4 volume
-for RESIZE2FS in /usr/sbin/resize2fs /sbin/resize2fs
-do
-	[ -x "${RESIZE2FS}" ] && break
-done
-
-[ ! -x "${RESIZE2FS}" ] && ReqPackageListAdd e2fsprogs
-
-# mount volume on ${BootFsFatPoint}, and ${RootFsExt4Point}
-for MOUNT in /usr/bin/mount /sbin/mount /bin/mount
-do
-	[ -x "${MOUNT}" ] && break
-done
-
-[ ! -x "${MOUNT}" ] && ReqPackageListAdd mount
-
-# unmount volume from /media/${USER}, ${BootFsFatPoint}, and ${RootFsExt4Point}
-for UMOUNT in /usr/bin/umount /sbin/umount /bin/umount
-do
-	[ -x "${UMOUNT}" ] && break
-done
-
-[ ! -x "${UMOUNT}" ] && ReqPackageListAdd mount
-
-# extract files to place rootfs.
-for TAR in /usr/bin/tar /bin/tar
-do
-	[ -x "${TAR}" ] && break
-done
-
-[ ! -x "${TAR}" ] && ReqPackageListAdd tar
-
-
-# dtc to touchup device tree binary blob.
-for DTC in /usr/bin/dtc /bin/dtc
-do
-	[ -x "${DTC}" ] && break
-done
-
-[ ! -x "${DTC}" ] && ReqPackageListAdd device-tree-compiler
-
-
-if [ -n "${ReqPackageList}" ]
-then
-	echo "$0: ERROR: Need following package(s)." 1>&2
-	echo "$0: INFO: ${ReqPackageList}" 1>&2
-	echo "$0: INFO: sudo apt install ${ReqPackageList}" 1>&2
-	exit 1
-fi
+RaspiOSImageTemp=""
+MyTemp=""
 
 # Check Path is used as mount point
 # args path
@@ -306,6 +159,83 @@ MyTempReady=
 
 # Prepare Temporal directory.
 # args none
+ReqPackageList=""
+
+function ReqPackageListAdd() {
+	for pkg in "$@"
+	do
+		if ! echo "${ReqPackageList}" | grep -q "${pkg}"
+		then
+			ReqPackageList="${ReqPackageList} ${pkg}"
+		fi
+	done
+}
+
+# Probe command
+#  Resolve absolute path or collect package name to suggest
+# arg1:   Absolute path variable
+# arg2:   Package name
+# arg3..: Absolute path list
+function ProbeCommand() {
+	local	cmd_var
+	local	package
+	local	x
+
+	cmd_var="$1"
+	shift
+	package="$1"
+	shift
+	for x in "$@"
+	do
+		[ -x "${x}" ] && break
+	done
+
+	if [ ! -x "${x}" ]
+	then
+		ReqPackageListAdd "${package}"
+		return 1
+	fi
+
+	eval "${cmd_var}"="${x}"
+	return 0
+}
+
+ProbeCommand SUDO sudo			/usr/bin/sudo /bin/sudo /usr/sbin/sudo
+ProbeCommand MODPROBE kmod		/usr/sbin/modprobe /sbin/modprobe /usr/bin/modprobe
+ProbeCommand BLKID util-linux		/usr/sbin/blkid /sbin/blkid /usr/bin/blkid
+ProbeCommand NBD_CLIENT nbd-client	/usr/sbin/nbd-client /sbin/nbd-client /usr/bin/nbd-client
+ProbeCommand QEMU_NBD qemu-utils	/usr/bin/qemu-nbd /bin/qemu-nbd /usr/sbin/qemu-nbd
+ProbeCommand QEMU_IMG qemu-utils	/usr/bin/qemu-img /bin/qemu-img /usr/sbin/qemu-img
+ProbeCommand PARTPROBE parted		/usr/sbin/partprobe /sbin/partprobe /usr/bin/partprobe
+ProbeCommand FILE file			/usr/bin/file /bin/file /usr/sbin/file
+ProbeCommand SFDISK fdisk		/usr/sbin/sfdisk /sbin/sfdisk /usr/bin/sfdisk
+ProbeCommand FSCK util-linux		/usr/sbin/fsck /sbin/fsck /usr/bin/fsck
+ProbeCommand GROWPART cloud-guest-utils	/usr/bin/growpart /usr/sbin/growpart /bin/growpart /sbin/growpart
+ProbeCommand RESIZE2FS e2fsprogs	/usr/sbin/resize2fs /sbin/resize2fs /usr/bin/resize2fs
+ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
+ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
+ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
+ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
+ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
+ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
+ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
+
+if [ -n "${ReqPackageList}" ]
+then
+	echo "$0: ERROR: Need following package(s)." 1>&2
+	echo "$0: INFO: ${ReqPackageList}" 1>&2
+	echo "$0: INFO: sudo apt install${ReqPackageList}" 1>&2
+	exit 1
+fi
+
+if [[ -z "${RaspiMedia}" ]]
+then
+	echo "$0: ERROR: Specify Raspberry Pi OS image media path." 1>&2
+	echo "$0: INFO: To find Raspberry Pi OS image media path, invoke as follows." 1>&2
+	echo "$0: INFO:   $0 find" 1>&2
+	exit 1
+fi
+
 # echo none
 function TempDirectoryPrepare() {
 	if [ -n "${MyTempReady}" ]
