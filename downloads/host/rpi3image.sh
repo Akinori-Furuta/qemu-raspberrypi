@@ -940,6 +940,24 @@ ${CHMOD} 600 "${RaspiOSImagePreview}"
 echo "$0: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"." 1>&2
 "${SUDO}" "${QEMU_IMG}" convert -p -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
 
+RaspiOSImageSizeConverted=$( ${STAT} -c "%s" "${RaspiOSImagePreview}" )
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not get size of Raspberry OS image file \"${RaspiOSImagePreview}\"." 1>&2
+	exit ${result}
+fi
+
+
+
+"${QEMU_IMG}" resize -f raw "${RaspiOSImagePreview}" "$(FileSizeAlignPow2G "${RaspiOSImageSizeConverted}")G"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not resize Raspberry OS image file \"${RaspiOSImagePreview}\"." 1>&2
+	exit ${result}
+fi
+
 NbdNum=$( cat /sys/module/nbd/parameters/nbds_max )
 if [[ -z "${NbdNum}" ]]
 then
