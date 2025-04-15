@@ -1104,7 +1104,7 @@ fi
 
 echo "$0: INFO: Set bootfs/firstrun.sh permission." 1>&2
 
-${CHMOD} 600 "${Pwd}/bootfs/firstrun.sh"
+"${CHMOD}" 600 "${Pwd}/bootfs/firstrun.sh"
 result=$?
 if (( ${result} != 0 ))
 then
