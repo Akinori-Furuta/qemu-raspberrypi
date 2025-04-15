@@ -307,7 +307,7 @@ function NbdFindAvailableNode() {
 	do
 		nbd="nbd${i}"
 		nbd_path="/sys/block/${nbd}"
-		if [ ! -e "${nbd_path}/pid" ]
+		if [[ ! -e "${nbd_path}/pid" ]]
 		then
 			echo "${nbd}"
 			return 0
@@ -474,7 +474,7 @@ function BlkIdLabel() {
 	result=$?
 
 	echo -n "${label}"
-	[ -n "${debug}" ] && echo "$0.BlkIdLabel(): DEBUG: Read block device label. dev=\"$1\", label=\"${label}\"" 1>&2
+	[[ -n "${debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device label. dev=\"$1\", label=\"${label}\"" 1>&2
 	return ${result}
 }
 
@@ -516,7 +516,7 @@ function BlkIdType() {
 	result=$?
 
 	echo -n "${type}"
-	[ -n "${debug}" ] && echo "$0.BlkIdLabel(): DEBUG: Read block device file system. dev=\"$1\", type=\"${type}\"" 1>&2
+	[[ -n "${debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device file system. dev=\"$1\", type=\"${type}\"" 1>&2
 
 	return ${result}
 }
@@ -696,12 +696,12 @@ function UmountRaspiOSMedia() {
 
 	UmountBlockDevicePart "${1}" 1
 	result=$?
-	[ -n "${debug}" ] && echo "$0.UmountRaspiOSMedia().1: DEBUG: umount \"${1}\" partition 1, result=${result}" 1>&2
+	[[ -n "${debug}" ]] && echo "$0.UmountRaspiOSMedia().1: DEBUG: umount \"${1}\" partition 1, result=${result}" 1>&2
 	(( ${result} != 0 )) && return ${result}
 
 	UmountBlockDevicePart "${1}" 2
 	result=$?
-	[ -n "${debug}" ] && echo "$0.UmountRaspiOSMedia().2: DEBUG: umount \"${1}\" partition 2, result=${result}" 1>&2
+	[[ -n "${debug}" ]] && echo "$0.UmountRaspiOSMedia().2: DEBUG: umount \"${1}\" partition 2, result=${result}" 1>&2
 	(( ${result} != 0 )) && return ${result}
 
 	return 0
