@@ -126,7 +126,7 @@ function TempPathGen() {
 	local	my_body="${MyBodyNoSpace}"
 	local	my_temp
 
-	if [ -z "${my_body}" ]
+	if [[ -z "${my_body}" ]]
 	then
 		my_body="rpi3image"
 	fi
@@ -177,10 +177,10 @@ function ProbeCommand() {
 	shift
 	for x in "$@"
 	do
-		[ -x "${x}" ] && break
+		[[ -x "${x}" ]] && break
 	done
 
-	if [ ! -x "${x}" ]
+	if [[ ! -x "${x}" ]]
 	then
 		ReqPackageListAdd "${package}"
 		return 1
@@ -215,7 +215,7 @@ ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
 ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
 ProbeCommand STAT coreutils		/usr/bin/stat /bin/stat /usr/sbin/stat
 
-if [ -n "${ReqPackageList}" ]
+if [[ -n "${ReqPackageList}" ]]
 then
 	echo "$0: ERROR: Need following package(s)." 1>&2
 	echo "$0: INFO: ${ReqPackageList}" 1>&2
@@ -236,14 +236,14 @@ fi
 # echo none
 # return code 0: mount point, 1: is not mount point.
 function DeviceIsMounted() {
-	if [ -z "$1" ]
+	if [[ -z "$1" ]]
 	then
 		echo "$0.DeviceIsMounted(): WARNING: No argument." 1>&2
 		return 1
 	fi
 	cat /proc/mounts | awk '{print $1}' | while read
 	do
-		if [ "${REPLY}" == "$1" ]
+		if [[ "${REPLY}" == "$1" ]]
 		then
 			echo yes
 			break
