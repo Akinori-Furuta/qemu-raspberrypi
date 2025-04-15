@@ -59,6 +59,9 @@ function PathIsMountPoint() {
 }
 
 # At exit procedure
+# args none
+# echo don't care
+# return don't care
 function ExitProc() {
 	cd "${Pwd}"
 
