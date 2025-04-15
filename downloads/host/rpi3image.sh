@@ -121,6 +121,7 @@ function TempDirectoryFind() {
 # Generate Tepm path.
 # args none
 # echo Private Temporary Directory
+# return ==0: success, !=0: failed
 function TempPathGen() {
 	local	my_body="${MyBodyNoSpace}"
 	local	my_temp
