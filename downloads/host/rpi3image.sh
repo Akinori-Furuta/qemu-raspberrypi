@@ -202,13 +202,16 @@ ProbeCommand SFDISK fdisk		/usr/sbin/sfdisk /sbin/sfdisk /usr/bin/sfdisk
 ProbeCommand FSCK util-linux		/usr/sbin/fsck /sbin/fsck /usr/bin/fsck
 ProbeCommand GROWPART cloud-guest-utils	/usr/bin/growpart /usr/sbin/growpart /bin/growpart /sbin/growpart
 ProbeCommand RESIZE2FS e2fsprogs	/usr/sbin/resize2fs /sbin/resize2fs /usr/bin/resize2fs
+ProbeCommand SYNC coreutils		/usr/bin/sync /bin/sync /usr/sbin/sync
 ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
 ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
 ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
 ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
 ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
+ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
 ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
 ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
+ProbeCommand STAT coreutils		/usr/bin/stat /bin/stat /usr/sbin/stat
 
 if [ -n "${ReqPackageList}" ]
 then
