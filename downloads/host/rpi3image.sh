@@ -236,7 +236,7 @@ fi
 # Check device is used as mount point
 # args path
 # echo none
-# return code 0: mount point, 1: is not mount point.
+# return code 0: is mount point, 1: is not mount point.
 function DeviceIsMounted() {
 	if [[ -z "$1" ]]
 	then
@@ -410,7 +410,7 @@ function FileSizeAlignPow2G() {
 
 # args path_to_block_device
 # echo size_of_block_device_in_bytes
-# path_to_block_device /dev/*
+# return ==0: Success, !=0: Failed
 function SizeOfBlockDevice() {
 	local	count
 	local	bs
@@ -448,9 +448,10 @@ function SizeOfBlockDevice() {
 	return 0
 }
 
+# Get block device label
 # args path_to_block_device
 # echo LABEL_string
-# retrun 0 or 1
+# retrun ==0: Success or !=0: Failed
 function BlkIdLabel() {
 	local	label
 	local	result
@@ -463,9 +464,10 @@ function BlkIdLabel() {
 	return ${result}
 }
 
+# Get block device partition label
 # args path_to_block_device partition_number
 # echo LABEL_string
-# return 0 or 1
+# return ==0: Success or !=0: Failed
 function BlkPartIdLabel() {
 	local	part_path
 
@@ -488,10 +490,10 @@ function BlkPartIdLabel() {
 	return 1
 }
 
-
+# Get block device type (file system)
 # args path_to_block_device
 # echo TYPE_string
-# retrun 0 or 1
+# retrun ==0: Success or !=0: Failed
 function BlkIdType() {
 	local	type
 	local	result
@@ -505,6 +507,7 @@ function BlkIdType() {
 	return ${result}
 }
 
+# Get block device partition type (file system)
 # args path_to_block_device partition_number
 # echo LABEL_string
 # return 0 or 1
@@ -529,6 +532,7 @@ function BlkPartIdType() {
 	return 1
 }
 
+# Check block device may be Raspberry Pi OS media
 # args path_to_block_device
 # echo Not defined
 # return ==0: May be Raspberry Pi OS media in device, \
@@ -602,6 +606,10 @@ function BlockDeviceIsRaspiOS() {
 	return 0
 }
 
+# Show block device information
+# arg path_to_block_device
+# echo human readable information
+# return 0
 function ShowBlockDevice() {
 	local	dev_basename
 	local	sys_path
@@ -640,6 +648,7 @@ function ShowBlockDevice() {
 	return 0
 }
 
+# Unmount block device partition
 # args path_to_block_device partition_number
 # echo   Not defined
 # exit   no
