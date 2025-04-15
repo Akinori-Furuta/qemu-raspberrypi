@@ -940,7 +940,7 @@ then
 	exit 1
 fi
 
-[ -n "${debug}" ] && echo "$0: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
+[[ -n "${debug}" ]] && echo "$0: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
 
 echo "$0: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
@@ -1079,13 +1079,13 @@ do
 		RaspiOSImage="${Pwd}/${RaspiOSImagePrefix}-32-$(printf "%04d" ${RaspiOSImageSn}).img"
 		;;
 	esac
-	if [ ! -f "${RaspiOSImage}" ]
+	if [[ ! -f "${RaspiOSImage}" ]]
 	then
 		"${MV}" -n "${RaspiOSImageTemp}" "${RaspiOSImage}"
 		result=$?
 		if (( ${result} == 0 ))
 		then
-			if [ ! -f "${RaspiOSImageTemp}" ]
+			if [[ ! -f "${RaspiOSImageTemp}" ]]
 			then
 				break
 			fi
