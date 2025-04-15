@@ -922,7 +922,7 @@ fi
 
 echo "$0: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
-sync
+"${SYNC}"
 
 while ! UmountRaspiOSMedia "${RaspiMediaDev}"
 do
@@ -932,7 +932,7 @@ done
 
 RaspiOSImagePreview="${Pwd}/${RaspiOSImagePrefix}-$$-$( HashedRamdom ).img"
 
-touch "${RaspiOSImagePreview}"
+${TOUCH} "${RaspiOSImagePreview}"
 ${CHMOD} 600 "${RaspiOSImagePreview}"
 
 # convert Raspberry Pi OS image media to file.
@@ -1094,7 +1094,7 @@ fi
 
 echo "$0: INFO: Modify device tree." 1>&2
 
-dtc -I dtb -O dts -o "${Pwd}/bootfs/${DtRpi3BName}.dts" "${Pwd}/bootfs/${DtRpi3BName}.dtb"
+"${DTC}" -I dtb -O dts -o "${Pwd}/bootfs/${DtRpi3BName}.dts" "${Pwd}/bootfs/${DtRpi3BName}.dtb"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1134,7 +1134,7 @@ then
 	exit ${result}
 fi
 
-dtc -I dts -O dtb -o "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}"
+"${DTC}" -I dts -O dtb -o "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1154,7 +1154,7 @@ fi
 
 echo "$0: INFO: Unmount Raspberry Pi OS image." 1>&2
 
-sync
+"${SYNC}"
 
 UmountRaspiOSMedia
 result=$?
@@ -1166,7 +1166,7 @@ fi
 
 echo "$0: INFO: Disconnect Raspberry Pi OS image from NBD." 1>&2
 
-sync
+"${SYNC}"
 
 "${SUDO}" "${QEMU_NBD}" -d "${NbdDev}"
 result=$?
