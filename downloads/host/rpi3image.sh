@@ -206,8 +206,10 @@ ProbeCommand SYNC coreutils		/usr/bin/sync /bin/sync /usr/sbin/sync
 ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
 ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
 ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
+ProbeCommand MV coreutils		/usr/bin/mv /bin/mv /usr/sbin/mv
 ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
 ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
+ProbeCommand PATCH patch		/usr/bin/patch /bin/patch /usr/sbin/patch
 ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
 ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
 ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
@@ -1059,7 +1061,7 @@ do
 	esac
 	if [ ! -f "${RaspiOSImage}" ]
 	then
-		mv -n "${RaspiOSImageTemp}" "${RaspiOSImage}"
+		"${MV}" -n "${RaspiOSImageTemp}" "${RaspiOSImage}"
 		result=$?
 		if (( ${result} == 0 ))
 		then
@@ -1131,7 +1133,7 @@ then
 	exit ${result}
 fi
 
-patch "${DtRpi3BNameQemuSource}" << EOF
+"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
 --- bcm2710-rpi-3-b.dts	2025-03-10 02:10:31.929049869 +0900
 +++ bcm2710-rpi-3-b-qemu.dts	2025-03-10 02:10:31.931049840 +0900
 @@ -567,7 +567,7 @@
@@ -1196,7 +1198,7 @@ fi
 
 echo "$0: INFO: Rename Raspberry Pi OS image file." 1>&2
 
-mv -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
+"${MV}" -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
 result=$?
 if (( ${result} != 0 ))
 then
