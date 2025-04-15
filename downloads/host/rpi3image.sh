@@ -166,6 +166,8 @@ function ReqPackageListAdd() {
 # arg1:   Absolute path variable
 # arg2:   Package name
 # arg3..: Absolute path list
+# echo: Don't care
+# return: ==0: Found command, !=0: Not found command
 function ProbeCommand() {
 	local	cmd_var
 	local	package
