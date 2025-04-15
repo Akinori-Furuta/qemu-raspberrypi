@@ -27,6 +27,12 @@ UMOUNT=":"
 NBD_CLIENT=":"
 QEMU_NBD=":"
 CHMOD="chmod"
+GREP="grep"
+LS="ls"
+CAT="cat"
+AWK="awk"
+RM="rm"
+MKTEMP="mktemp"
 
 # Set dummy value before ready to use.
 
@@ -47,14 +53,14 @@ function PathIsMountPoint() {
 		echo "$0.PathIsMountPoint(): WARNING: No argument." 1>&2
 		return 1
 	fi
-	cat /proc/mounts | awk '{print $2}' | while read
+	"${CAT}" /proc/mounts | "${AWK}" '{print $2}' | while read
 	do
 		if [[ "${REPLY}" == "$1" ]]
 		then
 			echo yes
 			break
 		fi
-	done | grep -q 'yes'
+	done | "${GREP}" -q 'yes'
 	return $?
 }
 
@@ -82,12 +88,12 @@ function ExitProc() {
 
 	if [[ -n "${RaspiOSImageTemp}" ]]
 	then
-		rm -f "${RaspiOSImageTemp}"
+		"${RM}" -f "${RaspiOSImageTemp}"
 	fi
 
 	if [[ -n "${MyTemp}" ]] && [[ -d "${MyTemp}" ]]
 	then
-		rm -rf "${MyTemp}"
+		"${RM}" -rf "${MyTemp}"
 	fi
 }
 
@@ -102,7 +108,7 @@ function TempDirectoryFind() {
 
 	for Temp in /run/user/${IdUser} /dev/shm /ramdisk "${TMP}" "${TEMP}" /tmp
 	do
-		if echo -n "${Temp}" | grep -q '[[:space:]]'
+		if echo -n "${Temp}" | "${GREP}" -q '[[:space:]]'
 		then
 			echo "$0.TempDirectoryFind(): NOTICE: Skip using temporary directory which has one or more spaces \"${Temp}\"." 1>&2
 			continue
@@ -130,7 +136,7 @@ function TempPathGen() {
 	then
 		my_body="rpi3image"
 	fi
-	if ! my_temp=$( mktemp -d -p "$( TempDirectoryFind )" "${my_body}-$$-XXXXXXXXXX" )
+	if ! my_temp=$( "${MKTEMP}" -d -p "$( TempDirectoryFind )" "${my_body}-$$-XXXXXXXXXX" )
 	then
 		return $?
 	fi
@@ -144,7 +150,7 @@ ReqPackageList=""
 function ReqPackageListAdd() {
 	for pkg in "$@"
 	do
-		if ! echo "${ReqPackageList}" | grep -q "${pkg}"
+		if ! echo "${ReqPackageList}" | "${GREP}" -q "${pkg}"
 		then
 			ReqPackageList="${ReqPackageList} ${pkg}"
 		fi
@@ -197,10 +203,18 @@ ProbeCommand RESIZE2FS e2fsprogs	/usr/sbin/resize2fs /sbin/resize2fs /usr/bin/re
 ProbeCommand SYNC coreutils		/usr/bin/sync /bin/sync /usr/sbin/sync
 ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
 ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
+ProbeCommand CAT coreutils		/usr/bin/cat /bin/cat /usr/sbin/cat
 ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
+ProbeCommand LS coreutils		/usr/bin/ls /bin/ls /usr/sbin/ls
+ProbeCommand MKDIR coreutils		/usr/bin/mkdir /bin/mkdir /usr/sbin/mkdir
+ProbeCommand MKTEMP coreutils		/usr/bin/mktemp /bin/mktemp /usr/sbin/mktemp
 ProbeCommand MV coreutils		/usr/bin/mv /bin/mv /usr/sbin/mv
+ProbeCommand RM coreutils		/usr/bin/rm /bin/rm /usr/sbin/rm
+ProbeCommand GREP grep			/usr/bin/grep /bin/grep /usr/sbin/grep
+ProbeCommand SED sed			/usr/bin/sed /bin/sed /usr/sbin/sed
 ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
 ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
+ProbeCommand AWK gawk			/usr/bin/awk /bin/awk /usr/bin/gawk /bin/gawk /usr/sbin/awk /sbin/awk
 ProbeCommand PATCH patch		/usr/bin/patch /bin/patch /usr/sbin/patch
 ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
 ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
@@ -233,14 +247,14 @@ function DeviceIsMounted() {
 		echo "$0.DeviceIsMounted(): WARNING: No argument." 1>&2
 		return 1
 	fi
-	cat /proc/mounts | awk '{print $1}' | while read
+	"${CAT}" /proc/mounts | "${AWK}" '{print $1}' | while read
 	do
 		if [[ "${REPLY}" == "$1" ]]
 		then
 			echo yes
 			break
 		fi
-	done | grep -q 'yes'
+	done | "${GREP}" -q 'yes'
 	return $?
 }
 
@@ -257,7 +271,7 @@ echo "$0: INFO: Use temporary directory \"${MyTemp}\"." 1>&2
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
 
-mkdir "${BootFsFatPoint}"
+"${MKDIR}" "${BootFsFatPoint}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -265,7 +279,7 @@ then
 	exit ${result}
 fi
 
-mkdir "${RootFsExt4Point}"
+"${MKDIR}" "${RootFsExt4Point}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -282,8 +296,8 @@ function NbdFindAvailableNode() {
 	local	nbd
 	local	nbd_path
 
-	n=$( cat /sys/module/nbd/parameters/nbds_max )
-	if [ -z "${n}" ]
+	n=$( "${CAT}" /sys/module/nbd/parameters/nbds_max )
+	if [[ -z "${n}" ]]
 	then
 		return 1
 	fi
@@ -320,7 +334,7 @@ function LogInt2() {
 }
 
 function SizeKiMiGi() {
-	echo $1 | awk -e '{
+	echo $1 | "${AWK}" -e '{
 		i=0;
 		a=$1;
 		while (a > 1024) {
@@ -348,7 +362,7 @@ function SizeKiMiGi() {
 }
 
 function SizeKMG() {
-	echo $1 | awk -e '{
+	echo $1 | "${AWK}" -e '{
 		i=0;
 		a=$1;
 		while (a > 1000) {
@@ -436,7 +450,7 @@ function SizeOfBlockDevice() {
 		return 1
 	fi
 
-	count=$( cat "${sys_block}/size" )
+	count=$( "${CAT}" "${sys_block}/size" )
 	if [[ -z "${count}" ]]
 	then
 		echo "$0.SizeOfBlockDevice(): ERROR: No block count in ${sys_block}/size" 1>&2
@@ -456,7 +470,7 @@ function BlkIdLabel() {
 	local	label
 	local	result
 
-	label="$( "${SUDO}" "${BLKID}" -o export "$1" | grep '^LABEL=' | sed 's/^[[:alnum:]_]\+=//' )"
+	label="$( "${SUDO}" "${BLKID}" -o export "$1" | "${GREP}" '^LABEL=' | "${SED}" 's/^[[:alnum:]_]\+=//' )"
 	result=$?
 
 	echo -n "${label}"
@@ -498,7 +512,7 @@ function BlkIdType() {
 	local	type
 	local	result
 
-	type="$( "${SUDO}" "${BLKID}" -o export "$1" | grep '^TYPE=' | sed 's/^[[:alnum:]_]\+=//' )"
+	type="$( "${SUDO}" "${BLKID}" -o export "$1" | "${GREP}" '^TYPE=' | "${SED}" 's/^[[:alnum:]_]\+=//' )"
 	result=$?
 
 	echo -n "${type}"
@@ -561,7 +575,7 @@ function BlockDeviceIsRaspiOS() {
 	dev_base="$( basename "${dev_path}" )"
 
 	if ! "${SUDO}" "${FILE}" -s "${dev_path}" | \
-	   grep -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
+	   "${GREP}" -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
 	then
 		echo "$0.BlockDeviceIsRaspiOS(): INFO: Not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
@@ -595,7 +609,7 @@ function BlockDeviceIsRaspiOS() {
 		return 1
 	fi
 
-	part_num=$( "${SUDO}" "${SFDISK}" -d "${dev_path}" | grep '^/dev/' | wc -l )
+	part_num=$( "${SUDO}" "${SFDISK}" -d "${dev_path}" | "${GREP}" '^/dev/' | wc -l )
 
 	if (( ${part_num} != 2 ))
 	then
@@ -624,7 +638,7 @@ function ShowBlockDevice() {
 	sys_path="/sys/block/${dev_basename}"
 	sys_dev_path="${sys_path}/device"
 
-	size=$( cat "${sys_path}/size" )
+	size=$( "${CAT}" "${sys_path}/size" )
 	size=$(( ${size} * 512 ))
 	size_iu="$( SizeKiMiGi ${size} )"
 	size_du="$( SizeKMG ${size} )"
@@ -632,13 +646,13 @@ function ShowBlockDevice() {
 	vendor=""
 	if [[ -f "${sys_dev_path}/vendor" ]]
 	then
-		vendor=$( cat "${sys_dev_path}/vendor" )
+		vendor=$( "${CAT}" "${sys_dev_path}/vendor" )
 	fi
 
 	model=""
 	if [[ -f "${sys_dev_path}/model" ]]
 	then
-		model=$( cat "${sys_dev_path}/model" )
+		model=$( "${CAT}" "${sys_dev_path}/model" )
 	fi
 
 	echo "$0: INFO: DEV_PATH=\"$1\"" 1>&2
@@ -854,7 +868,7 @@ if [[ "${RaspiMedia}" == "?" ]] || \
 then
 	found=1 # means exit with error.
 
-	for blk in $( ls /dev/sd* | grep -v '[0-9]$' )
+	for blk in $( "${LS}" /dev/sd* | "${GREP}" -v '[0-9]$' )
 	do
 		if [[ ! -b "${blk}" ]]
 		then
@@ -935,7 +949,7 @@ do
 	sleep 5
 done
 
-RaspiOSImagePreview="$( mktemp -p "${Pwd}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.img" )"
+RaspiOSImagePreview="$( "${MKTEMP}" -p "${Pwd}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.img" )"
 
 ${TOUCH} "${RaspiOSImagePreview}"
 ${CHMOD} 600 "${RaspiOSImagePreview}"
@@ -963,7 +977,7 @@ then
 	exit ${result}
 fi
 
-NbdNum=$( cat /sys/module/nbd/parameters/nbds_max )
+NbdNum=$( "${CAT}" /sys/module/nbd/parameters/nbds_max )
 if [[ -z "${NbdNum}" ]]
 then
 	echo "$0: ERROR: The kernel NBD module is not ready." 1>&2
@@ -1038,11 +1052,11 @@ then
 	exit ${result}
 fi
 
-RaspiOSArch=$( "${FILE}" "${RootFsExt4Point}/usr/bin/[" | sed 's!^.*ld-linux-\(.*\)[.]so[.].*$!\1!' )
+RaspiOSArch=$( "${FILE}" "${RootFsExt4Point}/usr/bin/[" | "${SED}" 's!^.*ld-linux-\(.*\)[.]so[.].*$!\1!' )
 
 echo "$0: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
 
-RaspiOSImageTemp=$( mktemp -p "${Pwd}" ${RaspiOSImagePrefix}-XXXXXXXXXX.img )
+RaspiOSImageTemp=$( "${MKTEMP}" -p "${Pwd}" ${RaspiOSImagePrefix}-XXXXXXXXXX.img )
 result=$?
 if (( ${result} != 0 ))
 then
