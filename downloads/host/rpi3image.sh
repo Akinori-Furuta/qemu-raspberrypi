@@ -96,6 +96,7 @@ trap ExitProc EXIT
 # Find Temporary Directory.
 # args none
 # echo Temporary Directory Path, not private, share with others.
+# return 0
 function TempDirectoryFind() {
 	local Temp
 
@@ -114,6 +115,7 @@ function TempDirectoryFind() {
 		fi
 	done
 	echo "${Temp}"
+	return 0
 }
 
 # Generate Tepm path.
