@@ -749,8 +749,10 @@ function FsckVolume() {
 	return ${result}
 }
 
+# fsck block device partition
 # args path_to_block_device partition_number
-
+# echo don't care
+# return ==0: Success, !=0: Failed
 function FsckPart() {
 	local	part_path
 
@@ -771,9 +773,10 @@ function FsckPart() {
 	return 1
 }
 
+# fsck Raspberry Pi OS media (image file)
 # args device_path
 # echo Not specified
-# return 0: Success, !=0: Failed
+# return ==0: Success, !=0: Failed
 function FsckRaspiOSMedia() {
 	local	result
 
