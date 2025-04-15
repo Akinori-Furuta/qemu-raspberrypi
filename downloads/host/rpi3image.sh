@@ -252,14 +252,6 @@ function DeviceIsMounted() {
 	return $?
 }
 
-
-# Generate random value.
-# args none
-# echo Random value in hex.
-function HashedRamdom() {
-	( cat /proc/sys/kernel/random/uuid; date +%s.%N ) | sha256sum | cut -f 1 -d ' '
-}
-
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
 
@@ -932,7 +924,7 @@ do
 	sleep 5
 done
 
-RaspiOSImagePreview="${Pwd}/${RaspiOSImagePrefix}-$$-$( HashedRamdom ).img"
+RaspiOSImagePreview="$( mktemp -p "${Pwd}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.img" )"
 
 ${TOUCH} "${RaspiOSImagePreview}"
 ${CHMOD} 600 "${RaspiOSImagePreview}"
