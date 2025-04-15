@@ -139,16 +139,6 @@ function TempPathGen() {
 	return 0
 }
 
-MyTemp="$( TempPathGen )"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "$0: ERROR: Can not create temporary directory."
-	exit ${result}
-fi
-
-echo "$0: INFO: Use temporary directory \"${MyTemp}\"." 1>&2
-
 ReqPackageList=""
 
 function ReqPackageListAdd() {
@@ -253,6 +243,16 @@ function DeviceIsMounted() {
 	done | grep -q 'yes'
 	return $?
 }
+
+MyTemp="$( TempPathGen )"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not create temporary directory."
+	exit ${result}
+fi
+
+echo "$0: INFO: Use temporary directory \"${MyTemp}\"." 1>&2
 
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
