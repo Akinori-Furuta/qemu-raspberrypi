@@ -20,6 +20,8 @@ RaspiMedia="$1"
 DtRpi3BName="bcm2710-rpi-3-b"
 DtRpi3BNameQemu="bcm2710-rpi-3-b-qemu"
 
+NBDDisconnectWait=3
+
 # Set dummy command before ready to use.
 
 SUDO=":"
@@ -201,6 +203,7 @@ ProbeCommand FSCK util-linux		/usr/sbin/fsck /sbin/fsck /usr/bin/fsck
 ProbeCommand GROWPART cloud-guest-utils	/usr/bin/growpart /usr/sbin/growpart /bin/growpart /sbin/growpart
 ProbeCommand RESIZE2FS e2fsprogs	/usr/sbin/resize2fs /sbin/resize2fs /usr/bin/resize2fs
 ProbeCommand SYNC coreutils		/usr/bin/sync /bin/sync /usr/sbin/sync
+ProbeCommand SLEEP coreutils		/usr/bin/sleep /bin/sleep /usr/sbin/sleep
 ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
 ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
 ProbeCommand CAT coreutils		/usr/bin/cat /bin/cat /usr/sbin/cat
@@ -1000,9 +1003,11 @@ then
 	exit ${result}
 fi
 
+RaspiOSImageSizeAligned="$( FileSizeAlignPow2G "${RaspiOSImageSizeConverted}" )"
 
+echo "$0: INFO: Resize Raspberry Pi OS image file \"${RaspiOSImagePreview}\" into ${RaspiOSImageSizeAligned}G" 1>&2
 
-"${QEMU_IMG}" resize -f raw "${RaspiOSImagePreview}" "$(FileSizeAlignPow2G "${RaspiOSImageSizeConverted}")G"
+"${QEMU_IMG}" resize -f raw "${RaspiOSImagePreview}" "${RaspiOSImageSizeAligned}G"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1226,7 +1231,12 @@ echo "$0: INFO: Unmount Raspberry Pi OS image." 1>&2
 
 "${SYNC}"
 
-UmountRaspiOSMedia
+# Expect flush disk I/O, read partition table.
+"${SUDO}" "${SFDISK}" -d "${NbdDev}" > /dev/null
+
+"${SYNC}"
+
+UmountRaspiOSMedia "${NbdDev}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1237,6 +1247,9 @@ fi
 echo "$0: INFO: Disconnect Raspberry Pi OS image from NBD." 1>&2
 
 "${SYNC}"
+"${SLEEP}" "${NBDDisconnectWait}"
+"${SYNC}"
+"${SLEEP}" "${NBDDisconnectWait}"
 
 "${SUDO}" "${QEMU_NBD}" -d "${NbdDev}"
 result=$?
