@@ -708,6 +708,12 @@ function UmountBlockDevicePart() {
 function UmountRaspiOSMedia() {
 	local	result
 
+	if [[ -z "${1}" ]]
+	then
+		echo "$0.UmountRaspiOSMedia(): ERROR: Specify path_to_block_device." 1>&2
+		return 1
+	fi
+
 	UmountBlockDevicePart "${1}" 1
 	result=$?
 	[[ -n "${debug}" ]] && echo "$0.UmountRaspiOSMedia().1: DEBUG: umount \"${1}\" partition 1, result=${result}" 1>&2
