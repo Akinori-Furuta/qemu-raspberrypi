@@ -880,6 +880,7 @@ function MountRaspiOSMedia() {
 
 if [[ "${RaspiMedia}" == "?" ]] || \
    [[ "${RaspiMedia}" == "find" ]] || \
+   [[ "${RaspiMedia}" == "scan" ]] || \
    [[ "${RaspiMedia}" == "search" ]] || \
    [[ "${RaspiMedia}" == "suggest" ]]
 then
