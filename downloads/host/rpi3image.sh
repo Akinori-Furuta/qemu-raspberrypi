@@ -690,6 +690,7 @@ function UmountBlockDevicePart() {
 	part_path="${1}${2}"
 	if DeviceIsMounted "${part_path}"
 	then
+		[[ -n "${debug}" ]] && echo "$0.UmountBlockDevicePart().1: DEBUG: umount \"${part_path}\"" 1>&2
 		"${SUDO}" "${UMOUNT}" "${part_path}"
 		return $?
 	fi
@@ -697,6 +698,7 @@ function UmountBlockDevicePart() {
 	part_path="${1}p${2}"
 	if DeviceIsMounted "${part_path}"
 	then
+		[[ -n "${debug}" ]] && echo "$0.UmountBlockDevicePart().2: DEBUG: umount \"${part_path}\"" 1>&2
 		"${SUDO}" "${UMOUNT}" "${part_path}"
 		return $?
 	fi
