@@ -670,9 +670,9 @@ function ShowBlockDevice() {
 	fi
 
 	echo "$0: INFO: DEV_PATH=\"$1\"" 1>&2
-	echo "$0: INFO: VENDOR[$1]=\"${vendor}\"" 1>&2
-	echo "$0: INFO: MODEL[$1]=\"${model}\"" 1>&2
-	echo "$0: INFO: SIZE[$1]=${size_iu}/${size_du} bytes" 1>&2
+	echo "$0: INFO: ${1}.VENDOR=\"${vendor}\"" 1>&2
+	echo "$0: INFO: ${1}.MODEL=\"${model}\"" 1>&2
+	echo "$0: INFO: ${1}.SIZE=${size_iu}/${size_du} bytes" 1>&2
 	return 0
 }
 
