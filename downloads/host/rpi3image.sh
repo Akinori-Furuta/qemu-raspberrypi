@@ -701,6 +701,7 @@ function UmountBlockDevicePart() {
 	return 0
 }
 
+# Unmount Raspberry Pi OS media
 # args path_to_block_device
 # echo   Not defined
 # exit   no
@@ -727,6 +728,10 @@ function UmountRaspiOSMedia() {
 	return 0
 }
 
+# Wait ready to use NBD partitions
+# args path_to_nbd_device
+# echo Don't care
+# return ==0: Success, !=0: Failed
 function WaitNbdRaspiOSMedia() {
 	local	i
 
@@ -752,6 +757,10 @@ then
 	FSCK_TRIES=10
 fi
 
+# fsck block device volume
+# args device_path_to_fsck
+# echo Don't care
+# return ==0: Success, !=0: Failed
 function FsckVolume() {
 	local	i
 	local	result
