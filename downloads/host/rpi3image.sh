@@ -232,8 +232,22 @@ fi
 if [[ -z "${RaspiMedia}" ]]
 then
 	echo "$0: ERROR: Specify Raspberry Pi OS image media path." 1>&2
-	echo "$0: INFO: To find Raspberry Pi OS image media path, invoke as follows." 1>&2
-	echo "$0: INFO:   $0 find" 1>&2
+	echo "$0: HELP: To find Raspberry Pi OS image media path, invoke as follows." 1>&2
+	echo "$0: HELP:   $0 find" 1>&2
+	exit 1
+fi
+
+if [[ "${RaspiMedia}" == "help" ]] ||
+   [[ "${RaspiMedia}" == "--help" ]] ||
+   [[ "${RaspiMedia}" == "-h" ]]
+then
+	echo "$0: HELP: Command line" 1>&2
+	echo "$0: HELP:   \"$0\" [/dev/RaspberryPiMedia]" 1>&2
+	echo "$0: HELP: To find /dev/RaspberryPiMedia, invoke as follows." 1>&2
+	echo "$0: HELP:   \"$0\" find" 1>&2
+	echo "$0: HELP: Copy Raspberry Pi OS media to virtual machine image files." 1>&2
+	echo "$0: HELP: Files are stored into current directory, under bootfs/ and" 1>&2
+	echo "$0: HELP: ./${RaspiOSImagePrefix}-OSBits-SerialNumber.img" 1>&2
 	exit 1
 fi
 
