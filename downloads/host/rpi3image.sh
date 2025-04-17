@@ -237,6 +237,9 @@ ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
 ProbeCommand CAT coreutils		/usr/bin/cat /bin/cat /usr/sbin/cat
 ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
 ProbeCommand LS coreutils		/usr/bin/ls /bin/ls /usr/sbin/ls
+ProbeCommand BASENAME coreutils		/usr/bin/basename /bin/basename /usr/sbin/basename
+ProbeCommand DIRNAME coreutils		/usr/bin/dirname /bin/dirname /usr/sbin/dirname
+ProbeCommand READLINK coreutils		/usr/bin/readlink /bin/readlink /usr/sbin/readlink
 ProbeCommand MKDIR coreutils		/usr/bin/mkdir /bin/mkdir /usr/sbin/mkdir
 ProbeCommand MKTEMP coreutils		/usr/bin/mktemp /bin/mktemp /usr/sbin/mktemp
 ProbeCommand MV coreutils		/usr/bin/mv /bin/mv /usr/sbin/mv
