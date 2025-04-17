@@ -309,7 +309,7 @@ function LogInt2Rup() {
 
 	i=0
 	a="$1"
-	f=$(( ( ${a} == 1 ) ? 1 : 0 ))
+	f=0
 	while (( ${a} > 1 ))
 	do
 		if (( ( ${a} & 0x1 ) != 0x0 ))
