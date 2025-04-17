@@ -976,7 +976,7 @@ fi
 
 if [ ! -d "/sys/module/nbd" ]
 then
-	echo "$0: INFO: Probe nbd kernel module." 2>&1
+	echo "$0: INFO: Probe nbd kernel module." 1>&2
 	"${SUDO}" "${MODPROBE}" nbd
 	result=$?
 	if (( ${result} != 0 ))
