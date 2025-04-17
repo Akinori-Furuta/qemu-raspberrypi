@@ -14,9 +14,34 @@ MyBody="${MyBase%.*}"
 MyBodyNoSpace="$( echo -n ${MyBody} | tr -s '\000-\040' '_')"
 MyBodyNoSuffix="${MyBody%%-*}"
 
+function Help() {
+	echo "$0: HELP: Command line:"
+	echo "$0: HELP:   \"$0\" [/dev/RaspberryPiMedia] [-s ImageFileSizeInGbyte] \\"
+	echo "$0: HELP:     [-o ImageFile] [-h]"
+	echo "$0: HELP: -s Number  Image file size in Gibytes. It should be powe of 2 and"
+	echo "$0: HELP:            larger or equal to Raspberry Pi OS media capacity."
+	echo "$0: HELP:            Without this option, resize image file size upto the"
+	echo "$0: HELP:            smallest number of power of 2 Gibyte size which is"
+	echo "$0: HELP:            larger or equal to Raspberry Pi OS media capacity."
+	echo "$0: HELP: -o File    Image file path to store media image."
+	echo "$0: HELP:            Without this option, image file is stored in"
+	echo "$0: HELP:            current directory and named as follows,"
+	echo "$0: HELP:            ${RaspiOSImagePrefix}-OSBits-SerialNumber.img"
+	echo "$0: HELP: Copy Raspberry Pi OS media at /dev/RaspberryPiMedia to virtual"
+	echo "$0: HELP: machine image files."
+	echo "$0: HELP: By default, files are stored into current directory."
+	echo "$0: HELP: Under bootfs/: Files copied from bootfs partition."
+	echo "$0: HELP: Device tree blobs (*.dtb) are used to boot QEMU emulator."
+	echo "$0: HELP: Under current directory: Store Raspberry Pi OS image file"
+	echo "$0: HELP: ${RaspiOSImagePrefix}-OSBits-SerialNumber.img or ImageFile"
+	echo "$0: HELP: (by -o option)."
+	echo "$0: HELP: To find Raspberry Pi OS image media path, invoke as follows."
+	echo "$0: HELP:   \"$0\" find"
+	exit 1
+}
+
 RaspiOSImagePrefix="raspios"
 
-RaspiMedia="$1"
 DtRpi3BName="bcm2710-rpi-3-b"
 DtRpi3BNameQemu="bcm2710-rpi-3-b-qemu"
 
@@ -232,11 +257,36 @@ then
 	exit 1
 fi
 
+OptionSize=""
+OptionOutput=""
+
+while getopts "s:o:h" OPT
+do
+	case ${OPT} in
+	(s)
+		OptionSize="${OPTARG}"
+		;;
+	(o)
+		OptionOutput="${OPTARG}"
+		;;
+	(h)
+		Help
+		;;
+	(*)
+		echo "$0: ERROR: Invalid option -${OPT}." 1>&2
+		Help
+		;;
+	esac
+done
+
+shift $(( ${OPTIND} - 1 ))
+
+RaspiMedia="$1"
+
 if [[ -z "${RaspiMedia}" ]]
 then
 	echo "$0: ERROR: Specify Raspberry Pi OS image media path." 1>&2
-	echo "$0: HELP: To find Raspberry Pi OS image media path, invoke as follows." 1>&2
-	echo "$0: HELP:   $0 find" 1>&2
+	Help
 	exit 1
 fi
 
@@ -244,13 +294,7 @@ if [[ "${RaspiMedia}" == "help" ]] ||
    [[ "${RaspiMedia}" == "--help" ]] ||
    [[ "${RaspiMedia}" == "-h" ]]
 then
-	echo "$0: HELP: Command line" 1>&2
-	echo "$0: HELP:   \"$0\" [/dev/RaspberryPiMedia]" 1>&2
-	echo "$0: HELP: To find /dev/RaspberryPiMedia, invoke as follows." 1>&2
-	echo "$0: HELP:   \"$0\" find" 1>&2
-	echo "$0: HELP: Copy Raspberry Pi OS media to virtual machine image files." 1>&2
-	echo "$0: HELP: Files are stored into current directory, under bootfs/ and" 1>&2
-	echo "$0: HELP: ./${RaspiOSImagePrefix}-OSBits-SerialNumber.img" 1>&2
+	Help
 	exit 1
 fi
 
