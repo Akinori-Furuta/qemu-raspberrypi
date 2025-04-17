@@ -308,6 +308,16 @@ then
 	exit 1
 fi
 
+RequestFind=""
+if [[ "${RaspiMedia}" == "?" ]] || \
+   [[ "${RaspiMedia}" == "find" ]] || \
+   [[ "${RaspiMedia}" == "scan" ]] || \
+   [[ "${RaspiMedia}" == "search" ]] || \
+   [[ "${RaspiMedia}" == "suggest" ]]
+then
+	RequestFind="yes"
+fi
+
 # Calculate Log2(integer), round up if fractional part is not zero.
 # args integer_value
 # echo The number of Log2()
@@ -343,6 +353,66 @@ then
 	if (( ${OptionSizeNum} != ( 1 << ${OptionSizeNumLog2} ) ))
 	then
 		echo "$0: The number of -s ${OptionSize} should be power of 2." 1>&2
+		exit 1
+	fi
+fi
+
+OptionOutputDirectory=""
+OptionOutputBaseName=""
+OptionOutputDirName=""
+
+if [[ -n "${OptionOutput}" ]]
+then
+	if [[ -d "${OptionOutput}" ]]
+	then
+		OptionOutputBaseName=""
+		OptionOutputDirectory="$( echo "${OptionOutput}" | "${SED}" 's!/*$!!' )"
+		OptionOutputDirName="${OptionOutputDirectory}"
+	else
+		if [[ "${OptionOutput}" == */ ]]
+		then
+			OptionOutputBaseName=""
+			OptionOutputDirectory="$( echo "${OptionOutput}" | "${SED}" 's!/*$!!' )"
+			OptionOutputDirName="${OptionOutputDirectory}"
+			echo "$0: NOTICE: Directory \"${OptionOutput}\" does not exist, will be created." 1>&2
+		else
+			OptionOutputBaseName="$( "${BASENAME}" "${OptionOutput}" )"
+			OptionOutputDirName="$( "${DIRNAME}"   "${OptionOutput}" )"
+			if [[ ! -d "${OptionOutputDirName}" ]]
+			then
+				echo "$0: NOTICE: Directory \"${OptionOutputDirName}\" does not exist, will be created." 1>&2
+
+			fi
+			OptionOutputDirectory="${OptionOutputDirName}"
+		fi
+	fi
+else
+	OptionOutputBaseName=""
+	OptionOutputDirName="${Pwd}"
+	OptionOutputDirectory="${Pwd}"
+fi
+
+OptionOutputDirectoryCanonic="$( "${READLINK}" -f "${OptionOutputDirectory}" )"
+
+if [[ -z "${RequestFind}" ]]
+then
+	may_overwrite=""
+
+	if [[ -n "${OptionOutput}" ]] && [[ -f "${OptionOutput}" ]]
+	then
+		echo "$0: WARNING: Overwrite existing file \"${OptionOutput}\"." 1>&2
+		may_overwrite="yes"
+	fi
+
+	if [[ -d "${OptionOutputDirectory}/bootfs" ]] || [[ -d "${OptionOutputDirectoryCanonic}/bootfs" ]]
+	then
+		echo "$0: WARNING: Overwrite existing directory \"${OptionOutputDirectory}/bootfs\"." 1>&2
+		may_overwrite="yes"
+	fi
+
+	if [[ -z "${OptionForce}" ]] && [[ -n "${may_overwrite}" ]]
+	then
+		echo "$0: HELP: Use -f option to overwrite existing files and/or directories." 1>&2
 		exit 1
 	fi
 fi
@@ -974,11 +1044,7 @@ function MountRaspiOSMedia() {
 	return ${result}
 }
 
-if [[ "${RaspiMedia}" == "?" ]] || \
-   [[ "${RaspiMedia}" == "find" ]] || \
-   [[ "${RaspiMedia}" == "scan" ]] || \
-   [[ "${RaspiMedia}" == "search" ]] || \
-   [[ "${RaspiMedia}" == "suggest" ]]
+if [[ -n "${RequestFind}" ]]
 then
 	found=1 # means exit with error.
 
@@ -1034,8 +1100,10 @@ TargetKit=""
 # and git cloned repository.
 
 for target_kit in "${Pwd}/rpios64bit-target-kit.tar.gz" \
+		  "${OptionOutputDirectory}/rpios64bit-target-kit.tar.gz" \
 		  "${MyDir}/../downloads/rpios64bit-target-kit.tar.gz" \
 		  "${Pwd}/rpios32bit-target-kit.tar.gz" \
+		  "${OptionOutputDirectory}/rpios32bit-target-kit.tar.gz" \
 		  "${MyDir}/../downloads/rpios32bit-target-kit.tar.gz"
 do
 	if [[ -f "${target_kit}" ]]
@@ -1063,10 +1131,33 @@ do
 	sleep 5
 done
 
-RaspiOSImagePreview="$( "${MKTEMP}" -p "${Pwd}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.img" )"
+if [[ ! -d "${OptionOutputDirectory}" ]]
+then
+	"${MKDIR}" -p "${OptionOutputDirectory}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "$0: ERROR: Can not create directory \"${OptionOutputDirectory}\"." 1>&2
+		exit ${result}
+	fi
+	chmod 700 "${OptionOutputDirectory}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "$0: ERROR: Can not change \"${OptionOutputDirectory}\" access mode into 700." 1>&2
+		exit ${result}
+	fi
+fi
 
-${TOUCH} "${RaspiOSImagePreview}"
+RaspiOSImagePreview="$( "${MKTEMP}" -p "${OptionOutputDirectory}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.img" )"
+
 ${CHMOD} 600 "${RaspiOSImagePreview}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not change \"${RaspiOSImagePreview}\" access mode into 600." 1>&2
+	exit ${result}
+fi
 
 # convert Raspberry Pi OS image media to file.
 
@@ -1187,54 +1278,59 @@ RaspiOSArch=$( "${FILE}" "${RootFsExt4Point}/usr/bin/[" | "${SED}" 's!^.*ld-linu
 
 echo "$0: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
 
-RaspiOSImageTemp=$( "${MKTEMP}" -p "${Pwd}" ${RaspiOSImagePrefix}-XXXXXXXXXX.img )
+RaspiOSImageTemp=$( "${MKTEMP}" -p "${OptionOutputDirectory}" ${RaspiOSImagePrefix}-XXXXXXXXXX.img )
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not create temporary file \"${RaspiOSImageTemp}\"." 1>&2
+	echo "$0: ERROR: Can not create temporary file in directory \"${OptionOutputDirectory}\"." 1>&2
 	exit ${result}
 fi
-RaspiOSImage="${Pwd}/rpios-0000.img"
-RaspiOSImageSn=0
 
-while (( ${RaspiOSImageSn} <= 9999 ))
-do
-	case "${RaspiOSArch}" in
-	(aarch64)
-		RaspiOSImage="${Pwd}/${RaspiOSImagePrefix}-64-$(printf "%04d" ${RaspiOSImageSn}).img"
-		;;
-	(*)
-		RaspiOSImage="${Pwd}/${RaspiOSImagePrefix}-32-$(printf "%04d" ${RaspiOSImageSn}).img"
-		;;
-	esac
-	if [[ ! -f "${RaspiOSImage}" ]]
-	then
-		"${MV}" -n "${RaspiOSImageTemp}" "${RaspiOSImage}"
-		result=$?
-		if (( ${result} == 0 ))
+if [[ -z "${OptionOutputBaseName}" ]]
+then
+	RaspiOSImage="${OptionOutputDirectory}/rpios-0000.img"
+	RaspiOSImageSn=0
+
+	while (( ${RaspiOSImageSn} <= 9999 ))
+	do
+		case "${RaspiOSArch}" in
+		(aarch64)
+			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-64-$(printf "%04d" ${RaspiOSImageSn}).img"
+			;;
+		(*)
+			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-32-$(printf "%04d" ${RaspiOSImageSn}).img"
+			;;
+		esac
+		if [[ ! -f "${RaspiOSImage}" ]]
 		then
-			if [[ ! -f "${RaspiOSImageTemp}" ]]
+			"${MV}" -n "${RaspiOSImageTemp}" "${RaspiOSImage}"
+			result=$?
+			if (( ${result} == 0 ))
 			then
-				break
+				if [[ ! -f "${RaspiOSImageTemp}" ]]
+				then
+					break
+				fi
 			fi
 		fi
-	fi
-	if (( ( ${RaspiOSImageSn} % 100 ) == 0 ))
+		if (( ( ${RaspiOSImageSn} % 100 ) == 0 ))
+		then
+			echo "$0: INFO: Search new Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
+		fi
+		RaspiOSImageSn=$(( ${RaspiOSImageSn} + 1 ))
+	done
+	if (( ${RaspiOSImageSn} > 9999 ))
 	then
-		echo "$0: INFO: Search new Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
+		echo "$0: ERROR: There are many Raspberry Pi OS image files upto \"${RaspiOSImage}\"." 1>&2
+		exit 1
 	fi
-	RaspiOSImageSn=$(( ${RaspiOSImageSn} + 1 ))
-done
-
-if (( ${RaspiOSImageSn} > 9999 ))
-then
-	echo "$0: ERROR: There are many Raspberry Pi OS image files upto \"${RaspiOSImage}\"." 1>&2
-	exit 1
+else
+	RaspiOSImage="${OptionOutputDirectory}/${OptionOutputBaseName}"
 fi
 
 echo "$0: INFO: Copy bootfs files." 1>&2
 
-"${SUDO}" "${CP}" -r "${BootFsFatPoint}" "${Pwd}/"
+"${SUDO}" "${CP}" -r "${BootFsFatPoint}" "${OptionOutputDirectory}/"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1242,7 +1338,7 @@ then
 	exit ${result}
 fi
 
-"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${Pwd}/bootfs"
+"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${OptionOutputDirectory}/bootfs"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1252,7 +1348,7 @@ fi
 
 echo "$0: INFO: Set bootfs/firstrun.sh permission." 1>&2
 
-"${CHMOD}" 600 "${Pwd}/bootfs/firstrun.sh"
+"${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1262,22 +1358,22 @@ fi
 
 echo "$0: INFO: Modify device tree." 1>&2
 
-"${DTC}" -I dtb -O dts -o "${Pwd}/bootfs/${DtRpi3BName}.dts" "${Pwd}/bootfs/${DtRpi3BName}.dtb"
+"${DTC}" -I dtb -O dts -o "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not disassemble device tree blob \"${Pwd}/bootfs/${DtRpi3BName}.dtb\"." 1>&2
+	echo "$0: ERROR: Can not disassemble device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb\"." 1>&2
 	exit ${result}
 fi
 
-DtRpi3BNameQemuSource="${Pwd}/bootfs/${DtRpi3BNameQemu}.dts"
-DtRpi3BNameQemuBlob="${Pwd}/bootfs/${DtRpi3BNameQemu}.dtb"
+DtRpi3BNameQemuSource="${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dts"
+DtRpi3BNameQemuBlob="${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dtb"
 
-"${CP}" -p "${Pwd}/bootfs/${DtRpi3BName}.dts" "${DtRpi3BNameQemuSource}"
+"${CP}" -p "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" "${DtRpi3BNameQemuSource}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not copy device tree blob \"${Pwd}/bootfs/${DtRpi3BName}.dts\"." 1>&2
+	echo "$0: ERROR: Can not copy device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts\"." 1>&2
 	exit ${result}
 fi
 
