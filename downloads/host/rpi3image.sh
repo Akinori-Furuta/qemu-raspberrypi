@@ -298,6 +298,31 @@ then
 	exit 1
 fi
 
+# Calculate Log2(integer), round up if fractional part is not zero.
+# args integer_value
+# echo The number of Log2()
+# return ==0: always
+function LogInt2Rup() {
+	local	a
+	local	i
+	local	f
+
+	i=0
+	a="$1"
+	f=$(( ( ${a} == 1 ) ? 1 : 0 ))
+	while (( ${a} > 1 ))
+	do
+		if (( ( ${a} & 0x1 ) != 0x0 ))
+		then
+			f=1
+		fi
+		a=$(( ${a} >> 1 ))
+		i=$(( ${i} + 1 ))
+	done
+	echo $(( ${i} + ${f} ))
+	return 0
+}
+
 # Check device is used as mount point
 # args path
 # echo none
@@ -379,21 +404,6 @@ function NbdFindAvailableNode() {
 	return 1
 }
 
-function LogInt2() {
-	local	a
-	local	i
-
-	i=0
-	a="$1"
-	while (( ${a} > 0 ))
-	do
-		i=$(( ${i} + 1 ))
-		a=$(( ${a} >> 1 ))
-	done
-	echo $i
-	return 0
-}
-
 function SizeKiMiGi() {
 	echo $1 | "${AWK}" -e '{
 		i=0;
@@ -470,9 +480,7 @@ function FileSizeAlignPow2G() {
 		return 0
 	fi
 
-	# Convert size into last offset
-	a=$(( $1 - 1 ))
-	la=$( LogInt2 ${a} )
+	la=$( LogInt2Rup $1 )
 	if (( ${la} <= 30 ))
 	then
 		echo "1" # 1Gibyte
