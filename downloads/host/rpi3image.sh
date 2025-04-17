@@ -532,8 +532,8 @@ function SizeOfBlockDevice() {
 		return 1
 	fi
 
-	dev_path="$( readlink -f "$1" )"
-	dev_base="$( basename "${dev_path}" )"
+	dev_path="$( "${READLINK}" -f "$1" )"
+	dev_base="$( "${BASENAME}" "${dev_path}" )"
 	sys_block="/sys/block/${dev_base}"
 
 	if [[ ! -d "${sys_block}" ]]
@@ -657,7 +657,7 @@ function BlockDeviceIsRaspiOS() {
 		return 1
 	fi
 
-	dev_path="$( readlink -f "$1" )"
+	dev_path="$( "${READLINK}" -f "$1" )"
 
 	if [[ ! -b "${dev_path}" ]]
 	then
@@ -665,7 +665,7 @@ function BlockDeviceIsRaspiOS() {
 		return 1
 	fi
 
-	dev_base="$( basename "${dev_path}" )"
+	dev_base="$( "${BASENAME}" "${dev_path}" )"
 
 	if ! "${SUDO}" "${FILE}" -s "${dev_path}" | \
 	   "${GREP}" -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
@@ -727,7 +727,7 @@ function ShowBlockDevice() {
 	local	vendor
 	local	model
 
-	dev_basename="$( basename "$1" )"
+	dev_basename="$( "${BASENAME}" "$1" )"
 	sys_path="/sys/block/${dev_basename}"
 	sys_dev_path="${sys_path}/device"
 
@@ -1011,7 +1011,7 @@ then
 	#       While the udev is creating /dev/nbd*,  do some process.
 fi
 
-RaspiMediaDev="$( readlink -f "${RaspiMedia}" )"
+RaspiMediaDev="$( "${READLINK}" -f "${RaspiMedia}" )"
 
 if [[ ! -b "${RaspiMediaDev}" ]]
 then
