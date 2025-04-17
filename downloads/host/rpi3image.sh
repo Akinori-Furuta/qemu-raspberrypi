@@ -263,12 +263,16 @@ then
 	exit 1
 fi
 
+OptionForce=""
 OptionSize=""
 OptionOutput=""
 
-while getopts "s:o:h" OPT
+while getopts "fs:o:h" OPT
 do
 	case ${OPT} in
+	(f)
+		OptionForce="yes"
+		;;
 	(s)
 		OptionSize="${OPTARG}"
 		;;
