@@ -323,6 +323,20 @@ function LogInt2Rup() {
 	return 0
 }
 
+OptionSizeNum=""
+OptionSizeNumLog2=""
+if [[ -n "${OptionSize}" ]]
+then
+	OptionSizeNum=$( echo "${OptionSize}" | "${SED}" 's/[gG][iI]\{0,1\}$//' )
+	OptionSizeNumLog2=$( LogInt2Rup "${OptionSizeNum}" )
+	[[ -n "${debug}" ]] && echo "$0: DEBUG: Check log2 calculation log2(${OptionSizeNum})=${OptionSizeNumLog2}" 1>&2
+	if (( ${OptionSizeNum} != ( 1 << ${OptionSizeNumLog2} ) ))
+	then
+		echo "$0: The number of -s ${OptionSize} should be power of 2." 1>&2
+		exit 1
+	fi
+fi
+
 # Check device is used as mount point
 # args path
 # echo none
@@ -1058,6 +1072,21 @@ then
 fi
 
 RaspiOSImageSizeAligned="$( FileSizeAlignPow2G "${RaspiOSImageSizeConverted}" )"
+
+if [[ -n "${OptionSizeNum}" ]]
+then
+	if (( ${RaspiOSImageSizeAligned} < ${OptionSizeNum} ))
+	then
+		RaspiOSImageSizeAligned=${OptionSizeNum}
+		echo "$0: NOTICE: Raspberry Pi OS image size will be fixed to ${RaspiOSImageSizeAligned}Gi bytes (by -s ${OptionSize})." 1>&2
+	else
+		if (( ${RaspiOSImageSizeAligned} > ${OptionSizeNum} ))
+		then
+			echo "$0: NOTICE: Raspberry Pi OS image size is larger than ${OptionSizeNum}Gi bytes (by -s ${OptionSize})." 1>&2
+			echo "$0: NOTICE: Use more suitable size." 1>&2
+		fi
+	fi
+fi
 
 echo "$0: INFO: Resize Raspberry Pi OS image file \"${RaspiOSImagePreview}\" into ${RaspiOSImageSizeAligned}G" 1>&2
 
