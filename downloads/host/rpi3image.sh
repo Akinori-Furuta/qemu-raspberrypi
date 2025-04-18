@@ -1223,7 +1223,7 @@ fi
 i=0
 while (( ${i} <= ${NbdNum} ))
 do
-	if ! NbdNode=$( NbdFindAvailableNode )
+	if ! NbdNode="$( NbdFindAvailableNode )"
 	then
 		echo "$0: ERROR: All NBDs are in use. NbdNum=${NbdNum}" 1>&2
 		exit 1
