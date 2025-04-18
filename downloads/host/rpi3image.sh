@@ -171,7 +171,7 @@ function PathIsMountPoint() {
 		echo "$0.PathIsMountPoint(): WARNING: No argument." 1>&2
 		return 1
 	fi
-	"${CAT}" /proc/mounts | "${AWK}" '{print $2}' | while read
+	"${AWK}" '{print $2}' /proc/mounts  | while read
 	do
 		if [[ "${REPLY}" == "$1" ]]
 		then
@@ -427,7 +427,7 @@ function DeviceIsMounted() {
 		echo "$0.DeviceIsMounted(): WARNING: No argument." 1>&2
 		return 1
 	fi
-	"${CAT}" /proc/mounts | "${AWK}" '{print $1}' | while read
+	"${AWK}" '{print $1}' /proc/mounts | while read
 	do
 		if [[ "${REPLY}" == "$1" ]]
 		then
