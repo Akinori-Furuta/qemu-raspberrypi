@@ -448,7 +448,7 @@ MyTemp="$( TempPathGen )"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not create temporary directory."
+	echo "$0: ERROR: Can not create temporary directory." 1>&2
 	exit ${result}
 fi
 
