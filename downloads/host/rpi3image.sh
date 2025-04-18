@@ -308,8 +308,7 @@ then
 fi
 
 if [[ "${RaspiMedia}" == "help" ]] ||
-   [[ "${RaspiMedia}" == "--help" ]] ||
-   [[ "${RaspiMedia}" == "-h" ]]
+   [[ "${RaspiMedia}" == "--help" ]]
 then
 	Help
 	exit 1
