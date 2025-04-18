@@ -158,6 +158,8 @@ BootFsFatPoint=""
 RootFsExt4Point=""
 NbdNode=""
 NbdDev=""
+RaspiOSImagePreviewReady=""
+RaspiOSImagePreview=""
 RaspiOSImageTemp=""
 MyTemp=""
 
@@ -207,6 +209,11 @@ function ExitProc() {
 	if [[ -n "${RaspiOSImageTemp}" ]]
 	then
 		"${RM}" -f "${RaspiOSImageTemp}"
+	fi
+
+	if [[ -z "${RaspiOSImagePreviewReady}" ]] && [[ -f "${RaspiOSImagePreview}" ]]
+	then
+		"${RM}" -f "${RaspiOSImagePreview}"
 	fi
 
 	if [[ -n "${MyTemp}" ]] && [[ -d "${MyTemp}" ]]
@@ -1149,6 +1156,7 @@ then
 	fi
 fi
 
+RaspiOSImagePreviewReady=""
 RaspiOSImagePreview="$( "${MKTEMP}" -p "${OptionOutputDirectory}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.img" )"
 
 ${CHMOD} 600 "${RaspiOSImagePreview}"
@@ -1163,6 +1171,13 @@ fi
 
 echo "$0: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"." 1>&2
 "${SUDO}" "${QEMU_IMG}" convert -p -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "$0: ERROR: Can not convert Raspberry OS media \"${RaspiMedia}\" to image file \"${RaspiOSImagePreview}\"." 1>&2
+	exit ${result}
+fi
+RaspiOSImagePreviewReady="yes"
 
 RaspiOSImageSizeConverted=$( ${STAT} -c "%s" "${RaspiOSImagePreview}" )
 result=$?
