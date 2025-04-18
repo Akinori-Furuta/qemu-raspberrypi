@@ -398,15 +398,15 @@ if [[ -z "${RequestFind}" ]]
 then
 	may_overwrite=""
 
-	if [[ -n "${OptionOutput}" ]] && [[ -f "${OptionOutput}" ]]
+	if [[ -n "${OptionOutput}" ]] && [[ -e "${OptionOutput}" ]]
 	then
-		echo "$0: WARNING: Overwrite existing file \"${OptionOutput}\"." 1>&2
+		echo "$0: WARNING: Overwrite existing file or directory \"${OptionOutput}\"." 1>&2
 		may_overwrite="yes"
 	fi
 
-	if [[ -d "${OptionOutputDirectory}/bootfs" ]] || [[ -d "${OptionOutputDirectoryCanonic}/bootfs" ]]
+	if [[ -e "${OptionOutputDirectory}/bootfs" ]] || [[ -e "${OptionOutputDirectoryCanonic}/bootfs" ]]
 	then
-		echo "$0: WARNING: Overwrite existing directory \"${OptionOutputDirectory}/bootfs\"." 1>&2
+		echo "$0: WARNING: Overwrite existing file or directory \"${OptionOutputDirectory}/bootfs\"." 1>&2
 		may_overwrite="yes"
 	fi
 
