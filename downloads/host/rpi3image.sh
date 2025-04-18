@@ -101,30 +101,48 @@ MyBodyNoSuffix="${MyBody%%-*}"
 RaspiOSImagePrefix="raspios"
 
 function Help() {
-	cat << EOF
+	"${CAT}" << EOF
 $0: HELP: Command line:
-$0: HELP:   \"$0\" [/dev/RaspberryPiMedia] [-s ImageFileSizeInGbyte] \\
-$0: HELP:     [-o ImageFile] [-f] [-h]
-$0: HELP: -s Number  Image file size in Gibytes. It should be powe of 2 and
-$0: HELP:            larger or equal to Raspberry Pi OS media capacity.
-$0: HELP:            Without this option, resize image file size upto the
-$0: HELP:            smallest number of power of 2 Gibytes size which is
-$0: HELP:            larger or equal to Raspberry Pi OS media capacity.
-$0: HELP: -o File    Image file or directory path to store media image.
-$0: HELP:            Without this option, image file is stored in
-$0: HELP:            current directory and named as follows,
-$0: HELP:            ${RaspiOSImagePrefix}-OSBits-SerialNumber.img
-$0: HELP: -f         Force overwrite existing file(s).
-$0: HELP: Copy Raspberry Pi OS media at /dev/RaspberryPiMedia to virtual
-$0: HELP: machine image files.
+$0: HELP:   "$0" [-s ImageFileSizeInGbyte] \\
+$0: HELP:     [-o ImagePath] [-f] [-h] \\
+$0: HELP:     [/dev/RaspberryPiMedia]
+$0: HELP:
+$0: HELP: -s number Image file size in Gibytes. It should be
+$0: HELP:           power of 2 and larger or equal to
+$0: HELP            Raspberry PiOSmedia capacity.
+$0: HELP:           Without this option, resize image file
+$0: HELP:           size upto the smallest number of power
+$0: HELP:           of 2 Gibytes size which is larger or equal
+$0: HELP:           to Raspberry Pi OS media capacity.
+$0: HELP: -o path   Image file or directory path to store
+$0: HELP:           media image.
+$0: HELP:           Without this option, image file is stored
+$0: HELP:           in current directory see more details in
+$0: HELP:           following text.
+$0: HELP: -f        Force overwrite existing file(s).
+$0: HELP: -h        Show help.
+$0: HELP:
+$0: HELP: Copy Raspberry Pi OS media at /dev/RaspberryPiMedia
+$0: HELP  to virtual machine image files.
 $0: HELP: By default, files are stored into current directory.
-$0: HELP: Under bootfs/: Files copied from bootfs partition.
-$0: HELP: Device tree blobs (*.dtb) are used to boot QEMU emulator.
-$0: HELP: Under current directory: Store Raspberry Pi OS image file
-$0: HELP: ${RaspiOSImagePrefix}-OSBits-SerialNumber.img or ImageFile
-$0: HELP: (by -o option).
-$0: HELP: To find Raspberry Pi OS image media path, invoke as follows.
-$0: HELP:   \"$0\" find
+$0: HELP: When the option -o ImagePath is specified. Outputs are
+$0: HELP: stored according to ImagePath points to as flollows,
+$0: HELP: * ImagePath is a file
+$0: HELP:   * Store Raspberry Pi OS image into file ImagePath
+$0: HELP:   * Store device tree blobs into
+$0: HELP:     \$(dirname ImagePath)/bootfs
+$0: HELP: * ImagePath is a directory
+$0: HELP:   * Store Raspberry Pi OS image into
+$0: HELP:     ImagePath/${RaspiOSImagePrefix}-OSBits-SerialNumber.img
+$0: HELP:   * Store device tree blobs into ImagePath/bootfs
+$0: HELP: * Not specified -o option
+$0: HELP:   * Store Raspberry Pi OS image into
+$0: HELP:     ./${RaspiOSImagePrefix}-OSBits-SerialNumber.img
+$0: HELP:   * Store device tree blobs into ./bootfs
+$0: HELP:
+$0: HELP: To find Raspberry Pi OS image media path,
+$0: HELP: run as follows.
+$0: HELP:   "$0" find
 EOF
 	exit 1
 }
