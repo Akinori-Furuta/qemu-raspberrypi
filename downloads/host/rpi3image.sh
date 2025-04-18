@@ -3,16 +3,99 @@
 
 export PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
 
-Pwd="$( pwd )"
-IdUser="$( id -u )"
-IdGroup="$( id -g )"
+declare -A ReqPackageList
 
-MyWhich="$( which "$0" )"
-MyPath="$( readlink -f "${MyWhich}" )"
-MyDir="$( dirname "${MyPath}" )"
-MyBase="$( basename "$0" )"
+# Probe command
+#  Resolve absolute path or collect package name to suggest
+# arg1:   Absolute path variable
+# arg2:   Package name
+# arg3..: Absolute path list
+# echo: Don't care
+# return: ==0: Found command, !=0: Not found command
+function ProbeCommand() {
+	local	cmd_var
+	local	package
+	local	x
+
+	cmd_var="$1"
+	shift
+	package="$1"
+	shift
+	for x in "$@"
+	do
+		[[ -x "${x}" ]] && break
+	done
+
+	if [[ ! -x "${x}" ]]
+	then
+		ReqPackageList["${package}"]="${package}"
+		return 1
+	fi
+
+	eval "${cmd_var}"="${x}"
+	return 0
+}
+
+ProbeCommand WHICH debianutils		/usr/bin/which /bin/which /usr/sbin/which
+ProbeCommand ID coreutils		/usr/bin/id /bin/id /usr/sbin/id
+ProbeCommand SUDO sudo			/usr/bin/sudo /bin/sudo /usr/sbin/sudo
+ProbeCommand CAT coreutils		/usr/bin/cat /bin/cat /usr/sbin/cat
+ProbeCommand MODPROBE kmod		/usr/sbin/modprobe /sbin/modprobe /usr/bin/modprobe
+ProbeCommand BLKID util-linux		/usr/sbin/blkid /sbin/blkid /usr/bin/blkid
+ProbeCommand NBD_CLIENT nbd-client	/usr/sbin/nbd-client /sbin/nbd-client /usr/bin/nbd-client
+ProbeCommand QEMU_NBD qemu-utils	/usr/bin/qemu-nbd /bin/qemu-nbd /usr/sbin/qemu-nbd
+ProbeCommand QEMU_IMG qemu-utils	/usr/bin/qemu-img /bin/qemu-img /usr/sbin/qemu-img
+ProbeCommand PARTPROBE parted		/usr/sbin/partprobe /sbin/partprobe /usr/bin/partprobe
+ProbeCommand FILE file			/usr/bin/file /bin/file /usr/sbin/file
+ProbeCommand SFDISK fdisk		/usr/sbin/sfdisk /sbin/sfdisk /usr/bin/sfdisk
+ProbeCommand FSCK util-linux		/usr/sbin/fsck /sbin/fsck /usr/bin/fsck
+ProbeCommand GROWPART cloud-guest-utils	/usr/bin/growpart /usr/sbin/growpart /bin/growpart /sbin/growpart
+ProbeCommand RESIZE2FS e2fsprogs	/usr/sbin/resize2fs /sbin/resize2fs /usr/bin/resize2fs
+ProbeCommand SYNC coreutils		/usr/bin/sync /bin/sync /usr/sbin/sync
+ProbeCommand SLEEP coreutils		/usr/bin/sleep /bin/sleep /usr/sbin/sleep
+ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
+ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
+ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
+ProbeCommand LS coreutils		/usr/bin/ls /bin/ls /usr/sbin/ls
+ProbeCommand PWD coreutils		/usr/bin/pwd /bin/pwd /usr/sbin/pwd
+ProbeCommand BASENAME coreutils		/usr/bin/basename /bin/basename /usr/sbin/basename
+ProbeCommand DIRNAME coreutils		/usr/bin/dirname /bin/dirname /usr/sbin/dirname
+ProbeCommand READLINK coreutils		/usr/bin/readlink /bin/readlink /usr/sbin/readlink
+ProbeCommand MKDIR coreutils		/usr/bin/mkdir /bin/mkdir /usr/sbin/mkdir
+ProbeCommand MKTEMP coreutils		/usr/bin/mktemp /bin/mktemp /usr/sbin/mktemp
+ProbeCommand MV coreutils		/usr/bin/mv /bin/mv /usr/sbin/mv
+ProbeCommand RM coreutils		/usr/bin/rm /bin/rm /usr/sbin/rm
+ProbeCommand GREP grep			/usr/bin/grep /bin/grep /usr/sbin/grep
+ProbeCommand SED sed			/usr/bin/sed /bin/sed /usr/sbin/sed
+ProbeCommand TR coreutils		/usr/bin/tr /bin/tr /usr/sbin/tr
+ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
+ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
+ProbeCommand AWK gawk			/usr/bin/awk /bin/awk /usr/bin/gawk /bin/gawk /usr/sbin/awk /sbin/awk
+ProbeCommand PATCH patch		/usr/bin/patch /bin/patch /usr/sbin/patch
+ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
+ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
+ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
+ProbeCommand STAT coreutils		/usr/bin/stat /bin/stat /usr/sbin/stat
+
+if (( ${#ReqPackageList[@]} > 0 ))
+then
+	echo "$0: INFO: Need following package(s)." 1>&2
+	echo "$0: INFO:   ${ReqPackageList[@]}" 1>&2
+	echo "$0: HELP: To install package(s), run following command." 1>&2
+	echo "$0: HELP:   sudo apt install ${ReqPackageList[@]}" 1>&2
+	exit 1
+fi
+
+Pwd="$( "${PWD}" )"
+IdUser="$( "${ID}" -u )"
+IdGroup="$( "${ID}" -g )"
+
+MyWhich="$( "${WHICH}" "$0" )"
+MyPath="$( "${READLINK}" -f "${MyWhich}" )"
+MyDir="$( "${DIRNAME}" "${MyPath}" )"
+MyBase="$( "${BASENAME}" "$0" )"
 MyBody="${MyBase%.*}"
-MyBodyNoSpace="$( echo -n ${MyBody} | tr -s '\000-\040' '_')"
+MyBodyNoSpace="$( echo -n ${MyBody} | "${TR}" -s '\000-\040' '_')"
 MyBodyNoSuffix="${MyBody%%-*}"
 
 RaspiOSImagePrefix="raspios"
@@ -50,20 +133,6 @@ DtRpi3BName="bcm2710-rpi-3-b"
 DtRpi3BNameQemu="bcm2710-rpi-3-b-qemu"
 
 NBDDisconnectWait=3
-
-# Set dummy command before ready to use.
-
-SUDO=":"
-UMOUNT=":"
-NBD_CLIENT=":"
-QEMU_NBD=":"
-CHMOD="chmod"
-GREP="grep"
-LS="ls"
-CAT="cat"
-AWK="awk"
-RM="rm"
-MKTEMP="mktemp"
 
 # Set dummy value before ready to use.
 
@@ -175,94 +244,6 @@ function TempPathGen() {
 	echo "${my_temp}"
 	return 0
 }
-
-ReqPackageList=""
-
-function ReqPackageListAdd() {
-	for pkg in "$@"
-	do
-		if ! echo "${ReqPackageList}" | "${GREP}" -q "${pkg}"
-		then
-			ReqPackageList="${ReqPackageList} ${pkg}"
-		fi
-	done
-}
-
-# Probe command
-#  Resolve absolute path or collect package name to suggest
-# arg1:   Absolute path variable
-# arg2:   Package name
-# arg3..: Absolute path list
-# echo: Don't care
-# return: ==0: Found command, !=0: Not found command
-function ProbeCommand() {
-	local	cmd_var
-	local	package
-	local	x
-
-	cmd_var="$1"
-	shift
-	package="$1"
-	shift
-	for x in "$@"
-	do
-		[[ -x "${x}" ]] && break
-	done
-
-	if [[ ! -x "${x}" ]]
-	then
-		ReqPackageListAdd "${package}"
-		return 1
-	fi
-
-	eval "${cmd_var}"="${x}"
-	return 0
-}
-
-ProbeCommand SUDO sudo			/usr/bin/sudo /bin/sudo /usr/sbin/sudo
-ProbeCommand MODPROBE kmod		/usr/sbin/modprobe /sbin/modprobe /usr/bin/modprobe
-ProbeCommand BLKID util-linux		/usr/sbin/blkid /sbin/blkid /usr/bin/blkid
-ProbeCommand NBD_CLIENT nbd-client	/usr/sbin/nbd-client /sbin/nbd-client /usr/bin/nbd-client
-ProbeCommand QEMU_NBD qemu-utils	/usr/bin/qemu-nbd /bin/qemu-nbd /usr/sbin/qemu-nbd
-ProbeCommand QEMU_IMG qemu-utils	/usr/bin/qemu-img /bin/qemu-img /usr/sbin/qemu-img
-ProbeCommand PARTPROBE parted		/usr/sbin/partprobe /sbin/partprobe /usr/bin/partprobe
-ProbeCommand FILE file			/usr/bin/file /bin/file /usr/sbin/file
-ProbeCommand SFDISK fdisk		/usr/sbin/sfdisk /sbin/sfdisk /usr/bin/sfdisk
-ProbeCommand FSCK util-linux		/usr/sbin/fsck /sbin/fsck /usr/bin/fsck
-ProbeCommand GROWPART cloud-guest-utils	/usr/bin/growpart /usr/sbin/growpart /bin/growpart /sbin/growpart
-ProbeCommand RESIZE2FS e2fsprogs	/usr/sbin/resize2fs /sbin/resize2fs /usr/bin/resize2fs
-ProbeCommand SYNC coreutils		/usr/bin/sync /bin/sync /usr/sbin/sync
-ProbeCommand SLEEP coreutils		/usr/bin/sleep /bin/sleep /usr/sbin/sleep
-ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
-ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
-ProbeCommand CAT coreutils		/usr/bin/cat /bin/cat /usr/sbin/cat
-ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
-ProbeCommand LS coreutils		/usr/bin/ls /bin/ls /usr/sbin/ls
-ProbeCommand BASENAME coreutils		/usr/bin/basename /bin/basename /usr/sbin/basename
-ProbeCommand DIRNAME coreutils		/usr/bin/dirname /bin/dirname /usr/sbin/dirname
-ProbeCommand READLINK coreutils		/usr/bin/readlink /bin/readlink /usr/sbin/readlink
-ProbeCommand MKDIR coreutils		/usr/bin/mkdir /bin/mkdir /usr/sbin/mkdir
-ProbeCommand MKTEMP coreutils		/usr/bin/mktemp /bin/mktemp /usr/sbin/mktemp
-ProbeCommand MV coreutils		/usr/bin/mv /bin/mv /usr/sbin/mv
-ProbeCommand RM coreutils		/usr/bin/rm /bin/rm /usr/sbin/rm
-ProbeCommand GREP grep			/usr/bin/grep /bin/grep /usr/sbin/grep
-ProbeCommand SED sed			/usr/bin/sed /bin/sed /usr/sbin/sed
-ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
-ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
-ProbeCommand AWK gawk			/usr/bin/awk /bin/awk /usr/bin/gawk /bin/gawk /usr/sbin/awk /sbin/awk
-ProbeCommand PATCH patch		/usr/bin/patch /bin/patch /usr/sbin/patch
-ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
-ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
-ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
-ProbeCommand STAT coreutils		/usr/bin/stat /bin/stat /usr/sbin/stat
-
-if [[ -n "${ReqPackageList}" ]]
-then
-	echo "$0: ERROR: Need following package(s)." 1>&2
-	echo "$0: INFO: ${ReqPackageList}" 1>&2
-	echo "$0: INFO: sudo apt install${ReqPackageList}" 1>&2
-	exit 1
-fi
 
 OptionForce=""
 OptionSize=""
