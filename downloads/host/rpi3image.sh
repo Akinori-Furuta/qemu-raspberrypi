@@ -980,8 +980,10 @@ function FsckRaspiOSMedia() {
 function GrowPartRaspiOSMedia() {
 	local	result
 	local	part_path
+	local	do_resize
 
 	result=1
+	do_resize=""
 
 	# Expand rootfs partition
 	"${SUDO}" "${GROWPART}" "$1" 2
@@ -991,6 +993,7 @@ function GrowPartRaspiOSMedia() {
 	part_path="${1}2"
 	if [[ -b "${part_path}" ]]
 	then
+		do_resize="-2"
 		"${SUDO}" "${RESIZE2FS}" "${part_path}"
 		return $?
 	fi
@@ -998,8 +1001,14 @@ function GrowPartRaspiOSMedia() {
 	part_path="${1}p2"
 	if [[ -b "${part_path}" ]]
 	then
+		do_resize="-p2"
 		"${SUDO}" "${RESIZE2FS}" "${part_path}"
 		return $?
+	fi
+
+	if [[ -z "${do_resize}" ]]
+	then
+		echo "$0.GrowPartRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition(s)." 1>&2
 	fi
 
 	return 1
