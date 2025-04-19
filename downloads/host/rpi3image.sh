@@ -1005,16 +1005,30 @@ function GrowPartRaspiOSMedia() {
 	return 1
 }
 
+# Mount Raspberry Pi media or image file
+# args path_to_device [mount_option]
+# echo don't care
+# return ==0: Success, !=0: Failed
 function MountRaspiOSMedia() {
 	local	result
 	local	part_path
+	local	mount_opt
+	local	do_mount
 
 	result=0
+	do_mount=""
+
+	mount_opt="rw"
+	if [[ -n "${2}" ]]
+	then
+		mount_opt="${2}"
+	fi
 
 	part_path="${1}1"
 	if [[ -b "${part_path}" ]]
 	then
-		if ! "${SUDO}" "${MOUNT}" "${part_path}" "${BootFsFatPoint}"
+		do_mount="${do_mount}-1"
+		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${BootFsFatPoint}"
 		then
 			result=$?
 		fi
@@ -1023,7 +1037,8 @@ function MountRaspiOSMedia() {
 	part_path="${1}p1"
 	if [[ -b "${part_path}" ]]
 	then
-		if ! "${SUDO}" "${MOUNT}" "${part_path}" "${BootFsFatPoint}"
+		do_mount="${do_mount}-p1"
+		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${BootFsFatPoint}"
 		then
 			result=$?
 		fi
@@ -1032,7 +1047,8 @@ function MountRaspiOSMedia() {
 	part_path="${1}2"
 	if [[ -b "${part_path}" ]]
 	then
-		if ! "${SUDO}" "${MOUNT}" "${part_path}" "${RootFsExt4Point}"
+		do_mount="${do_mount}-2"
+		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${RootFsExt4Point}"
 		then
 			result=$?
 		fi
@@ -1041,10 +1057,17 @@ function MountRaspiOSMedia() {
 	part_path="${1}p2"
 	if [[ -b "${part_path}" ]]
 	then
-		if ! "${SUDO}" "${MOUNT}" "${part_path}" "${RootFsExt4Point}"
+		do_mount="${do_mount}-p2"
+		if ! "${SUDO}" "${MOUNT}"  -o "${mount_opt}" "${part_path}" "${RootFsExt4Point}"
 		then
 			result=$?
 		fi
+	fi
+
+	if [[ -z "${do_mount}" ]]
+	then
+		echo "$0: ERROR: Device \"${1}\" does not have partition(s)." 1>&2
+		return 1
 	fi
 
 	return ${result}
@@ -1430,7 +1453,19 @@ then
 	exit ${result}
 fi
 
-echo "$0: INFO: Unmount Raspberry Pi OS image." 1>&2
+echo "$0: INFO: Remount with read-only mode Raspberry Pi OS image." 1>&2
+
+"${SYNC}"
+
+# Remount Raspberry Pi OS image file with read-only mode
+# Expect flush I/O requests.
+MountRaspiOSMedia "${NbdDev}" "remount,ro"
+result=$?
+if (( ${result} != 0))
+then
+	echo "$0: ERROR: Can not remount partition(s) with read-only." 1>&2
+	exit ${result}
+fi
 
 "${SYNC}"
 
@@ -1438,6 +1473,8 @@ echo "$0: INFO: Unmount Raspberry Pi OS image." 1>&2
 "${SUDO}" "${SFDISK}" -d "${NbdDev}" > /dev/null
 
 "${SYNC}"
+
+echo "$0: INFO: Unmount Raspberry Pi OS image." 1>&2
 
 UmountRaspiOSMedia "${NbdDev}"
 result=$?
