@@ -1025,13 +1025,14 @@ function MountRaspiOSMedia() {
 	local	do_mount
 
 	result=0
-	do_mount=""
 
 	mount_opt="rw"
 	if [[ -n "${2}" ]]
 	then
 		mount_opt="${2}"
 	fi
+
+	do_mount=""
 
 	part_path="${1}1"
 	if [[ -b "${part_path}" ]]
@@ -1052,6 +1053,14 @@ function MountRaspiOSMedia() {
 			result=$?
 		fi
 	fi
+
+	if [[ -z "${do_mount}" ]]
+	then
+		echo "$0.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 1." 1>&2
+		return 1
+	fi
+
+	do_mount=""
 
 	part_path="${1}2"
 	if [[ -b "${part_path}" ]]
@@ -1075,7 +1084,7 @@ function MountRaspiOSMedia() {
 
 	if [[ -z "${do_mount}" ]]
 	then
-		echo "$0: ERROR: Device \"${1}\" does not have partition(s)." 1>&2
+		echo "$0.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 2." 1>&2
 		return 1
 	fi
 
