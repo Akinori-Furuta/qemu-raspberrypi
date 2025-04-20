@@ -202,7 +202,7 @@ sudo nmcli conn modify bridge-brnm0 ipv4.method disabled
 Error: Failed to add 'bridge-brnm0' connection: Message recipient disconnected from message bus without replying
 ```
 
-エラーが発生したら、次のコマンドは実行せずに即座に次に示す回復操作をします。エラーで完了できなかった操作を完了し、結果が確定します。
+エラーが発生したら、即座に次に示す回復操作をします。エラーで完了できなかった操作を完了し、結果が確定します。
 
 ```bash
 # Recover "Message recipient disconnected from message bus without replying"
