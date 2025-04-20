@@ -790,6 +790,51 @@ function BlockDeviceIsRaspiOS() {
 	return 0
 }
 
+# Convert SCSI device name to /sys/bus/usb/devices/* path
+# arg scsi_basename
+# echo /sys/bus/usb/devices/* path
+# return ==0: Success, !=0: Failed
+function ConvertScsiDevToUSBDev() {
+	local	sys_block_path
+	local	scsi_link
+	local	scsi_hcil
+	local	scsi_host
+	local	sys_host_path
+	local	host_link
+	local	usb_dev_link
+	local	result
+
+	sys_block_path="/sys/block/${1}"
+	scsi_link="$( "${READLINK}" "${sys_block_path}/device" )"
+	scsi_hcil="$( "${BASENAME}" "${scsi_link}" )"
+	scsi_host="$( echo "${scsi_hcil}" | "${AWK}" -F ':' '{print $1}' )"
+	if [[ -z "${scsi_host}" ]]
+	then
+		return 1
+	fi
+
+	sys_host_path="/sys/bus/scsi/devices/host${scsi_host}"
+	host_link="$( "${READLINK}" "${sys_host_path}" )"
+	if ! echo "${host_link}" | "${GREP}" -q "/usb"
+	then
+		return 1
+	fi
+	# Remove hostN
+	usb_dev_link="$( "${DIRNAME}" "${host_link}" )"
+	# Remove :Configuration.Interface
+	usb_dev_link="$( "${DIRNAME}" "${usb_dev_link}" )"
+	# Pick USB device path
+	usb_dev_link="$( "${BASENAME}" "${usb_dev_link}" )"
+
+	if [[ -z "${usb_dev_link}" ]] || [[ "${usb_dev_link}" != [0-9]* ]]
+	then
+		return 1
+	fi
+
+	echo "/sys/bus/usb/devices/${usb_dev_link}"
+	return 0
+}
+
 # Show block device information
 # arg path_to_block_device
 # echo human readable information
@@ -803,6 +848,7 @@ function ShowBlockDevice() {
 	local	size_du
 	local	vendor
 	local	model
+	local	usb_dev_link
 
 	dev_basename="$( "${BASENAME}" "$1" )"
 	sys_path="/sys/block/${dev_basename}"
@@ -817,6 +863,15 @@ function ShowBlockDevice() {
 	if [[ -f "${sys_dev_path}/vendor" ]]
 	then
 		vendor=$( "${CAT}" "${sys_dev_path}/vendor" )
+	fi
+
+	if echo "${vendor}" | "${GREP}" -q '^[[:space:]]*$'
+	then
+		usb_dev_link="$( ConvertScsiDevToUSBDev "${dev_basename}" )"
+		if [[ -d "${usb_dev_link}" ]]
+		then
+			vendor="$( "${CAT}" "${usb_dev_link}/manufacturer" )"
+		fi
 	fi
 
 	model=""
