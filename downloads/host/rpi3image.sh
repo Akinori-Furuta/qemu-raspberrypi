@@ -150,7 +150,8 @@ EOF
 DtRpi3BName="bcm2710-rpi-3-b"
 DtRpi3BNameQemu="bcm2710-rpi-3-b-qemu"
 
-NBDDisconnectWait=3
+NBDDisconnectWait1=3
+NBDDisconnectWait2=5
 
 # Set dummy value before ready to use.
 
@@ -1505,9 +1506,9 @@ fi
 echo "$0: INFO: Disconnect Raspberry Pi OS image from NBD." 1>&2
 
 "${SYNC}"
-"${SLEEP}" "${NBDDisconnectWait}"
+"${SLEEP}" "${NBDDisconnectWait1}"
 "${SYNC}"
-"${SLEEP}" "${NBDDisconnectWait}"
+"${SLEEP}" "${NBDDisconnectWait2}"
 
 "${SUDO}" "${QEMU_NBD}" -d "${NbdDev}"
 result=$?
