@@ -117,12 +117,12 @@ $0: HELP:           to Raspberry Pi OS media capacity.
 $0: HELP: -o path   Image file or directory path to store
 $0: HELP:           media image.
 $0: HELP:           Without this option, image file is stored
-$0: HELP:           in current directory see more details in
+$0: HELP:           into current directory see more details in
 $0: HELP:           following text.
 $0: HELP: -f        Force overwrite existing file(s).
 $0: HELP: -h        Show help.
 $0: HELP:
-$0: HELP: Copy Raspberry Pi OS media at /dev/RaspberryPiMedia
+$0: HELP: Copy the Raspberry Pi OS media at /dev/RaspberryPiMedia
 $0: HELP  to virtual machine image files.
 $0: HELP: By default, files are stored into current directory.
 $0: HELP: When the option -o ImagePath is specified. Outputs are
@@ -135,7 +135,7 @@ $0: HELP: * ImagePath is a directory
 $0: HELP:   * Store Raspberry Pi OS image into
 $0: HELP:     ImagePath/${RaspiOSImagePrefix}-OSBits-SerialNumber.img
 $0: HELP:   * Store device tree blobs into ImagePath/bootfs
-$0: HELP: * Not specified -o option
+$0: HELP: * Not specified the -o option
 $0: HELP:   * Store Raspberry Pi OS image into
 $0: HELP:     ./${RaspiOSImagePrefix}-OSBits-SerialNumber.img
 $0: HELP:   * Store device tree blobs into ./bootfs
