@@ -77,12 +77,19 @@ ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
 ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
 ProbeCommand STAT coreutils		/usr/bin/stat /bin/stat /usr/sbin/stat
 
+if [[ -n "${BASENAME}" ]]
+then
+	MyBase="$( "${BASENAME}" "$0" )"
+else
+	MyBase="$0"
+fi
+
 if (( ${#ReqPackageList[@]} > 0 ))
 then
-	echo "$0: INFO: Need following package(s)." 1>&2
-	echo "$0: INFO:   ${ReqPackageList[@]}" 1>&2
-	echo "$0: HELP: To install package(s), run following command." 1>&2
-	echo "$0: HELP:   sudo apt install ${ReqPackageList[@]}" 1>&2
+	echo "${MyBase}: INFO: Need following package(s)." 1>&2
+	echo "${MyBase}: INFO:   ${ReqPackageList[@]}" 1>&2
+	echo "${MyBase}: HELP: To install package(s), run following command." 1>&2
+	echo "${MyBase}: HELP:   sudo apt install ${ReqPackageList[@]}" 1>&2
 	exit 1
 fi
 
@@ -93,7 +100,6 @@ IdGroup="$( "${ID}" -g )"
 MyWhich="$( "${WHICH}" "$0" )"
 MyPath="$( "${READLINK}" -f "${MyWhich}" )"
 MyDir="$( "${DIRNAME}" "${MyPath}" )"
-MyBase="$( "${BASENAME}" "$0" )"
 MyBody="${MyBase%.*}"
 MyBodyNoSpace="$( echo -n ${MyBody} | "${TR}" -s '\000-\040' '_')"
 MyBodyNoSuffix="${MyBody%%-*}"
@@ -102,47 +108,47 @@ RaspiOSImagePrefix="raspios"
 
 function Help() {
 	"${CAT}" << EOF
-$0: HELP: Command line:
-$0: HELP:   "$0" [-s ImageFileSizeInGbyte] \\
-$0: HELP:     [-o ImagePath] [-f] [-h] \\
-$0: HELP:     [/dev/RaspberryPiMedia]
-$0: HELP:
-$0: HELP: -s number Image file size in Gibytes. It should be
-$0: HELP:           power of 2 and larger or equal to
-$0: HELP            Raspberry PiOSmedia capacity.
-$0: HELP:           Without this option, resize image file
-$0: HELP:           size upto the smallest number of power
-$0: HELP:           of 2 Gibytes size which is larger or equal
-$0: HELP:           to Raspberry Pi OS media capacity.
-$0: HELP: -o path   Image file or directory path to store
-$0: HELP:           media image.
-$0: HELP:           Without this option, image file is stored
-$0: HELP:           into current directory see more details in
-$0: HELP:           following text.
-$0: HELP: -f        Force overwrite existing file(s).
-$0: HELP: -h        Show help.
-$0: HELP:
-$0: HELP: Copy the Raspberry Pi OS media at /dev/RaspberryPiMedia
-$0: HELP  to virtual machine image files.
-$0: HELP: By default, files are stored into current directory.
-$0: HELP: When the option -o ImagePath is specified. Outputs are
-$0: HELP: stored according to ImagePath points to as flollows,
-$0: HELP: * ImagePath is a file
-$0: HELP:   * Store Raspberry Pi OS image into file ImagePath
-$0: HELP:   * Store device tree blobs into
-$0: HELP:     \$(dirname ImagePath)/bootfs
-$0: HELP: * ImagePath is a directory
-$0: HELP:   * Store Raspberry Pi OS image into
-$0: HELP:     ImagePath/${RaspiOSImagePrefix}-OSBits-SerialNumber.img
-$0: HELP:   * Store device tree blobs into ImagePath/bootfs
-$0: HELP: * Not specified the -o option
-$0: HELP:   * Store Raspberry Pi OS image into
-$0: HELP:     ./${RaspiOSImagePrefix}-OSBits-SerialNumber.img
-$0: HELP:   * Store device tree blobs into ./bootfs
-$0: HELP:
-$0: HELP: To find Raspberry Pi OS image media path,
-$0: HELP: run as follows.
-$0: HELP:   "$0" find
+${MyBase}: HELP: Command line:
+${MyBase}: HELP:   "${MyBase}" [-s ImageFileSizeInGbyte] \\
+${MyBase}: HELP:     [-o ImagePath] [-f] [-h] \\
+${MyBase}: HELP:     [/dev/RaspberryPiMedia]
+${MyBase}: HELP:
+${MyBase}: HELP: -s number Image file size in Gibytes. It should be
+${MyBase}: HELP:           power of 2 and larger or equal to
+${MyBase}: HELP            Raspberry PiOSmedia capacity.
+${MyBase}: HELP:           Without this option, resize image file
+${MyBase}: HELP:           size upto the smallest number of power
+${MyBase}: HELP:           of 2 Gibytes size which is larger or equal
+${MyBase}: HELP:           to Raspberry Pi OS media capacity.
+${MyBase}: HELP: -o path   Image file or directory path to store
+${MyBase}: HELP:           media image.
+${MyBase}: HELP:           Without this option, image file is stored
+${MyBase}: HELP:           into current directory see more details in
+${MyBase}: HELP:           following text.
+${MyBase}: HELP: -f        Force overwrite existing file(s).
+${MyBase}: HELP: -h        Show help.
+${MyBase}: HELP:
+${MyBase}: HELP: Copy the Raspberry Pi OS media at /dev/RaspberryPiMedia
+${MyBase}: HELP  to virtual machine image files.
+${MyBase}: HELP: By default, files are stored into current directory.
+${MyBase}: HELP: When the option -o ImagePath is specified. Outputs are
+${MyBase}: HELP: stored according to ImagePath points to as flollows,
+${MyBase}: HELP: * ImagePath is a file
+${MyBase}: HELP:   * Store Raspberry Pi OS image into file ImagePath
+${MyBase}: HELP:   * Store device tree blobs into
+${MyBase}: HELP:     \$(dirname ImagePath)/bootfs
+${MyBase}: HELP: * ImagePath is a directory
+${MyBase}: HELP:   * Store Raspberry Pi OS image into
+${MyBase}: HELP:     ImagePath/${RaspiOSImagePrefix}-OSBits-SerialNumber.img
+${MyBase}: HELP:   * Store device tree blobs into ImagePath/bootfs
+${MyBase}: HELP: * Not specified the -o option
+${MyBase}: HELP:   * Store Raspberry Pi OS image into
+${MyBase}: HELP:     ./${RaspiOSImagePrefix}-OSBits-SerialNumber.img
+${MyBase}: HELP:   * Store device tree blobs into ./bootfs
+${MyBase}: HELP:
+${MyBase}: HELP: To find Raspberry Pi OS image media path,
+${MyBase}: HELP: run as follows.
+${MyBase}: HELP:   "$0" find
 EOF
 	exit 1
 }
@@ -291,7 +297,7 @@ do
 		Help
 		;;
 	(*)
-		echo "$0: ERROR: Invalid option -${OPT}." 1>&2
+		echo "${MyBase}: ERROR: Invalid option -${OPT}." 1>&2
 		Help
 		;;
 	esac
@@ -303,7 +309,7 @@ RaspiMedia="$1"
 
 if [[ -z "${RaspiMedia}" ]]
 then
-	echo "$0: ERROR: Specify Raspberry Pi OS image media path." 1>&2
+	echo "${MyBase}: ERROR: Specify Raspberry Pi OS image media path." 1>&2
 	Help
 	exit 1
 fi
@@ -356,10 +362,10 @@ if [[ -n "${OptionSize}" ]]
 then
 	OptionSizeNum=$( echo "${OptionSize}" | "${SED}" 's/[gG][iI]\{0,1\}$//' )
 	OptionSizeNumLog2=$( LogInt2Rup "${OptionSizeNum}" )
-	[[ -n "${debug}" ]] && echo "$0: DEBUG: Check log2 calculation log2(${OptionSizeNum})=${OptionSizeNumLog2}" 1>&2
+	[[ -n "${debug}" ]] && echo "${MyBase}: DEBUG: Check log2 calculation log2(${OptionSizeNum})=${OptionSizeNumLog2}" 1>&2
 	if (( ${OptionSizeNum} != ( 1 << ${OptionSizeNumLog2} ) ))
 	then
-		echo "$0: The number of -s ${OptionSize} should be power of 2." 1>&2
+		echo "${MyBase}: The number of -s ${OptionSize} should be power of 2." 1>&2
 		exit 1
 	fi
 fi
@@ -381,13 +387,13 @@ then
 			OptionOutputBaseName=""
 			OptionOutputDirectory="$( echo "${OptionOutput}" | "${SED}" 's!/*$!!' )"
 			OptionOutputDirName="${OptionOutputDirectory}"
-			echo "$0: NOTICE: Directory \"${OptionOutput}\" does not exist, will be created." 1>&2
+			echo "${MyBase}: NOTICE: Directory \"${OptionOutput}\" does not exist, will be created." 1>&2
 		else
 			OptionOutputBaseName="$( "${BASENAME}" "${OptionOutput}" )"
 			OptionOutputDirName="$( "${DIRNAME}"   "${OptionOutput}" )"
 			if [[ ! -d "${OptionOutputDirName}" ]]
 			then
-				echo "$0: NOTICE: Directory \"${OptionOutputDirName}\" does not exist, will be created." 1>&2
+				echo "${MyBase}: NOTICE: Directory \"${OptionOutputDirName}\" does not exist, will be created." 1>&2
 
 			fi
 			OptionOutputDirectory="${OptionOutputDirName}"
@@ -407,19 +413,19 @@ then
 
 	if [[ -n "${OptionOutput}" ]] && [[ -e "${OptionOutput}" ]]
 	then
-		echo "$0: WARNING: Overwrite existing file or directory \"${OptionOutput}\"." 1>&2
+		echo "${MyBase}: WARNING: Overwrite existing file or directory \"${OptionOutput}\"." 1>&2
 		may_overwrite="yes"
 	fi
 
 	if [[ -e "${OptionOutputDirectory}/bootfs" ]] || [[ -e "${OptionOutputDirectoryCanonic}/bootfs" ]]
 	then
-		echo "$0: WARNING: Overwrite existing file or directory \"${OptionOutputDirectory}/bootfs\"." 1>&2
+		echo "${MyBase}: WARNING: Overwrite existing file or directory \"${OptionOutputDirectory}/bootfs\"." 1>&2
 		may_overwrite="yes"
 	fi
 
 	if [[ -z "${OptionForce}" ]] && [[ -n "${may_overwrite}" ]]
 	then
-		echo "$0: HELP: Use -f option to overwrite existing files and/or directories." 1>&2
+		echo "${MyBase}: HELP: Use -f option to overwrite existing files and/or directories." 1>&2
 		exit 1
 	fi
 fi
@@ -449,11 +455,11 @@ MyTemp="$( TempPathGen )"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not create temporary directory." 1>&2
+	echo "${MyBase}: ERROR: Can not create temporary directory." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Use temporary directory \"${MyTemp}\"." 1>&2
+echo "${MyBase}: INFO: Use temporary directory \"${MyTemp}\"." 1>&2
 
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
@@ -462,7 +468,7 @@ RootFsExt4Point="${MyTemp}/rootfs"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not create bootfs mount point. BootFsFatPoint=\"${BootFsFatPoint}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not create bootfs mount point. BootFsFatPoint=\"${BootFsFatPoint}\"." 1>&2
 	exit ${result}
 fi
 
@@ -470,7 +476,7 @@ fi
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not create rootfs mount point. RootFsExt4Point=\"${RootFsExt4Point}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not create rootfs mount point. RootFsExt4Point=\"${RootFsExt4Point}\"." 1>&2
 	exit ${result}
 fi
 
@@ -880,10 +886,10 @@ function ShowBlockDevice() {
 		model=$( "${CAT}" "${sys_dev_path}/model" )
 	fi
 
-	echo "$0: INFO: DEV_PATH=\"$1\"" 1>&2
-	echo "$0: INFO: ${1}.VENDOR=\"${vendor}\"" 1>&2
-	echo "$0: INFO: ${1}.MODEL=\"${model}\"" 1>&2
-	echo "$0: INFO: ${1}.SIZE=${size_iu}/${size_du} bytes" 1>&2
+	echo "${MyBase}: INFO: DEV_PATH=\"$1\"" 1>&2
+	echo "${MyBase}: INFO: ${1}.VENDOR=\"${vendor}\"" 1>&2
+	echo "${MyBase}: INFO: ${1}.MODEL=\"${model}\"" 1>&2
+	echo "${MyBase}: INFO: ${1}.SIZE=${size_iu}/${size_du} bytes" 1>&2
 	return 0
 }
 
@@ -957,7 +963,7 @@ function WaitNbdRaspiOSMedia() {
 			return 1
 		fi
 
-		echo "$0: NOTICE: Waiting partitions become ready NBD \"${1}\"." 1>&2
+		echo "${MyBase}: NOTICE: Waiting partitions become ready NBD \"${1}\"." 1>&2
 		i=$(( ${i} + 1 ))
 		sleep 1
 	done
@@ -1159,7 +1165,7 @@ then
 		fi
 		if BlockDeviceIsRaspiOS "${blk}"
 		then
-			echo "$0: INFO: Found Raspberry Pi OS image media at \"${blk}\"." 1>&2
+			echo "${MyBase}: INFO: Found Raspberry Pi OS image media at \"${blk}\"." 1>&2
 			found=0
 			ShowBlockDevice "${blk}"
 		fi
@@ -1169,7 +1175,7 @@ fi
 
 if [ ! -d "/sys/module/nbd" ]
 then
-	echo "$0: INFO: Probe nbd kernel module." 1>&2
+	echo "${MyBase}: INFO: Probe nbd kernel module." 1>&2
 	"${SUDO}" "${MODPROBE}" nbd
 	result=$?
 	if (( ${result} != 0 ))
@@ -1184,13 +1190,13 @@ RaspiMediaDev="$( "${READLINK}" -f "${RaspiMedia}" )"
 
 if [[ ! -b "${RaspiMediaDev}" ]]
 then
-	echo "$0: ERROR: Not a block device \"${RaspiMedia}\"." 1>&2
+	echo "${MyBase}: ERROR: Not a block device \"${RaspiMedia}\"." 1>&2
 	exit 1
 fi
 
 if ! BlockDeviceIsRaspiOS "${RaspiMedia}"
 then
-	echo "$0: ERROR: Not a Raspberry Pi OS media \"${RaspiMedia}\"." 1>&2
+	echo "${MyBase}: ERROR: Not a Raspberry Pi OS media \"${RaspiMedia}\"." 1>&2
 	exit 1
 fi
 
@@ -1218,19 +1224,19 @@ done
 
 if [[ -z "${TargetKit}" ]]
 then
-	echo "$0: ERROR: Can not found target kit tar.gz, rpios32bit-target-kit.tar.gz or rpios64bit-target-kit.tar.gz" 1>&2
+	echo "${MyBase}: ERROR: Can not found target kit tar.gz, rpios32bit-target-kit.tar.gz or rpios64bit-target-kit.tar.gz" 1>&2
 	exit 1
 fi
 
-[[ -n "${debug}" ]] && echo "$0: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
+[[ -n "${debug}" ]] && echo "${MyBase}: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
 
-echo "$0: INFO: Unmount \"${RaspiMedia}\"." 1>&2
+echo "${MyBase}: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
 "${SYNC}"
 
 while ! UmountRaspiOSMedia "${RaspiMediaDev}"
 do
-	echo "$0: NOTICE: Retry umount \"${RaspiMedia}\"." 1>&2
+	echo "${MyBase}: NOTICE: Retry umount \"${RaspiMedia}\"." 1>&2
 	sleep 5
 done
 
@@ -1240,14 +1246,14 @@ then
 	result=$?
 	if (( ${result} != 0 ))
 	then
-		echo "$0: ERROR: Can not create directory \"${OptionOutputDirectory}\"." 1>&2
+		echo "${MyBase}: ERROR: Can not create directory \"${OptionOutputDirectory}\"." 1>&2
 		exit ${result}
 	fi
 	chmod 700 "${OptionOutputDirectory}"
 	result=$?
 	if (( ${result} != 0 ))
 	then
-		echo "$0: ERROR: Can not change \"${OptionOutputDirectory}\" access mode into 700." 1>&2
+		echo "${MyBase}: ERROR: Can not change \"${OptionOutputDirectory}\" access mode into 700." 1>&2
 		exit ${result}
 	fi
 fi
@@ -1259,18 +1265,18 @@ ${CHMOD} 600 "${RaspiOSImagePreview}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not change \"${RaspiOSImagePreview}\" access mode into 600." 1>&2
+	echo "${MyBase}: ERROR: Can not change \"${RaspiOSImagePreview}\" access mode into 600." 1>&2
 	exit ${result}
 fi
 
 # convert Raspberry Pi OS image media to file.
 
-echo "$0: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"." 1>&2
+echo "${MyBase}: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"." 1>&2
 "${SUDO}" "${QEMU_IMG}" convert -p -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not convert Raspberry OS media \"${RaspiMedia}\" to image file \"${RaspiOSImagePreview}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not convert Raspberry OS media \"${RaspiMedia}\" to image file \"${RaspiOSImagePreview}\"." 1>&2
 	exit ${result}
 fi
 RaspiOSImagePreviewReady="yes"
@@ -1279,7 +1285,7 @@ RaspiOSImageSizeConverted=$( ${STAT} -c "%s" "${RaspiOSImagePreview}" )
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not get size of Raspberry OS image file \"${RaspiOSImagePreview}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not get size of Raspberry OS image file \"${RaspiOSImagePreview}\"." 1>&2
 	exit ${result}
 fi
 
@@ -1290,30 +1296,30 @@ then
 	if (( ${RaspiOSImageSizeAligned} < ${OptionSizeNum} ))
 	then
 		RaspiOSImageSizeAligned=${OptionSizeNum}
-		echo "$0: NOTICE: Raspberry Pi OS image size will be fixed to ${RaspiOSImageSizeAligned}Gi bytes (by -s ${OptionSize})." 1>&2
+		echo "${MyBase}: NOTICE: Raspberry Pi OS image size will be fixed to ${RaspiOSImageSizeAligned}Gi bytes (by -s ${OptionSize})." 1>&2
 	else
 		if (( ${RaspiOSImageSizeAligned} > ${OptionSizeNum} ))
 		then
-			echo "$0: NOTICE: Raspberry Pi OS image size is larger than ${OptionSizeNum}Gi bytes (by -s ${OptionSize})." 1>&2
-			echo "$0: NOTICE: Use more suitable size." 1>&2
+			echo "${MyBase}: NOTICE: Raspberry Pi OS image size is larger than ${OptionSizeNum}Gi bytes (by -s ${OptionSize})." 1>&2
+			echo "${MyBase}: NOTICE: Use more suitable size." 1>&2
 		fi
 	fi
 fi
 
-echo "$0: INFO: Resize Raspberry Pi OS image file \"${RaspiOSImagePreview}\" into ${RaspiOSImageSizeAligned}G" 1>&2
+echo "${MyBase}: INFO: Resize Raspberry Pi OS image file \"${RaspiOSImagePreview}\" into ${RaspiOSImageSizeAligned}G" 1>&2
 
 "${QEMU_IMG}" resize -f raw "${RaspiOSImagePreview}" "${RaspiOSImageSizeAligned}G"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not resize Raspberry OS image file \"${RaspiOSImagePreview}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not resize Raspberry OS image file \"${RaspiOSImagePreview}\"." 1>&2
 	exit ${result}
 fi
 
 NbdNum=$( "${CAT}" /sys/module/nbd/parameters/nbds_max )
 if [[ -z "${NbdNum}" ]]
 then
-	echo "$0: ERROR: The kernel NBD module is not ready." 1>&2
+	echo "${MyBase}: ERROR: The kernel NBD module is not ready." 1>&2
 	exit 1
 fi
 
@@ -1322,7 +1328,7 @@ while (( ${i} <= ${NbdNum} ))
 do
 	if ! NbdNode="$( NbdFindAvailableNode )"
 	then
-		echo "$0: ERROR: All NBDs are in use. NbdNum=${NbdNum}" 1>&2
+		echo "${MyBase}: ERROR: All NBDs are in use. NbdNum=${NbdNum}" 1>&2
 		exit 1
 	fi
 
@@ -1337,23 +1343,23 @@ done
 
 if (( ${i} > ${NbdNum} ))
 then
-	echo "$0: ERROR: Can not connect image file to NBD." 1>&2
+	echo "${MyBase}: ERROR: Can not connect image file to NBD." 1>&2
 	exit 1
 fi
 
-echo "$0: INFO: Connect image \"${RaspiOSImagePreview}\" file to NBD \"${NbdDev}\"." 1>&2
+echo "${MyBase}: INFO: Connect image \"${RaspiOSImagePreview}\" file to NBD \"${NbdDev}\"." 1>&2
 
 "${SUDO}" "${PARTPROBE}" "${NbdDev}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not probe partition NBD \"${NbdDev}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not probe partition NBD \"${NbdDev}\"." 1>&2
 	exit ${result}
 fi
 
 if ! WaitNbdRaspiOSMedia "${NbdDev}"
 then
-	echo "$0: ERROR: Partitions do not become ready NBD \"${NbdDev}\"." 1>&2
+	echo "${MyBase}: ERROR: Partitions do not become ready NBD \"${NbdDev}\"." 1>&2
 	exit 1
 fi
 
@@ -1361,39 +1367,39 @@ FsckRaspiOSMedia "${NbdDev}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not finish fsck \"${NbdDev}\" partitions." 1>&2
+	echo "${MyBase}: ERROR: Can not finish fsck \"${NbdDev}\" partitions." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Grow rootfs partition (device \"${NbdDev}\" partition 2)." 1>&2
+echo "${MyBase}: INFO: Grow rootfs partition (device \"${NbdDev}\" partition 2)." 1>&2
 
 GrowPartRaspiOSMedia "${NbdDev}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not grow rootfs partition." 1>&2
+	echo "${MyBase}: ERROR: Can not grow rootfs partition." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Mount partitions in Raspberry Pi OS image." 1>&2
+echo "${MyBase}: INFO: Mount partitions in Raspberry Pi OS image." 1>&2
 
 MountRaspiOSMedia "${NbdDev}"
 result=$?
 if (( ${result} != 0))
 then
-	echo "$0: ERROR: Can not mount partition(s)." 1>&2
+	echo "${MyBase}: ERROR: Can not mount partition(s)." 1>&2
 	exit ${result}
 fi
 
 RaspiOSArch=$( "${FILE}" "${RootFsExt4Point}/usr/bin/[" | "${SED}" 's!^.*ld-linux-\(.*\)[.]so[.].*$!\1!' )
 
-echo "$0: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
+echo "${MyBase}: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
 
 RaspiOSImageTemp=$( "${MKTEMP}" -p "${OptionOutputDirectory}" ${RaspiOSImagePrefix}-XXXXXXXXXX.img )
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not create temporary file in directory \"${OptionOutputDirectory}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not create temporary file in directory \"${OptionOutputDirectory}\"." 1>&2
 	exit ${result}
 fi
 
@@ -1426,26 +1432,26 @@ then
 		fi
 		if (( ( ${RaspiOSImageSn} % 100 ) == 0 ))
 		then
-			echo "$0: INFO: Search new Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
+			echo "${MyBase}: INFO: Search new Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
 		fi
 		RaspiOSImageSn=$(( ${RaspiOSImageSn} + 1 ))
 	done
 	if (( ${RaspiOSImageSn} > 9999 ))
 	then
-		echo "$0: ERROR: There are many Raspberry Pi OS image files upto \"${RaspiOSImage}\"." 1>&2
+		echo "${MyBase}: ERROR: There are many Raspberry Pi OS image files upto \"${RaspiOSImage}\"." 1>&2
 		exit 1
 	fi
 else
 	RaspiOSImage="${OptionOutputDirectory}/${OptionOutputBaseName}"
 fi
 
-echo "$0: INFO: Copy bootfs files." 1>&2
+echo "${MyBase}: INFO: Copy bootfs files." 1>&2
 
 "${SUDO}" "${CP}" -r "${BootFsFatPoint}" "${OptionOutputDirectory}/"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not copy bootfs partition." 1>&2
+	echo "${MyBase}: ERROR: Can not copy bootfs partition." 1>&2
 	exit ${result}
 fi
 
@@ -1453,27 +1459,27 @@ fi
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not change owner bootfs directory and files." 1>&2
+	echo "${MyBase}: ERROR: Can not change owner bootfs directory and files." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Set bootfs/firstrun.sh permission." 1>&2
+echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
 
 "${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not change mode bootfs/firstrun.sh." 1>&2
+	echo "${MyBase}: ERROR: Can not change mode bootfs/firstrun.sh." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Modify device tree." 1>&2
+echo "${MyBase}: INFO: Modify device tree." 1>&2
 
 "${DTC}" -I dtb -O dts -o "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not disassemble device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb\"." 1>&2
+	echo "${MyBase}: ERROR: Can not disassemble device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb\"." 1>&2
 	exit ${result}
 fi
 
@@ -1484,7 +1490,7 @@ DtRpi3BNameQemuBlob="${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dtb"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not copy device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts\"." 1>&2
+	echo "${MyBase}: ERROR: Can not copy device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts\"." 1>&2
 	exit ${result}
 fi
 
@@ -1505,7 +1511,7 @@ EOF
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not patch device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not patch device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
 	exit ${result}
 fi
 
@@ -1513,21 +1519,21 @@ fi
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not compile device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not compile device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Apply target kit to rootfs." 1>&2
+echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
 
 "${SUDO}" tar -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not apply target kit to rootfs." 1>&2
+	echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Remount with read-only mode Raspberry Pi OS image." 1>&2
+echo "${MyBase}: INFO: Remount with read-only mode Raspberry Pi OS image." 1>&2
 
 "${SYNC}"
 
@@ -1537,7 +1543,7 @@ MountRaspiOSMedia "${NbdDev}" "remount,ro"
 result=$?
 if (( ${result} != 0))
 then
-	echo "$0: ERROR: Can not remount partition(s) with read-only." 1>&2
+	echo "${MyBase}: ERROR: Can not remount partition(s) with read-only." 1>&2
 	exit ${result}
 fi
 
@@ -1548,17 +1554,17 @@ fi
 
 "${SYNC}"
 
-echo "$0: INFO: Unmount Raspberry Pi OS image." 1>&2
+echo "${MyBase}: INFO: Unmount Raspberry Pi OS image." 1>&2
 
 UmountRaspiOSMedia "${NbdDev}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not unmount Raspberry Pi OS image." 1>&2
+	echo "${MyBase}: ERROR: Can not unmount Raspberry Pi OS image." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Disconnect Raspberry Pi OS image from NBD." 1>&2
+echo "${MyBase}: INFO: Disconnect Raspberry Pi OS image from NBD." 1>&2
 
 "${SYNC}"
 "${SLEEP}" "${NBDDisconnectWait1}"
@@ -1569,17 +1575,17 @@ echo "$0: INFO: Disconnect Raspberry Pi OS image from NBD." 1>&2
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not disconnect Raspberry Pi OS image." 1>&2
+	echo "${MyBase}: ERROR: Can not disconnect Raspberry Pi OS image." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Rename Raspberry Pi OS image file." 1>&2
+echo "${MyBase}: INFO: Rename Raspberry Pi OS image file." 1>&2
 
 "${MV}" -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not rename \"${RaspiOSImagePreview}\" to \"${RaspiOSImage}\" Raspberry Pi OS image file." 1>&2
+	echo "${MyBase}: ERROR: Can not rename \"${RaspiOSImagePreview}\" to \"${RaspiOSImage}\" Raspberry Pi OS image file." 1>&2
 	exit ${result}
 fi
 
@@ -1587,13 +1593,13 @@ fi
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "$0: ERROR: Can not change file \"${RaspiOSImage}\" owner to ${IdUser}:${IdGroup}." 1>&2
+	echo "${MyBase}: ERROR: Can not change file \"${RaspiOSImage}\" owner to ${IdUser}:${IdGroup}." 1>&2
 	exit ${result}
 fi
 
-echo "$0: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
+echo "${MyBase}: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
 if [[ "${RaspiOSArch}" == "aarch64" ]]
 then
-	echo "$0: INFO: Created Raspberry Pi Model 3B device tree file \"${DtRpi3BNameQemuBlob}\"." 1>&2
+	echo "${MyBase}: INFO: Created Raspberry Pi Model 3B device tree file \"${DtRpi3BNameQemuBlob}\"." 1>&2
 fi
 exit 0
