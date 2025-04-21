@@ -1525,7 +1525,7 @@ fi
 
 echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
 
-"${SUDO}" tar -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
+"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
 result=$?
 if (( ${result} != 0 ))
 then
