@@ -67,7 +67,7 @@ qemu-system-arm を Raspberry Pi model 2B の構成で起動する [`./rpi2vm32-
 
 [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh) を実行すると仮想 Raspberry Pi の画面ウインドウが表示されます。初期設定なので GUI 画面はでません。[`./rpi2vm32-2nd.sh`](../downloads/host/rpi2vm32-2nd.sh) も同様に GUI 画面はでません。
 
-![Booting Raspberyy Pi OS](../img/booting-raspberrypi-s.png)
+![Booting Raspberry Pi OS](../img/booting-raspberrypi-s.png)
 
 [`./rpi2vm32-1st.sh`](../downloads/host/rpi2vm32-1st.sh) を実行して 30 秒 ～ 2 分程度経過すると次の様な表示で止まったように見えます。空き領域の trim 処理をしています。20 ～ 30 分程度掛かります。
 
@@ -167,7 +167,7 @@ Raspberry Pi OS の service で VNC 接続できる様になっています。�
 
 ### ssh connection
 
-SSH server を有効にしているので `ssh PiUserName@PiHostName.local` で接続できようになっています。
+SSH server を有効にしているので `ssh PiUserName@PiHostName.local` で接続できるようになっています。
 
 ## (参考) 仮想 Raspberry Pi のシリアルポートと標準入出力の操作について
 
@@ -204,7 +204,7 @@ ssh でログインすると煩わしさはありません。
 [`rpi2vm32.conf`](../downloads/host/rpi2vm32.conf) と [`rpi2vm32-vnc.conf`](../downloads/host/rpi2vm32-vnc.conf) は qemu-system-arm コマンドに渡すパラメータを設定するファイルです。修正しなくてもある程度動作する様にしてあります。自動的なパラメータ設定で上手くいかない場合は修正して下さい。
 
 > [!TIP]
-> qemu 起動スクリプトが rpi2vm32-vnc.sh の場合は拡張子 .sh の部分を .conf に置き換えたファイル rpivm32-vnc.conf が読み込まれます。
+> qemu 起動スクリプトが rpi2vm32-vnc.sh の場合は拡張子 .sh の部分を .conf に置き換えたファイル rpi2vm32-vnc.conf が読み込まれます。
 
 |shell variable|default value|description|
 |--------------|-------------|-----------|
