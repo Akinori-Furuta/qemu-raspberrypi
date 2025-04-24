@@ -177,7 +177,7 @@ tar xvf rpios64bit-host-kit.tar.gz
 Raspberry Pi OS を格納した SD card を USB card reader に差し込み、Linux PC に接続します。次の様に `./rpi3image.sh find` を実行して SD card がある block device を探します。root 権限を必要とするので、パスワードを入力して下さい。
 
 ```bash
-# Extract files from Raspberry Pi OS 64bit host kit .tar.gz file
+# Find Raspberry Pi OS SD card image
 ./rpi3image.sh find
 ```
 
