@@ -206,7 +206,7 @@ rpi3image.sh: INFO: /dev/sdc.SIZE=14.7Gi/15.8G bytes
 ./rpi3image.sh: HELP:   sudo apt install cloud-guest-utils qemu-utils nbd-client device-tree-compiler
 ```
 
-SD card を読み取りイメージファイルを作成します。_/dev/sdX は `./rpi3image.sh find` などで見つけたブロックデバイスのパス(例えば /dev/sdc)を指定して下さい。
+SD card を読み取りイメージファイルを作成します。_/dev/sdX_ は `./rpi3image.sh find` などで見つけたブロックデバイスのパス(例えば /dev/sdc)を指定して下さい。
 
 ```bash
 # Read SD card image, create image file and device tree blobs
