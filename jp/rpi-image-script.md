@@ -235,7 +235,7 @@ OS が対応する CPU ビット数毎の出力ファイルは次の様になり
 
 |OS bits|image file pattern|image file name example|Device Tree Blob|
 |-------|------------------|-----------------------|----------------|
-|32|raspios-32-NNNN.img|raspios-32-0000.img|bootfs//bcm2709-rpi-2-b.dtb|
+|32|raspios-32-NNNN.img|raspios-32-0000.img|bootfs/bcm2709-rpi-2-b.dtb|
 |64|raspios-64-NNNN.img|raspios-64-0000.img|bootfs/bcm2710-rpi-3-b-qemu.dtb|
 
 次はRaspberry Pi OS の初期設定を行います。OS が対応する CPU ビット数に合わせて進んで下さい。
