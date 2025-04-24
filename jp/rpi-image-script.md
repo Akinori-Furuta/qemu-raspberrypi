@@ -116,7 +116,7 @@ sudo apt install curl bridge-utils uml-utilities \
 
 ### 手順中の読み換え内容
 
-書き終わった SD card を Linux PC に接続して、SD card イメージファイルを作成します。QEMU で実行するために必要な書き換えはスクリプト rpi3image.sh が全て行います。
+書き終わった SD card を Linux PC に接続して、SD card イメージファイルを作成します。QEMU で実行するために必要な書き換えはスクリプト [rpi3image.sh](../downloads/host/rpi3image.sh) が全て行います。
 
 |symbol|example|description|
 |------|-------|-----------|
