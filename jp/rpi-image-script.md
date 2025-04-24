@@ -154,9 +154,9 @@ chmod 700 .
 
 ```bash
 # Download host kit
-curl -O https://github.com/Akinori-Furuta/qemu-raspberrypi/tree/master/downloads/rpios32bit-host-kit.tar.gz
+curl -OL https://github.com/Akinori-Furuta/qemu-raspberrypi/tree/master/downloads/rpios32bit-host-kit.tar.gz
 # Download target kit, keep .tar.gz archive
-curl -O https://github.com/Akinori-Furuta/qemu-raspberrypi/tree/master/downloads/rpios32bit-target-kit.tar.gz
+curl -OL https://github.com/Akinori-Furuta/qemu-raspberrypi/tree/master/downloads/rpios32bit-target-kit.tar.gz
 # Extract files from Raspberry Pi OS 32bit host kit .tar.gz file
 tar xvf rpios32bit-host-kit.tar.gz
 ```
@@ -165,9 +165,9 @@ tar xvf rpios32bit-host-kit.tar.gz
 
 ```bash
 # Download host kit
-curl -O https://github.com/Akinori-Furuta/qemu-raspberrypi/tree/master/downloads/rpios64bit-host-kit.tar.gz
+curl -OL https://github.com/Akinori-Furuta/qemu-raspberrypi/tree/master/downloads/rpios64bit-host-kit.tar.gz
 # Download target kit (same as 32bit target kit), keep .tar.gz archive
-curl -O https://github.com/Akinori-Furuta/qemu-raspberrypi/tree/master/downloads/rpios32bit-target-kit.tar.gz
+curl -OL https://github.com/Akinori-Furuta/qemu-raspberrypi/tree/master/downloads/rpios32bit-target-kit.tar.gz
 # Extract files from Raspberry Pi OS 64bit host kit .tar.gz file
 tar xvf rpios64bit-host-kit.tar.gz
 ```
