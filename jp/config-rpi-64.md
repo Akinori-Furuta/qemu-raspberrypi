@@ -51,7 +51,7 @@ Raspberry Pi OS の初期設定を次の様な流れで行います。
 
 ## 1 回目の初期設定起動と 2 回目の初期設定起動をします
 
-current directory は _/PathTo/RpiVMFiles_ です。[QEMU で実行する Rasiberry Pi イメージファイルをスクリプトを使って作る](rpi-image-script.md) の続きの作業です。
+current directory は _/PathTo/RpiVMFiles_ です。[QEMU で実行する Raspberry Pi イメージファイルをスクリプトを使って作る](rpi-image-script.md) の続きの作業です。
 
 qemu-system-aarch64 を Raspberry Pi model 3B の構成で起動する [`./rpi3vm64-1st.sh`](../downloads/host/rpi3vm64-1st.sh), [`./rpi3vm64-2nd.sh`](../downloads/host/rpi3vm64-2nd.sh) を実行します。これらの script は自動的に script が配置されているディレクトリにある SD card イメージファイル *.img を見つけて qemu-system-aarch64 に渡します。
 
