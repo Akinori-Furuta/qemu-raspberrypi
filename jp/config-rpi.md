@@ -238,8 +238,8 @@ qemu-system-arm を呼び出すスクリプト [`rpi2vm32.sh`](../downloads/host
 
 |renamed?|invoke|common file path|
 |------|-------|-----------|
+|no|[./rpi2vm32.sh](../downloads/host/rpi2vm32.sh)|_/PathTo/RpiVMFiles_/rpi2vm32-common.sh|
 |no|[./rpi2vm32-1st.sh](../downloads/host/rpi2vm32-1st.sh)|_/PathTo/RpiVMFiles_/rpi2vm32-common.sh|
-|no|[./rpi2vm32.sh](../downloads/host/rpi2vm32-2nd.sh)|_/PathTo/RpiVMFiles_/rpi2vm32-common.sh|
 |yes|./rpi2vm32-1280x1024.sh|_/PathTo/RpiVMFiles_/rpi2vm32-common.sh|
 |yes|./rpi2vm32-with-swap.sh|_/PathTo/RpiVMFiles_/rpi2vm32-common.sh|
 |yes|./raspios32.sh|_/PathTo/RpiVMFiles_/raspios32-common.sh|

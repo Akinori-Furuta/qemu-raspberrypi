@@ -234,8 +234,8 @@ qemu-system-aarch64 を呼び出すスクリプト [`rpi3vm64.sh`](../downloads/
 
 |renamed?|invoke|common file path|
 |------|-------|-----------|
+|no|[./rpi3vm64.sh](../downloads/host/rpi3vm64.sh)|_/PathTo/RpiVMFiles_/rpi3vm64-common.sh|
 |no|[./rpi3vm64-1st.sh](../downloads/host/rpi3vm64-1st.sh)|_/PathTo/RpiVMFiles_/rpi3vm64-common.sh|
-|no|[./rpi3vm64.sh](../downloads/host/rpi3vm64-2nd.sh)|_/PathTo/RpiVMFiles_/rpi3vm64-common.sh|
 |yes|./rpi3vm64-1280x1024.sh|_/PathTo/RpiVMFiles_/rpi3vm64-common.sh|
 |yes|./rpi3vm64-with-swap.sh|_/PathTo/RpiVMFiles_/rpi23m64-common.sh|
 |yes|./raspios64.sh|_/PathTo/RpiVMFiles_/raspios64-common.sh|
