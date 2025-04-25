@@ -120,7 +120,7 @@ sudo apt install curl bridge-utils uml-utilities \
 
 |symbol|example|description|
 |------|-------|-----------|
-|_/dev/sdX_|/dev/sdg|SD card の device path です。他の SATA, USB, SCSI ドライブなどの SCSI ドライブに抽象化された器機の状況によって変わります。`rpi3image.sh find` で探すこともできます。|
+|_/dev/sdX_|/dev/sdc|SD card の device path です。他の SATA, USB, SCSI ドライブなどの SCSI ドライブに抽象化された器機の状況によって変わります。`rpi3image.sh find` で探すこともできます。|
 |_PiHostName_|rpi3vm64-000|Raspberry Pi OS の host 名です。[Raspberry Pi OS の初期設定を行う](config-rpi-64.md)で参照します。|
 |_PiUserName_|furuta|Raspberry Pi OS に作ったアカウントのユーザー名です。[Raspberry Pi OS の初期設定を行う](config-rpi-64.md)で参照します。|
 |_UserName_|furuta|QEMU を使おうとするユーザー名です。|
