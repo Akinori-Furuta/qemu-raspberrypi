@@ -112,20 +112,20 @@ sudo apt install bridge-utils uml-utilities \
 
 |symbol|example|description|
 |------|-------|-----------|
-|/dev/sdX|/dev/sdg|SD card の device path です。他の SATA, USB, SCSI ドライブなどの SCSI ドライブに抽象化された器機の状況によって変わります。|
-|/dev/sdX1|/dev/sdg1|SD card の 第 1 パーティションです。bootfs パーティションになります。|
-|/dev/sdX2|/dev/sdg2|SD card の 第 2 パーティションです。rootfs パーティションになります。|
-|/dev/nbdN|/dev/nbd0|SD card から読み取ったイメージを block device として扱う path です。Network Block Device を使っていなければ /dev/nbd0 が使えますが、/dev/nbd0 が使用中であれば /dev/nbd1, /dev/nbd2, ... の様な代わりの path を使って下さい。|
-|/dev/nbdNp1|/dev/nbd0p1|/dev/nbdN の 第1 パーティションです。bootfs パーティションになります。|
-|/dev/nbdNp2|/dev/nbd0p2|/dev/nbdN の 第2 パーティションです。rootfs パーティションになります。|
-|/mnt/nbdNp1|/mnt/nbd0p1|第1 パーティションの mount point です。|
-|/mnt/nbdNp2|/mnt/nbd0p2|第2 パーティションの mount point です。|
-|UserName|furuta|QEMU を使おうとするユーザー名です。|
-|PiHostName|rpi2vm32|Raspberry Pi OS の host 名です。[Raspberry Pi OS の初期設定を行う](config-rpi.md)で参照します。|
-|PiUserName|furuta|Raspberry Pi OS に作ったアカウントのユーザー名です。[Raspberry Pi OS の初期設定を行う](config-rpi.md)で参照します。|
-|/PathTo/RpiVMFiles|/home/UserName/qemu-vms/rpi2vm|仮想 Raspberry Pi 2 を動かすために必要なファイル群を配置するディレクトリです。NVMe, SATA 接続など直結していて安定したアクセスが可能なストレージ上に配置することを推奨します。|
-|Rpi2VM32.img|rpi2vm32.img|SD card から変換した Raspberry Pi OS 32bit イメージファイルです。|
-|/DownLoaded|/home/furuta/git/qemu-raspberrypi/downloads|[rpios32bit-target-kit.tar.gz](../downloads/rpios32bit-target-kit.tar.gz), [rpios32bit-host-kit.tar.gz](../downloads/rpios32bit-host-kit.tar.gz) をダウンロードしたディレクトリです。この git repository を clone した場合は _git_cloned_base_/downloads になります。|
+|_/dev/sdX_|/dev/sdg|SD card の device path です。他の SATA, USB, SCSI ドライブなどの SCSI ドライブに抽象化された器機の状況によって変わります。|
+|_/dev/sdX1_|/dev/sdg1|SD card の 第 1 パーティションです。bootfs パーティションになります。|
+|_/dev/sdX2_|/dev/sdg2|SD card の 第 2 パーティションです。rootfs パーティションになります。|
+|_/dev/nbdN_|/dev/nbd0|SD card から読み取ったイメージを block device として扱う path です。Network Block Device を使っていなければ /dev/nbd0 が使えますが、/dev/nbd0 が使用中であれば /dev/nbd1, /dev/nbd2, ... の様な代わりの path を使って下さい。|
+|_/dev/nbdNp1_|/dev/nbd0p1|/dev/nbdN の 第1 パーティションです。bootfs パーティションになります。|
+|_/dev/nbdNp2_|/dev/nbd0p2|/dev/nbdN の 第2 パーティションです。rootfs パーティションになります。|
+|_/mnt/nbdNp1_|/mnt/nbd0p1|第1 パーティションの mount point です。|
+|_/mnt/nbdNp2_|/mnt/nbd0p2|第2 パーティションの mount point です。|
+|_UserName_|furuta|QEMU を使おうとするユーザー名です。|
+|_PiHostName_|rpi2vm32|Raspberry Pi OS の host 名です。[Raspberry Pi OS の初期設定を行う](config-rpi.md)で参照します。|
+|_PiUserName_|furuta|Raspberry Pi OS に作ったアカウントのユーザー名です。[Raspberry Pi OS の初期設定を行う](config-rpi.md)で参照します。|
+|_/PathTo/RpiVMFiles_|/home/UserName/qemu-vms/rpi2vm|仮想 Raspberry Pi 2 を動かすために必要なファイル群を配置するディレクトリです。NVMe, SATA 接続など直結していて安定したアクセスが可能なストレージ上に配置することを推奨します。|
+|_Rpi2VM32.img_|rpi2vm32.img|SD card から変換した Raspberry Pi OS 32bit イメージファイルです。|
+|_/DownLoaded_|/home/furuta/git/qemu-raspberrypi/downloads|[rpios32bit-target-kit.tar.gz](../downloads/rpios32bit-target-kit.tar.gz), [rpios32bit-host-kit.tar.gz](../downloads/rpios32bit-host-kit.tar.gz) をダウンロードしたディレクトリです。この git repository を clone した場合は _git_cloned_base_/downloads になります。|
 
 > [!WARNING]
 > 作業中のファイル、仮想マシン実行でセキュリティが弱い状態が生じます。厳格な保護はしないで進めます。警戒が必要であれば手順を見直す必要があります。
@@ -174,7 +174,7 @@ sudo df
 mount
 ```
 
-デスクトップ環境によって自動マウントされていると次の様に /media/UserName 以下に mount されている状況が表示されます。
+デスクトップ環境によって自動マウントされていると次の様に /media/_UserName_ 以下に mount されている状況が表示されます。
 
 ```text
 --- outputs from df ---
@@ -258,7 +258,7 @@ Raspberry Pi OS を QEMU で実行出来るようにイメージファイルを�
 
 ### image file を拡張する
 
-カレントディレクトリは先の続きで /PathTo/RpiVMFiles になっている状態でイメージファイルの拡張を行います。
+カレントディレクトリは先の続きで _/PathTo/RpiVMFiles_ になっている状態でイメージファイルの拡張を行います。
 
 ```bash
 # Here current directory is /PathTo/RpiVMFiles
@@ -278,7 +278,7 @@ sudo fsck -f /dev/nbdNp2
 ```
 
 > [!TIP]
-> `qemu-nbd` を実行してもパーティションを認識せず /dev/nbdNp1, /dev/nbdNp2 が作られない場合があります。認識を確実にするため `partprobe` を使用しています。
+> `qemu-nbd` を実行してもパーティションを認識せず _/dev/nbdNp1_, _/dev/nbdNp2_ が作られない場合があります。認識を確実にするため `partprobe` を使用しています。
 
 `fsck` をした結果、質問された場合は修正する方向で応答して下さい。`fsck -f /dev/nbdNp1` で想定される質問と回答は次の通りです。
 
