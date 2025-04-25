@@ -366,6 +366,7 @@ tar --no-same-owner -xvf /DownLoaded/rpios32bit-host-kit.tar.gz
 
 |file|description|
 |----|-----------|
+|[rpi3image.sh](../downloads/host/rpi3image.sh)|[イメージファイルを作成するツールです。こちらを利用した方が簡単です。](rpi-image-script.md)|
 |[rpi2vm32.conf](../downloads/host/rpi2vm32.conf)|起動パラメータを格納しているファイルです。|
 |[rpi2vm32-1st.sh](../downloads/host/rpi2vm32-1st.sh)|1 回目の初期設定起動をするスクリプトです。|
 |[rpi2vm32-2nd.sh](../downloads/host/rpi2vm32-2nd.sh)|2 回目の初期設定起動をするスクリプトです。|
