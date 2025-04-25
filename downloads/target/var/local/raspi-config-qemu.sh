@@ -20,3 +20,38 @@ sudo raspi-config nonint do_wayland W1
 #  Note: 0: enable, 1: disable
 echo "Configure 3/I3 VNC: Enable graphical remote desktop access."
 sudo raspi-config nonint do_vnc 0
+
+# Wait greeter or GUI session becomes ready.
+
+TimeOut=180
+wait_count=0
+pi_greeter=""
+
+while (( ${wait_count} < ${TimeOut} ))
+do
+	# Check running greeter, Window Manager,
+	# Session Manager, or Menu panels
+	if /usr/bin/ps uwwh -C pi-greeter -C openbox -C lxsession -C lxpanel > /dev/null
+	then
+		echo "Running pi-greeter or GUI session. wait_count=${wait_count}"
+		pi_greeter="ready"
+		break
+	fi
+	if (( ( ${wait_count} % 10 ) == 0 ))
+	then
+		echo "Waiting pi-greeter (Login GUI) becomes ready... wait_count=${wait_count}"
+	fi
+	sleep 1
+	wait_count=$(( ${wait_count} + 1 ))
+done
+
+if [[ -z "${pi_greeter}" ]]
+then
+	echo "Not ready pi-greeter (Login GUI)."
+	exit 1
+fi
+
+echo "Do additional sleep."
+sleep 4
+
+exit 0
