@@ -45,7 +45,7 @@ Linux の QEMU で実行する Raspberry Pi イメージファイルをスクリ
 
 Raspberry Pi OS image を格納したメディアを次の設定で作ります。
 
-### Raspberry Pi OS 32bit の場合
+### Raspberry Pi OS 32bit で SD card イメージを作成する場合
 
 + Raspberry Pi 2
 + Raspberry Pi OS (32-bit)
@@ -55,7 +55,7 @@ Raspberry Pi OS image を格納したメディアを次の設定で作ります�
 
 ![Create Raspberry Pi OS 32bit image](../img/select-rpi2-32bit.png)
 
-### Raspberry Pi OS 64bit の場合
+### Raspberry Pi OS 64bit で SD card イメージを作成する場合
 
 + Raspberry Pi 3
 + Raspberry Pi OS (64-bit)
@@ -150,7 +150,7 @@ chmod 700 .
 > [!TIP]
 > 32bit, 64bit OS の両方で [rpios32bit-target-kit.tar.gz](../downloads/rpios32bit-target-kit.tar.gz) を使います。
 
-#### Raspberry Pi OS 32bit の場合
+#### Raspberry Pi OS 32bit イメージファイルを作るためのダウンロードとスクリプト展開
 
 ```bash
 # Download host kit
@@ -161,7 +161,7 @@ curl -OL https://github.com/Akinori-Furuta/qemu-raspberrypi/raw/refs/heads/maste
 tar xvf rpios32bit-host-kit.tar.gz
 ```
 
-#### Raspberry Pi OS 64bit の場合
+#### Raspberry Pi OS 64bit イメージファイルを作るためのダウンロードとスクリプト展開
 
 ```bash
 # Download host kit
