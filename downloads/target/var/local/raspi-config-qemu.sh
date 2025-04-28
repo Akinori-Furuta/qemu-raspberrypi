@@ -78,7 +78,7 @@ echo "${MyBaseName}: INFO: Configure 1/S5/D2 Screen Blanking: Disable screen bla
 /usr/bin/sudo /usr/bin/raspi-config nonint do_blanking 1
 
 # Use X11 display server.
-echo "Configure 6/A6/W1 X11: Openbox window manager with X11 backend".
+echo "${MyBaseName}: INFO: Configure 6/A6/W1 X11: Openbox window manager with X11 backend".
 /usr/bin/sudo /usr/bin/raspi-config nonint do_wayland W1
 
 # Wait greeter or GUI session becomes ready.
