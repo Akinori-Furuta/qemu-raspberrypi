@@ -96,6 +96,10 @@ function IsReadyGUIGreeter() {
 	return $?
 }
 
+# Compare frame buffer 0 with initial image
+# args none
+# echo Don't care
+# return ==0: Same as initial image, !=0: Different from initial image
 function CmpFb0() {
 	local	result
 
@@ -160,6 +164,10 @@ echo "${MyBaseName}: INFO: Do additional sleep."
 echo "${MyBaseName}: INFO: Configure 3/I3 VNC: Enable graphical remote desktop access."
 /usr/bin/sudo /usr/bin/raspi-config nonint do_vnc 0
 
+# Get service status
+# args ServiceName
+# echo ServiceState
+# return ==0: Success, !=0: Failed
 function ServiceActive() {
 	/usr/bin/systemctl --no-pager -l status "${1}" |
 	/usr/bin/grep  '^[[:space:]]*[aA]ctive:' |
