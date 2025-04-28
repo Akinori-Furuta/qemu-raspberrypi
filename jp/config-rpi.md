@@ -152,7 +152,7 @@ Raspberry Pi OS は /etc/dhcp/dhclient.conf で dhcp-lease-time を指定して�
 
 ### VNC connection
 
-Raspberry Pi OS の service で VNC 接続できる様になっています。ユーザー名とパスワードを利用できる VNC client アプリケーションを使って下さい。[Remote access VNC (Raspberry Pi Documentation)](https://www.raspberrypi.com/documentation/computers/remote-access.html#vnc) を参考にして下さい。IP address PiHostName.local の様に .local 接尾辞を付けて、IP address を解決できるはずです。
+Raspberry Pi OS の service で VNC 接続できる様になっています。ユーザー名とパスワードを利用できる VNC client アプリケーションを使って下さい。[Remote access VNC (Raspberry Pi Documentation)](https://www.raspberrypi.com/documentation/computers/remote-access.html#vnc) を参考にして下さい。_PiHostName_.local の様に .local 接尾辞を付けて、IP address を解決できるはずです。
 
 > [!TIP]
 > もし VNC 接続ができず仮想 Raspberry Pi 内の /var/log/vncserver-x11.log に次の様なログが残っていた場合は、
