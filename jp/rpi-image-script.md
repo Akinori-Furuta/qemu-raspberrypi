@@ -197,7 +197,7 @@ rpi3image.sh: INFO: /dev/sdc.SIZE=14.7Gi/15.8G bytes
 
 上記の例では /dev/sdc に Raspberry Pi OS を格納した SD card が見つかっています。SD card reader の製造元(VENDOR)、型番(MODEL)、SD card の容量(SIZE) が一致しているか確認して下さい。複数の Raspbery Pi OS を格納した SD card が存在する場合は、それぞれを見つけます。
 
-状況によって次の様なパッケージが足りないメッセージが表示されます。パッケージをインストールして下さい。次の例は `sudo apt install cloud-guest-utils qemu-utils nbd-client device-tree-compiler` を実行してパッケージを追加する必要があります。 
+状況によって次の様なパッケージが足りないメッセージが表示されます。パッケージをインストールして下さい。次の例は `sudo apt install cloud-guest-utils qemu-utils nbd-client device-tree-compiler` を実行してパッケージを追加する必要があります。
 
 ```text
 ./rpi3image.sh: INFO: Need following package(s).
