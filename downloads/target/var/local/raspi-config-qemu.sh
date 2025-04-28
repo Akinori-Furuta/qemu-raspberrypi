@@ -165,6 +165,7 @@ function ServiceActive() {
 	/usr/bin/grep  '^[[:space:]]*[aA]ctive:' |
 	/usr/bin/sed 's/^[[:space:]]*[[:alnum:]]*:[[:space:]]*//' |
 	/usr/bin/awk '{print $1}'
+	return $?
 }
 
 echo "${MyBaseName}: INFO: Waiting VNC server service ready."
