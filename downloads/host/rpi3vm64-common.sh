@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: BSD-2-Clause
 # Copy this script to same directory
 # which contains SD card Raspberry Pi OS image file *.img and bootfs/*
 # Source this file from rpi3vm64-1st.sh, rpi3vm64-2nd.sh or rpi3vm64.sh
