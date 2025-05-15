@@ -116,7 +116,7 @@ sudo apt install curl bridge-utils uml-utilities \
 
 ### 手順中の読み換え内容
 
-書き終わった SD card を Linux PC に接続して、SD card イメージファイルを作成します。QEMU で実行するために必要な書き換えはスクリプト [rpi3image.sh](../downloads/host/rpi3image.sh) が全て行います。
+コマンドや説明で次の様なシンボルを使います。都合や環境に合わせて読み替えて下さい。
 
 |symbol|example|description|
 |------|-------|-----------|
@@ -129,6 +129,8 @@ sudo apt install curl bridge-utils uml-utilities \
 |_/DownLoaded_|/home/furuta/git/qemu-raspberrypi/downloads|[rpios32bit-target-kit.tar.gz](../downloads/rpios32bit-target-kit.tar.gz), [rpios32bit-host-kit.tar.gz](../downloads/rpios32bit-host-kit.tar.gz), [rpios64bit-host-kit.tar.gz](../downloads/rpios64bit-host-kit.tar.gz) をダウンロードしたディレクトリです。この git repository を clone した場合は _git_cloned_base_/downloads になります。|
 
 ### SD card image を読み取る
+
+書き終わった SD card を Linux PC に接続して、SD card イメージファイルを作成します。QEMU で実行するために必要な書き換えはスクリプト [rpi3image.sh](../downloads/host/rpi3image.sh) が全て行います。
 
 Raspberry Pi OS イメージファイルとスクリプトを格納する作業ディレクトリ _/PathTo/RpiVMFiles_ を作ります。
 
