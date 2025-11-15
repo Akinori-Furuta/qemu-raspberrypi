@@ -94,9 +94,19 @@ then
 fi
 
 Pwd="$( "${PWD}" )"
-IdUser="$( "${ID}" -u )"
-IdGroup="$( "${ID}" -g )"
+if [[ -n "${SUDO_UID}" ]]
+then
+	IdUser=${SUDO_UID}
+else
+	IdUser="$( "${ID}" -u )"
+fi
 
+if [[ -n "${SUDO_GID}" ]]
+then
+	IdGroup=${SUDO_GID}
+else
+	IdGroup="$( "${ID}" -g )"
+fi
 MyWhich="$( "${WHICH}" "$0" )"
 MyPath="$( "${READLINK}" -f "${MyWhich}" )"
 MyDir="$( "${DIRNAME}" "${MyPath}" )"
