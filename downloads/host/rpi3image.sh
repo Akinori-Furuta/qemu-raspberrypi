@@ -135,6 +135,7 @@ ${MyBase}: HELP:           media image.
 ${MyBase}: HELP:           Without this option, image file is stored
 ${MyBase}: HELP:           into current directory see more details in
 ${MyBase}: HELP:           following text.
+${MyBase}: HELP: -m        Migrate working SD card to qemu.
 ${MyBase}: HELP: -f        Force overwrite existing file(s).
 ${MyBase}: HELP: -h        Show help.
 ${MyBase}: HELP:
@@ -290,8 +291,9 @@ function TempPathGen() {
 OptionForce=""
 OptionSize=""
 OptionOutput=""
+OptionMigrate=""
 
-while getopts "fs:o:h" OPT
+while getopts "fs:o:mh" OPT
 do
 	case ${OPT} in
 	(f)
@@ -302,6 +304,9 @@ do
 		;;
 	(o)
 		OptionOutput="${OPTARG}"
+		;;
+	(m)
+		OptionMigrate="migrate"
 		;;
 	(h)
 		Help
@@ -799,8 +804,13 @@ function BlockDeviceIsRaspiOS() {
 
 	if (( ${part_num} != 2 ))
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media \"$1\"." 1>&2
-		return 1
+		if [[ -z "${OptionMigrate}" ]]
+		then
+			echo "$0.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media \"$1\"." 1>&2
+			return 1
+		else
+			echo "$0.BlockDeviceIsRaspiOS(): NOTICE: There are ${part_num} partitions in media \"$1\", may be added extra partition." 1>&2
+		fi
 	fi
 
 	return 0
@@ -1381,14 +1391,20 @@ then
 	exit ${result}
 fi
 
-echo "${MyBase}: INFO: Grow rootfs partition (device \"${NbdDev}\" partition 2)." 1>&2
-
-GrowPartRaspiOSMedia "${NbdDev}"
-result=$?
-if (( ${result} != 0 ))
+if [[ -z "${OptionMigrate}" ]]
 then
-	echo "${MyBase}: ERROR: Can not grow rootfs partition." 1>&2
-	exit ${result}
+	echo "${MyBase}: INFO: Grow rootfs partition (device \"${NbdDev}\" partition 2)." 1>&2
+
+	GrowPartRaspiOSMedia "${NbdDev}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not grow rootfs partition." 1>&2
+		exit ${result}
+	fi
+else
+	echo "${MyBase}: NOTICE: Keep rootfs partition (device \"${NbdDev}\" partition 2) size." 1>&2
+	echo "${MyBase}: NOTICE: If you want to resize partition, resize or move partitions in virtual machine." 1>&2
 fi
 
 echo "${MyBase}: INFO: Mount partitions in Raspberry Pi OS image." 1>&2
@@ -1473,14 +1489,17 @@ then
 	exit ${result}
 fi
 
-echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
-
-"${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
-result=$?
-if (( ${result} != 0 ))
+if [[ -z "${OptionMigrate}" ]]
 then
-	echo "${MyBase}: ERROR: Can not change mode bootfs/firstrun.sh." 1>&2
-	exit ${result}
+	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
+
+	"${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not change mode bootfs/firstrun.sh." 1>&2
+		exit ${result}
+	fi
 fi
 
 echo "${MyBase}: INFO: Modify device tree." 1>&2
