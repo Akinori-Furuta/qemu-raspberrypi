@@ -1516,7 +1516,9 @@ fi
 
 echo "${MyBase}: INFO: Modify device tree." 1>&2
 
-"${DTC}" -I dtb -O dts -o "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb"
+DtRpi3BNameSource="${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts"
+
+"${DTC}" -I dtb -O dts -o "${DtRpi3BNameSource}" "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb"
 result=$?
 if (( ${result} != 0 ))
 then
