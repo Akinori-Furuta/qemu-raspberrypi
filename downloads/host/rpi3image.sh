@@ -1149,20 +1149,20 @@ function MountRaspiOSMedia() {
 
 	do_mount=""
 
-	part_path="${1}1"
+	part_path="${1}p1"
 	if [[ -b "${part_path}" ]]
 	then
-		do_mount="${do_mount}-1"
+		do_mount="${do_mount}-p1"
 		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${BootFsFatPoint}"
 		then
 			result=$?
 		fi
 	fi
 
-	part_path="${1}p1"
-	if [[ -b "${part_path}" ]]
+	part_path="${1}1"
+	if [[ -z "${do_mount}" ]] && [[ -b "${part_path}" ]]
 	then
-		do_mount="${do_mount}-p1"
+		do_mount="${do_mount}-1"
 		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${BootFsFatPoint}"
 		then
 			result=$?
@@ -1177,21 +1177,21 @@ function MountRaspiOSMedia() {
 
 	do_mount=""
 
-	part_path="${1}2"
-	if [[ -b "${part_path}" ]]
-	then
-		do_mount="${do_mount}-2"
-		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${RootFsExt4Point}"
-		then
-			result=$?
-		fi
-	fi
-
 	part_path="${1}p2"
 	if [[ -b "${part_path}" ]]
 	then
 		do_mount="${do_mount}-p2"
 		if ! "${SUDO}" "${MOUNT}"  -o "${mount_opt}" "${part_path}" "${RootFsExt4Point}"
+		then
+			result=$?
+		fi
+	fi
+
+	part_path="${1}2"
+	if [[ -z "${do_mount}" ]] && [[ -b "${part_path}" ]]
+	then
+		do_mount="${do_mount}-2"
+		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${RootFsExt4Point}"
 		then
 			result=$?
 		fi
