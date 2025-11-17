@@ -137,6 +137,7 @@ ${MyBase}: HELP:           Without this option, image file is stored
 ${MyBase}: HELP:           into current directory see more details in
 ${MyBase}: HELP:           following text.
 ${MyBase}: HELP: -m        Migrate working SD card to qemu.
+${MyBase}: HELP:           Create qcow2 output image file.
 ${MyBase}: HELP: -f        Force overwrite existing file(s).
 ${MyBase}: HELP: -h        Show help.
 ${MyBase}: HELP:
@@ -151,11 +152,11 @@ ${MyBase}: HELP:   * Store device tree blobs into
 ${MyBase}: HELP:     \$(dirname ImagePath)/bootfs
 ${MyBase}: HELP: * ImagePath is a directory
 ${MyBase}: HELP:   * Store Raspberry Pi OS image into
-${MyBase}: HELP:     ImagePath/${RaspiOSImagePrefix}-OSBits-SerialNumber.img
+${MyBase}: HELP:     ImagePath/${RaspiOSImagePrefix}-OSBits-SerialNumber.{img|qcow2}
 ${MyBase}: HELP:   * Store device tree blobs into ImagePath/bootfs
 ${MyBase}: HELP: * Not specified the -o option
 ${MyBase}: HELP:   * Store Raspberry Pi OS image into
-${MyBase}: HELP:     ./${RaspiOSImagePrefix}-OSBits-SerialNumber.img
+${MyBase}: HELP:     ./${RaspiOSImagePrefix}-OSBits-SerialNumber.{img|qcow2}
 ${MyBase}: HELP:   * Store device tree blobs into ./bootfs
 ${MyBase}: HELP:
 ${MyBase}: HELP: To find Raspberry Pi OS image media path,
@@ -388,6 +389,16 @@ fi
 
 OptionOutputDirectory=""
 OptionOutputBaseName=""
+if [[ -z "${OptionMigrate}" ]]
+then
+	OptionOutputFormat="raw"
+	OptionOutputExt="img"
+	OptionOutputCompression=""
+else
+	OptionOutputFormat="qcow2"
+	OptionOutputExt="qcow2"
+	OptionOutputCompression="-c"
+fi
 OptionOutputDirName=""
 
 if [[ -n "${OptionOutput}" ]]
@@ -406,11 +417,30 @@ then
 			echo "${MyBase}: NOTICE: Directory \"${OptionOutput}\" does not exist, will be created." 1>&2
 		else
 			OptionOutputBaseName="$( "${BASENAME}" "${OptionOutput}" )"
-			OptionOutputDirName="$( "${DIRNAME}"   "${OptionOutput}" )"
+			case "${OptionOutputBaseName@L}" in
+			(*img)
+				OptionOutputFormat="raw"
+				OptionOutputCompression=""
+				OptionOutputExt="${OptionOutputBaseName##*.}"
+				;;
+			(*qcow)
+				echo "${OptionOutput}: ERROR: Not supported qcow file format, it does not support resize." 1>&2
+				exit 1
+				;;
+			(*qcow2)
+				OptionOutputFormat="qcow2"
+				OptionOutputCompression="-c"
+				OptionOutputExt="qcow2"
+				;;
+			(*)
+				echo "${OptionOutput}: ERROR: Not supported file format." 1>&2
+				exit 1
+				;;
+			esac
+			OptionOutputDirName="$( "${DIRNAME}" "${OptionOutput}" )"
 			if [[ ! -d "${OptionOutputDirName}" ]]
 			then
 				echo "${MyBase}: NOTICE: Directory \"${OptionOutputDirName}\" does not exist, will be created." 1>&2
-
 			fi
 			OptionOutputDirectory="${OptionOutputDirName}"
 		fi
@@ -1278,7 +1308,7 @@ then
 fi
 
 RaspiOSImagePreviewReady=""
-RaspiOSImagePreview="$( "${MKTEMP}" -p "${OptionOutputDirectory}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.img" )"
+RaspiOSImagePreview="$( "${MKTEMP}" -p "${OptionOutputDirectory}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.${OptionOutputExt}" )"
 
 ${CHMOD} 600 "${RaspiOSImagePreview}"
 result=$?
@@ -1291,7 +1321,7 @@ fi
 # convert Raspberry Pi OS image media to file.
 
 echo "${MyBase}: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"." 1>&2
-"${SUDO}" "${QEMU_IMG}" convert -p -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
+"${SUDO}" "${QEMU_IMG}" convert -p -f raw -O ${OptionOutputFormat} ${OptionOutputCompression} "${RaspiMedia}" "${RaspiOSImagePreview}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1330,7 +1360,7 @@ fi
 
 echo "${MyBase}: INFO: Resize Raspberry Pi OS image file \"${RaspiOSImagePreview}\" into ${RaspiOSImageSizeAligned}G" 1>&2
 
-"${QEMU_IMG}" resize -f raw "${RaspiOSImagePreview}" "${RaspiOSImageSizeAligned}G"
+"${QEMU_IMG}" resize -f ${OptionOutputFormat} "${RaspiOSImagePreview}" "${RaspiOSImageSizeAligned}G"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1356,7 +1386,7 @@ do
 
 	NbdDev="/dev/${NbdNode}"
 
-	if "${SUDO}" "${QEMU_NBD}" -f raw -c "${NbdDev}" "${RaspiOSImagePreview}" 1>&2
+	if "${SUDO}" "${QEMU_NBD}" -f ${OptionOutputFormat} -c "${NbdDev}" "${RaspiOSImagePreview}" 1>&2
 	then
 		break
 	fi
@@ -1423,7 +1453,7 @@ RaspiOSArch=$( "${FILE}" "${RootFsExt4Point}/usr/bin/[" | "${SED}" 's!^.*ld-linu
 
 echo "${MyBase}: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
 
-RaspiOSImageTemp=$( "${MKTEMP}" -p "${OptionOutputDirectory}" ${RaspiOSImagePrefix}-XXXXXXXXXX.img )
+RaspiOSImageTemp=$( "${MKTEMP}" -p "${OptionOutputDirectory}" ${RaspiOSImagePrefix}-XXXXXXXXXX.${OptionOutputExt} )
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1433,17 +1463,17 @@ fi
 
 if [[ -z "${OptionOutputBaseName}" ]]
 then
-	RaspiOSImage="${OptionOutputDirectory}/rpios-0000.img"
+	RaspiOSImage="${OptionOutputDirectory}/rpios-0000.${OptionOutputExt}"
 	RaspiOSImageSn=0
 
 	while (( ${RaspiOSImageSn} <= 9999 ))
 	do
 		case "${RaspiOSArch}" in
 		(aarch64)
-			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-64-$(printf "%04d" ${RaspiOSImageSn}).img"
+			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-64-$(printf "%04d" ${RaspiOSImageSn}).${OptionOutputExt}"
 			;;
 		(*)
-			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-32-$(printf "%04d" ${RaspiOSImageSn}).img"
+			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-32-$(printf "%04d" ${RaspiOSImageSn}).${OptionOutputExt}"
 			;;
 		esac
 		if [[ ! -f "${RaspiOSImage}" ]]
