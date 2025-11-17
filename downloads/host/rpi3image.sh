@@ -1566,6 +1566,52 @@ then
 	exit ${result}
 fi
 
+"${CHOWN}" "${IdUser}:${IdGroup}" "${DtRpi3BNameQemuBlob}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "${MyBase}: ERROR: Can not change \"${DtRpi3BNameQemuBlob}\" owner to ${IdUser}:${IdGroup}." 1>&2
+	exit ${result}
+fi
+
+"${CHMOD}" "644" "${DtRpi3BNameQemuBlob}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "${MyBase}: ERROR: Can not change \"${DtRpi3BNameQemuBlob}\" mode  to 644." 1>&2
+	exit ${result}
+fi
+
+"${CHOWN}" "${IdUser}:${IdGroup}" "${DtRpi3BNameQemuSource}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "${MyBase}: WARNING: Can not change \"${DtRpi3BNameQemuSource}\" owner to ${IdUser}:${IdGroup}." 1>&2
+fi
+
+"${CHMOD}" "644" "${DtRpi3BNameQemuSource}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "${MyBase}: WARNIG: Can not change \"${DtRpi3BNameQemuSource}\" mode  to 644." 1>&2
+	exit ${result}
+fi
+
+"${CHOWN}" "${IdUser}:${IdGroup}" "${DtRpi3BNameSource}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "${MyBase}: WARNING: Can not change \"${DtRpi3BNameSource}\" owner to ${IdUser}:${IdGroup}." 1>&2
+fi
+
+"${CHMOD}" "644" "${DtRpi3BNameSource}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "${MyBase}: WARNIG: Can not change \"${DtRpi3BNameSource}\" mode  to 644." 1>&2
+	exit ${result}
+fi
+
 echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
 
 "${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
