@@ -1051,19 +1051,21 @@ function FsckVolume() {
 # echo don't care
 # return ==0: Success, !=0: Failed
 function FsckPart() {
-	local	part_path
+	local	part_path_scsi
+	local	part_path_nbd
 
-	part_path="${1}${2}"
-	if [[ -b "${part_path}" ]]
+	part_path_scsi="${1}${2}"
+	part_path_nbd="${1}p${2}"
+
+	if [[ -b "${part_path_nbd}" ]]
 	then
-		FsckVolume "${part_path}"
+		FsckVolume "${part_path_nbd}"
 		return $?
 	fi
 
-	part_path="${1}p${2}"
-	if [[ -b "${part_path}" ]]
+	if [[ -b "${part_path_scsi}" ]]
 	then
-		FsckVolume "${part_path}"
+		FsckVolume "${part_path_scsi}"
 		return $?
 	fi
 
