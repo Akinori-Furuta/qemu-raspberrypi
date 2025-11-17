@@ -1092,7 +1092,8 @@ function FsckRaspiOSMedia() {
 
 function GrowPartRaspiOSMedia() {
 	local	result
-	local	part_path
+	local	part_path_scsi
+	local	part_path_nbd
 	local	do_resize
 
 	result=1
@@ -1103,19 +1104,20 @@ function GrowPartRaspiOSMedia() {
 	result=$?
 	(( ${result} != 0 )) && return ${result}
 
-	part_path="${1}2"
-	if [[ -b "${part_path}" ]]
+	part_path_scsi="${1}2"
+	part_path_nbd="${1}p2"
+
+	if [[ -b "${part_path_nbd}" ]]
 	then
-		do_resize="-2"
-		"${SUDO}" "${RESIZE2FS}" "${part_path}"
+		do_resize="-p2"
+		"${SUDO}" "${RESIZE2FS}" "${part_path_nbd}"
 		return $?
 	fi
 
-	part_path="${1}p2"
-	if [[ -b "${part_path}" ]]
+	if [[ -b "${part_path_scsi}" ]]
 	then
-		do_resize="-p2"
-		"${SUDO}" "${RESIZE2FS}" "${part_path}"
+		do_resize="-2"
+		"${SUDO}" "${RESIZE2FS}" "${part_path_scsi}"
 		return $?
 	fi
 
