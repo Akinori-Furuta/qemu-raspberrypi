@@ -809,7 +809,7 @@ function BlockDeviceIsRaspiOS() {
 		return 1
 	fi
 
-	part_num=$( "${SUDO}" "${SFDISK}" -d "${dev_path}" | "${GREP}" '^/dev/' | wc -l )
+	part_num=$( BlockDevicePartitions "$1" )
 
 	if (( ${part_num} != 2 ))
 	then
