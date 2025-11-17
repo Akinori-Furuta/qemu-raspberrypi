@@ -68,6 +68,7 @@ ProbeCommand RM coreutils		/usr/bin/rm /bin/rm /usr/sbin/rm
 ProbeCommand GREP grep			/usr/bin/grep /bin/grep /usr/sbin/grep
 ProbeCommand SED sed			/usr/bin/sed /bin/sed /usr/sbin/sed
 ProbeCommand TR coreutils		/usr/bin/tr /bin/tr /usr/sbin/tr
+ProbeCommand WC coreutils		/usr/bin/wc /bin/wc /usr/sbin/wc
 ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
 ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
 ProbeCommand AWK gawk			/usr/bin/awk /bin/awk /usr/bin/gawk /bin/gawk /usr/sbin/awk /sbin/awk
@@ -735,6 +736,14 @@ function BlkPartIdType() {
 	fi
 
 	return 1
+}
+
+# Count partitions on storage
+# args  path_to_block_device
+# echo  the number of partitons
+# return ==0: Success, !=0: Failed
+function BlockDevicePartitions() {
+	"${SUDO}" "${SFDISK}" -d "${dev_path}" | "${GREP}" '^/dev/' | "${WC}" -l
 }
 
 # Check block device may be Raspberry Pi OS media
