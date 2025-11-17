@@ -922,56 +922,46 @@ function ShowBlockDevice() {
 	return 0
 }
 
-# Unmount block device partition
-# args path_to_block_device partition_number
+# Unmount block device partition by fully qualified path
+# args path_to_block_device_part
 # echo   Not defined
 # exit   no
-# return 0
-function UmountBlockDevicePart() {
-	local	part_path
-
-	part_path="${1}${2}"
-	if DeviceIsMounted "${part_path}"
+# return ==0: Succes, !=0: Failed
+function UmountBlockDevicePartPath() {
+	if DeviceIsMounted "${1}"
 	then
-		[[ -n "${debug}" ]] && echo "$0.UmountBlockDevicePart().1: DEBUG: umount \"${part_path}\"" 1>&2
-		"${SUDO}" "${UMOUNT}" "${part_path}"
-		return $?
-	fi
-
-	part_path="${1}p${2}"
-	if DeviceIsMounted "${part_path}"
-	then
-		[[ -n "${debug}" ]] && echo "$0.UmountBlockDevicePart().2: DEBUG: umount \"${part_path}\"" 1>&2
-		"${SUDO}" "${UMOUNT}" "${part_path}"
+		[[ -n "${debug}" ]] && echo "$0.UmountBlockDevicePart().1: DEBUG: umount \"${1}\"" 1>&2
+		"${SUDO}" "${UMOUNT}" "${1}"
 		return $?
 	fi
 
 	return 0
 }
 
-# Unmount Raspberry Pi OS media
+# Unmount whole partitions in block device
 # args path_to_block_device
 # echo   Not defined
 # exit   no
-# return 0
-function UmountRaspiOSMedia() {
+# return ==0: Success, !=0: Failed
+function UmountBlockDeviceWhole() {
+	local	part_path
 	local	result
 
 	if [[ -z "${1}" ]]
 	then
-		echo "$0.UmountRaspiOSMedia(): ERROR: Specify path_to_block_device." 1>&2
+		echo "$0.UmountBlockDeviceWhole(): ERROR: Specify path_to_block_device." 1>&2
 		return 1
 	fi
 
-	UmountBlockDevicePart "${1}" 1
-	result=$?
-	[[ -n "${debug}" ]] && echo "$0.UmountRaspiOSMedia().1: DEBUG: umount \"${1}\" partition 1, result=${result}" 1>&2
-	(( ${result} != 0 )) && return ${result}
-
-	UmountBlockDevicePart "${1}" 2
-	result=$?
-	[[ -n "${debug}" ]] && echo "$0.UmountRaspiOSMedia().2: DEBUG: umount \"${1}\" partition 2, result=${result}" 1>&2
-	(( ${result} != 0 )) && return ${result}
+	for part_path in $( "${SUDO}" "${SFDISK}" -d "${1}" | "${GREP}" '^/dev/' | "${AWK}" '{print $1}' )
+	do
+		UmountBlockDevicePartPath "${part_path}"
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			return ${result}
+		fi
+	done
 
 	return 0
 }
@@ -1263,7 +1253,7 @@ echo "${MyBase}: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
 "${SYNC}"
 
-while ! UmountRaspiOSMedia "${RaspiMediaDev}"
+while ! UmountBlockDeviceWhole "${RaspiMediaDev}"
 do
 	echo "${MyBase}: NOTICE: Retry umount \"${RaspiMedia}\"." 1>&2
 	sleep 5
@@ -1645,7 +1635,7 @@ fi
 
 echo "${MyBase}: INFO: Unmount Raspberry Pi OS image." 1>&2
 
-UmountRaspiOSMedia "${NbdDev}"
+UmountBlockDeviceWhole "${NbdDev}"
 result=$?
 if (( ${result} != 0 ))
 then
