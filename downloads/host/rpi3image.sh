@@ -1310,7 +1310,10 @@ then
 fi
 RaspiOSImagePreviewReady="yes"
 
-RaspiOSImageSizeConverted=$( ${STAT} -c "%s" "${RaspiOSImagePreview}" )
+RaspiOSImageSizeConverted=$( "${QEMU_IMG}" info "${RaspiOSImagePreview}" \
+	| "${GREP}" -i '^virtual[[:space:]]*size' \
+	| "${SED}" 's/^.*(\([0-9]\+\).*).*$/\1/'
+)
 result=$?
 if (( ${result} != 0 ))
 then
