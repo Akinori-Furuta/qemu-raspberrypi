@@ -1517,14 +1517,6 @@ then
 	exit ${result}
 fi
 
-"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${OptionOutputDirectory}/bootfs"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not change owner bootfs directory and files." 1>&2
-	exit ${result}
-fi
-
 if [[ -z "${OptionMigrate}" ]]
 then
 	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
@@ -1590,49 +1582,19 @@ then
 	exit ${result}
 fi
 
-"${CHOWN}" "${IdUser}:${IdGroup}" "${DtRpi3BNameQemuBlob}"
+"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${OptionOutputDirectory}/bootfs"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "${MyBase}: ERROR: Can not change \"${DtRpi3BNameQemuBlob}\" owner to ${IdUser}:${IdGroup}." 1>&2
+	echo "${MyBase}: ERROR: Can not change owner bootfs directory and files." 1>&2
 	exit ${result}
 fi
 
-"${CHMOD}" "644" "${DtRpi3BNameQemuBlob}"
+"${SUDO}" "${CHMOD}" "644" "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}" "${DtRpi3BNameSource}"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "${MyBase}: ERROR: Can not change \"${DtRpi3BNameQemuBlob}\" mode  to 644." 1>&2
-	exit ${result}
-fi
-
-"${CHOWN}" "${IdUser}:${IdGroup}" "${DtRpi3BNameQemuSource}"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: WARNING: Can not change \"${DtRpi3BNameQemuSource}\" owner to ${IdUser}:${IdGroup}." 1>&2
-fi
-
-"${CHMOD}" "644" "${DtRpi3BNameQemuSource}"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: WARNIG: Can not change \"${DtRpi3BNameQemuSource}\" mode  to 644." 1>&2
-	exit ${result}
-fi
-
-"${CHOWN}" "${IdUser}:${IdGroup}" "${DtRpi3BNameSource}"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: WARNING: Can not change \"${DtRpi3BNameSource}\" owner to ${IdUser}:${IdGroup}." 1>&2
-fi
-
-"${CHMOD}" "644" "${DtRpi3BNameSource}"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: WARNIG: Can not change \"${DtRpi3BNameSource}\" mode  to 644." 1>&2
+	echo "${MyBase}: ERROR: Can not change one of or more \"${DtRpi3BNameQemuBlob}\", \"${DtRpi3BNameQemuSource}\", or \"${DtRpi3BNameSource}\" mode to 644." 1>&2
 	exit ${result}
 fi
 
