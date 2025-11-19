@@ -1582,19 +1582,19 @@ then
 	exit ${result}
 fi
 
-"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${OptionOutputDirectory}/bootfs"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not change owner bootfs directory and files." 1>&2
-	exit ${result}
-fi
-
 "${SUDO}" "${CHMOD}" "644" "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}" "${DtRpi3BNameSource}"
 result=$?
 if (( ${result} != 0 ))
 then
 	echo "${MyBase}: ERROR: Can not change one of or more \"${DtRpi3BNameQemuBlob}\", \"${DtRpi3BNameQemuSource}\", or \"${DtRpi3BNameSource}\" mode to 644." 1>&2
+	exit ${result}
+fi
+
+"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${OptionOutputDirectory}/bootfs"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "${MyBase}: ERROR: Can not change owner bootfs directory and files." 1>&2
 	exit ${result}
 fi
 
