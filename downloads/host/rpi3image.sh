@@ -138,6 +138,9 @@ ${MyBase}: HELP:           into current directory see more details in
 ${MyBase}: HELP:           following text.
 ${MyBase}: HELP: -m        Migrate working SD card to qemu.
 ${MyBase}: HELP:           Create qcow2 output image file.
+${MyBase}: HELP: -x [debug_specs,...] Specify debug options.
+${MyBase}: HELP:             debug: Print debug messages.
+${MyBase}: HELP:             copy_only: Do not modify image file.
 ${MyBase}: HELP: -f        Force overwrite existing file(s).
 ${MyBase}: HELP: -h        Show help.
 ${MyBase}: HELP:
@@ -295,9 +298,20 @@ OptionSize=""
 OptionOutput=""
 OptionMigrate=""
 
-while getopts "fs:o:mh" OPT
+if [[ -z "${Debug}" ]]
+then
+	if [[ -n "${debug}" ]]
+	then
+		Debug="${debug}"
+	else
+		Debug=""
+	fi
+fi
+DebugCopyOnly=""
+
+while getopts "fs:o:mx:h" OPT
 do
-	case ${OPT} in
+	case "${OPT}" in
 	(f)
 		OptionForce="yes"
 		;;
@@ -309,6 +323,23 @@ do
 		;;
 	(m)
 		OptionMigrate="migrate"
+		;;
+	(x)
+		# Debug option
+		for debug_spec in ${OPTARG/,/}
+		do
+			case "${debug_spec}" in
+			(debug)
+				Debug="y"
+				;;
+			(copy_only)
+				DebugCopyOnly="y"
+				;;
+			(*)
+				echo "${MyBase}: WARNING: Unknown debug specifier \"${debug_spec}\"." 1>&2
+				;;
+			esac
+		done
 		;;
 	(h)
 		Help
@@ -379,7 +410,7 @@ if [[ -n "${OptionSize}" ]]
 then
 	OptionSizeNum=$( echo "${OptionSize}" | "${SED}" 's/[gG][iI]\{0,1\}$//' )
 	OptionSizeNumLog2=$( LogInt2Rup "${OptionSizeNum}" )
-	[[ -n "${debug}" ]] && echo "${MyBase}: DEBUG: Check log2 calculation log2(${OptionSizeNum})=${OptionSizeNumLog2}" 1>&2
+	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Check log2 calculation log2(${OptionSizeNum})=${OptionSizeNumLog2}" 1>&2
 	if (( ${OptionSizeNum} != ( 1 << ${OptionSizeNumLog2} ) ))
 	then
 		echo "${MyBase}: The number of -s ${OptionSize} should be power of 2." 1>&2
@@ -696,7 +727,7 @@ function BlkIdLabel() {
 	result=$?
 
 	echo -n "${label}"
-	[[ -n "${debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device label. dev=\"$1\", label=\"${label}\"" 1>&2
+	[[ -n "${Debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device label. dev=\"$1\", label=\"${label}\"" 1>&2
 	return ${result}
 }
 
@@ -738,7 +769,7 @@ function BlkIdType() {
 	result=$?
 
 	echo -n "${type}"
-	[[ -n "${debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device file system. dev=\"$1\", type=\"${type}\"" 1>&2
+	[[ -n "${Debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device file system. dev=\"$1\", type=\"${type}\"" 1>&2
 
 	return ${result}
 }
@@ -960,7 +991,7 @@ function ShowBlockDevice() {
 function UmountBlockDevicePartPath() {
 	if DeviceIsMounted "${1}"
 	then
-		[[ -n "${debug}" ]] && echo "$0.UmountBlockDevicePart().1: DEBUG: umount \"${1}\"" 1>&2
+		[[ -n "${Debug}" ]] && echo "$0.UmountBlockDevicePart().1: DEBUG: umount \"${1}\"" 1>&2
 		"${SUDO}" "${UMOUNT}" "${1}"
 		return $?
 	fi
@@ -1281,7 +1312,7 @@ then
 	exit 1
 fi
 
-[[ -n "${debug}" ]] && echo "${MyBase}: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
+[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
 
 echo "${MyBase}: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
@@ -1598,14 +1629,19 @@ then
 	exit ${result}
 fi
 
-echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
-
-"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
-result=$?
-if (( ${result} != 0 ))
+if [[ -z "${DebugCopyOnly}" ]]
 then
-	echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
-	exit ${result}
+	echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
+
+	"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
+		exit ${result}
+	fi
+else
+	echo "${MyBase}: DEBUG: Skip modifying rootfs." 1>&2
 fi
 
 echo "${MyBase}: INFO: Remount with read-only mode Raspberry Pi OS image." 1>&2
