@@ -58,7 +58,7 @@ EOF
 >
 > * Disable Bluhtooth interface via serial port.
 > * Disable watchdog timer.
->   * Also disables shutdown driver. So, shutdown, then quit QEMU by typing **[Ctrl]-[a]**, **[q]** at monitor terminal.
+>   * Also disables shutdown driver. So, shutdown, then exit QEMU by typing **[Ctrl]-[a]**, **[x]** (QEMU monitor control type in sequence to exit) at monitor terminal.
 > * Disable Wifi device on SDIO bus.
 
 ## 目次
