@@ -1540,7 +1540,7 @@ fi
 
 echo "${MyBase}: INFO: Copy bootfs files." 1>&2
 
-"${SUDO}" "${CP}" -r "${BootFsFatPoint}" "${OptionOutputDirectory}/"
+"${CP}" -r "${BootFsFatPoint}" "${OptionOutputDirectory}/"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1552,7 +1552,7 @@ if [[ -z "${OptionMigrate}" ]]
 then
 	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
 
-	"${SUDO}" "${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
+	"${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
 	result=$?
 	if (( ${result} != 0 ))
 	then
@@ -1629,7 +1629,7 @@ then
 	exit ${result}
 fi
 
-"${SUDO}" "${CHMOD}" "644" "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}" "${DtRpi3BNameSource}"
+"${CHMOD}" "644" "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}" "${DtRpi3BNameSource}"
 result=$?
 if (( ${result} != 0 ))
 then
