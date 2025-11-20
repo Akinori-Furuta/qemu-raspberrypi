@@ -1585,8 +1585,8 @@ then
 fi
 
 "${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
---- bcm2710-rpi-3-b.dts	2025-03-10 02:10:31.929049869 +0900
-+++ bcm2710-rpi-3-b-qemu.dts	2025-03-10 02:10:31.931049840 +0900
+--- bcm2710-rpi-3-b.dts	2025-11-19 23:06:31.189266841 +0900
++++ bcm2710-rpi-3-b-qemu.dts	2025-11-20 01:50:14.622630538 +0900
 @@ -567,7 +567,7 @@
  				shutdown-gpios = <0x0b 0x00 0x00>;
  				local-bd-address = [00 00 00 00 00 00];
@@ -1596,6 +1596,30 @@ fi
  				phandle = <0x3a>;
  			};
  		};
+@@ -876,6 +876,7 @@
+ 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
+ 			clock-names = "v3d\0peri_image\0h264\0isp";
+ 			system-power-controller;
++			status = "disabled";
+ 			phandle = <0x2c>;
+ 		};
+ 
+@@ -1002,6 +1003,7 @@
+ 			wifi@1 {
+ 				reg = <0x01>;
+ 				compatible = "brcm,bcm4329-fmac";
++				status = "disabled";
+ 				phandle = <0x8a>;
+ 			};
+ 		};
+@@ -1133,6 +1135,7 @@
+ 			compatible = "simple-bus";
+ 			#address-cells = <0x01>;
+ 			#size-cells = <0x01>;
++			status = "disabled";
+ 
+ 			nvmem_otp {
+ 				compatible = "raspberrypi,rpi-otp";
 EOF
 
 result=$?
