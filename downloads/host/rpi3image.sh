@@ -1612,14 +1612,6 @@ fi
  				phandle = <0x8a>;
  			};
  		};
-@@ -1133,6 +1135,7 @@
- 			compatible = "simple-bus";
- 			#address-cells = <0x01>;
- 			#size-cells = <0x01>;
-+			status = "disabled";
- 
- 			nvmem_otp {
- 				compatible = "raspberrypi,rpi-otp";
 EOF
 
 result=$?
