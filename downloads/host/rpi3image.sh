@@ -1552,7 +1552,7 @@ if [[ -z "${OptionMigrate}" ]]
 then
 	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
 
-	"${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
+	"${SUDO}" "${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
 	result=$?
 	if (( ${result} != 0 ))
 	then
