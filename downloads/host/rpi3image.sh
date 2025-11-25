@@ -1090,14 +1090,20 @@ function FsckPart() {
 
 	if [[ -b "${part_path_nbd}" ]]
 	then
+		[[ -n "${Debug}" ]] && echo "$0.FsckPart(): DEBUG: Find partition \"${part_path_nbd}\"."
 		FsckVolume "${part_path_nbd}"
 		return $?
+	else
+		[[ -n "${Debug}" ]] && echo "$0.FsckPart(): DEBUG: Not found partition \"${part_path_nbd}\"."
 	fi
 
 	if [[ -b "${part_path_scsi}" ]]
 	then
+		[[ -n "${Debug}" ]] && echo "$0.FsckPart(): DEBUG: Find partition \"${part_path_scsi}\"."
 		FsckVolume "${part_path_scsi}"
 		return $?
+	else
+		[[ -n "${Debug}" ]] && echo "$0.FsckPart(): DEBUG: Not found partition \"${part_path_scsi}\"."
 	fi
 
 	return 1
