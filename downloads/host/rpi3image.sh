@@ -1323,6 +1323,8 @@ then
 fi
 
 TargetKit=""
+TargetKitPostSetup=""
+TargetKitRaspiConfigQemu=""
 
 # note: Currently We use one target kit rpios32bit-target-kit.tar.gz
 #       to both 32bit and 64bit.
@@ -1346,11 +1348,32 @@ done
 
 if [[ -z "${TargetKit}" ]]
 then
-	echo "${MyBase}: ERROR: Can not found target kit tar.gz, rpios32bit-target-kit.tar.gz or rpios64bit-target-kit.tar.gz" 1>&2
-	exit 1
-fi
+	echo "${MyBase}: NOTICE: Can not find target kit rpios32bit-target-kit.tar.gz or rpios64bit-target-kit.tar.gz" 1>&2
 
-[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
+	target_kit_post_setup="${GitCloned}/downloads/target/var/local/post-setup.sh"
+	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Search git cloned target kit post_setup=\"${target_kit_post_setup}\"." 1>&2
+	if [[ -f "${target_kit_post_setup}" ]]
+	then
+		TargetKitPostSetup="${target_kit_post_setup}"
+		echo "${MyBase}: INFO: Use git cloned target kit \"${TargetKitPostSetup}\"." 1>&2
+	fi
+
+	target_kit_raspi_config_qemu="${GitCloned}/downloads/target/var/local/raspi-config-qemu.sh"
+	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Search git cloned target kit raspi_config_qemu=\"${target_kit_raspi_config_qemu}\"." 1>&2
+	if [[ -f "${target_kit_raspi_config_qemu}" ]]
+	then
+		TargetKitRaspiConfigQemu="${target_kit_raspi_config_qemu}"
+		echo "${MyBase}: INFO: Use git cloned target kit \"${TargetKitRaspiConfigQemu}\"." 1>&2
+	fi
+
+	if [[ -z "${TargetKitPostSetup}" || -z "${TargetKitRaspiConfigQemu}" ]]
+	then
+		echo "${MyBase}: ERROR: Can not find target kit files post-setup.sh and raspi-config-qemu.sh" 1>&2
+		exit 1
+	fi
+else
+	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
+fi
 
 echo "${MyBase}: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
