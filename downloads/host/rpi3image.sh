@@ -1548,7 +1548,15 @@ fi
 
 RaspiOSArch=$( "${FILE}" "${RootFsExt4Point}/usr/bin/[" | "${SED}" 's!^.*ld-linux-\(.*\)[.]so[.].*$!\1!' )
 
+RaspiOsReleaseBookworm=12
+RaspiOsReleaseTrixie=13
+
+RaspiOsReleaseNo=$( "${GREP}" 'VERSION_ID' "${RootFsExt4Point}/etc/os-release" \
+	| "${AWK}" 'BEGIN {FS="="} {print $2}' \
+	| "${TR}" -d '"' )
+
 echo "${MyBase}: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
+echo "${MyBase}: INFO: Raspberry Pi OS image release is \"${RaspiOsReleaseNo}\"." 1>&2
 
 RaspiOSImageTemp=$( "${MKTEMP}" -p "${OptionOutputDirectory}" ${RaspiOSImagePrefix}-XXXXXXXXXX.${OptionOutputExt} )
 result=$?
