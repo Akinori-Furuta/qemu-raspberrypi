@@ -1836,10 +1836,56 @@ EOF
 		echo "${MyBase}: ERROR: Can not patch \"${SystemConfMountEtc}\"." 1>&2
 		exit ${result}
 	fi
+
+	LightdmService="/etc/systemd/system/lightdm.service"
+	LightdmServiceMountEtc="${RootFsExt4Point}${LightdmService}"
+	LightdmServiceMountLib="${RootFsExt4Point}${LightdmService/etc/lib}"
+
+	echo "${MyBase}: INFO: Place modified systemd unit file \"${LightdmServiceMountEtc}\"." 1>&2
+
+	"${SUDO}" "${CP}" "${LightdmServiceMountLib}" "${LightdmServiceMountEtc}"
+
 	result=$?
 	if (( ${result} != 0 ))
 	then
-		echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
+		echo "${MyBase}: ERROR: Can not copy \"${LightdmServiceMountLib}\" to \"${LightdmServiceMountEtc}\"." 1>&2
+		exit ${result}
+	fi
+
+	"${SUDO}" "${CHMOD}" 644 "${LightdmServiceMountEtc}"
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not change \"${LightdmServiceMountEtc}\" mode to 644." 1>&2
+		exit ${result}
+	fi
+
+	"${SUDO}" "${PATCH}" "${LightdmServiceMountEtc}" << EOF
+--- /lib/systemd/system/lightdm.service	2025-03-15 00:02:00.000000000 +0900
++++ /etc/systemd/system/lightdm.service	2025-11-25 13:14:40.222838504 +0900
+@@ -1,8 +1,10 @@
+ [Unit]
+ Description=Light Display Manager
+ Documentation=man:lightdm(1)
+-After=systemd-user-sessions.service dev-dri-card0.device dev-dri-renderD128.device
+-Wants=dev-dri-card0.device dev-dri-renderD128.device
++#After=systemd-user-sessions.service dev-dri-card0.device dev-dri-renderD128.device
++#Wants=dev-dri-card0.device dev-dri-renderD128.device
++After=systemd-user-sessions.service
++Wants=
+ 
+ # replaces plymouth-quit since lightdm quits plymouth on its own
+ Conflicts=plymouth-quit.service
+EOF
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch \"${LightdmServiceMountEtc}\"." 1>&2
+		exit ${result}
+	fi
+
 		exit ${result}
 	fi
 else
