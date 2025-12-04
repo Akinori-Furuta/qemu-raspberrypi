@@ -1661,9 +1661,15 @@ then
 	exit ${result}
 fi
 
-"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
---- bcm2710-rpi-3-b.dts	2025-11-19 23:06:31.189266841 +0900
-+++ bcm2710-rpi-3-b-qemu.dts	2025-11-20 01:50:14.622630538 +0900
+if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
+then
+	# Trixie or later
+	#  Disable bluetooth serial interface
+	#  Disable watchdog and also power off device (may be PMIC).
+	#  Disable WiFi on SDIO bus.
+	"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
+--- bcm2710-rpi-3-b.dts	2025-12-03 20:52:28.115354511 +0900
++++ bcm2710-rpi-3-b-qemu.dts	2025-12-03 22:13:27.262886074 +0900
 @@ -567,7 +567,7 @@
  				shutdown-gpios = <0x0b 0x00 0x00>;
  				local-bd-address = [00 00 00 00 00 00];
@@ -1681,6 +1687,15 @@ fi
  			phandle = <0x2c>;
  		};
  
+@@ -991,7 +992,7 @@
+ 			dma-names = "rx-tx";
+ 			brcm,overclock-50 = <0x00>;
+ 			non-removable;
+-			status = "okay";
++			status = "disabled";
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <0x1b>;
+ 			bus-width = <0x04>;
 @@ -1002,6 +1003,7 @@
  			wifi@1 {
  				reg = <0x01>;
@@ -1689,7 +1704,33 @@ fi
  				phandle = <0x8a>;
  			};
  		};
+@@ -1091,7 +1093,7 @@
+ 				compatible = "brcm,bcm2835-virtgpio";
+ 				gpio-controller;
+ 				#gpio-cells = <0x02>;
+-				status = "okay";
++				status = "disabled";
+ 				phandle = <0x3e>;
+ 			};
+ 		};
 EOF
+else
+	# Bookworm or earlier
+	#  Disable bluetooth serial interface
+	"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
+--- bcm2710-rpi-3-b.dts	2025-03-10 02:10:31.929049869 +0900
++++ bcm2710-rpi-3-b-qemu.dts	2025-03-10 02:10:31.931049840 +0900
+@@ -567,7 +567,7 @@
+ 				shutdown-gpios = <0x0b 0x00 0x00>;
+ 				local-bd-address = [00 00 00 00 00 00];
+ 				fallback-bd-address;
+-				status = "okay";
++				status = "disabled";
+ 				phandle = <0x3a>;
+ 			};
+ 		};
+EOF
+fi
 
 result=$?
 if (( ${result} != 0 ))
