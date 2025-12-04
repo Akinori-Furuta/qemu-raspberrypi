@@ -1759,7 +1759,7 @@ fi
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "${MyBase}: ERROR: Can not change owner bootfs directory and files." 1>&2
+	echo "${MyBase}: ERROR: Can not change owner directory \"${OptionOutputDirectory}/bootfs\" and files." 1>&2
 	exit ${result}
 fi
 
