@@ -318,6 +318,7 @@ if [[ -z "${Debug}" ]]
 then
 	if [[ -n "${debug}" ]]
 	then
+		# Defined debug environment value, use it.
 		Debug="${debug}"
 	else
 		Debug=""
