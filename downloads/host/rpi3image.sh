@@ -1804,6 +1804,38 @@ then
 			exit ${result}
 		fi
 	fi
+
+	SystemConf="/etc/systemd/system.conf"
+	SystemConfMountEtc="${RootFsExt4Point}${SystemConf}"
+
+	echo "${MyBase}: INFO: modify \"${SystemConfMountEtc}\"." 1>&2
+
+	"${SUDO}" "${PATCH}" "${SystemConfMountEtc}" << EOF
+--- system.conf.orig 2024-10-11 02:40:53.000000000 +0900
++++ system.conf 2025-01-21 11:40:15.555694259 +0900
+@@ -43,11 +43,11 @@
+ #DefaultTimerAccuracySec=1min
+ #DefaultStandardOutput=journal
+ #DefaultStandardError=inherit
+-#DefaultTimeoutStartSec=90s
++DefaultTimeoutStartSec=400s
+ #DefaultTimeoutStopSec=90s
+ #DefaultTimeoutAbortSec=
+-#DefaultDeviceTimeoutSec=90s
+-#DefaultRestartSec=100ms
++DefaultDeviceTimeoutSec=400s
++DefaultRestartSec=2000ms
+ #DefaultStartLimitIntervalSec=10s
+ #DefaultStartLimitBurst=5
+ #DefaultEnvironment=
+EOF
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch \"${SystemConfMountEtc}\"." 1>&2
+		exit ${result}
+	fi
 	result=$?
 	if (( ${result} != 0 ))
 	then
