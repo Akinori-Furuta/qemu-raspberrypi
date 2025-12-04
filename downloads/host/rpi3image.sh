@@ -2015,7 +2015,7 @@ fi
 
 echo "${MyBase}: INFO: Rename Raspberry Pi OS image file." 1>&2
 
-"${MV}" -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
+"${SUDO}" "${MV}" -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
 result=$?
 if (( ${result} != 0 ))
 then
