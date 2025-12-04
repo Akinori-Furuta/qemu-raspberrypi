@@ -570,7 +570,7 @@ echo "${MyBase}: INFO: Use temporary directory \"${MyTemp}\"." 1>&2
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
 
-"${MKDIR}" "${BootFsFatPoint}"
+"${MKDIR}" -m 700 "${BootFsFatPoint}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -578,7 +578,9 @@ then
 	exit ${result}
 fi
 
-"${MKDIR}" "${RootFsExt4Point}"
+echo "${MyBase}: INFO: Create bootfs mount point \"${BootFsFatPoint}\"." 1>&2
+
+"${MKDIR}" -m 700 "${RootFsExt4Point}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -586,6 +588,7 @@ then
 	exit ${result}
 fi
 
+echo "${MyBase}: INFO: Create root mount point \"${RootFsExt4Point}\"." 1>&2
 
 # Find available nbd node
 # echo nbdN
