@@ -943,7 +943,7 @@ function ConvertScsiDevToUSBDev() {
 
 	sys_host_path="/sys/bus/scsi/devices/host${scsi_host}"
 	host_link="$( "${READLINK}" "${sys_host_path}" )"
-	if ! echo "${host_link}" | "${GREP}" -q "/usb"
+	if [[ "${host_link}" != */usb[0-9]* ]]
 	then
 		return 1
 	fi
