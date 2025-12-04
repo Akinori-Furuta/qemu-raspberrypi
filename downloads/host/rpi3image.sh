@@ -1457,7 +1457,7 @@ fi
 
 echo "${MyBase}: INFO: Resize Raspberry Pi OS image file \"${RaspiOSImagePreview}\" into ${RaspiOSImageSizeAligned}G" 1>&2
 
-"${QEMU_IMG}" resize -f ${OptionOutputFormat} "${RaspiOSImagePreview}" "${RaspiOSImageSizeAligned}G"
+"${SUDO}" "${QEMU_IMG}" resize -f ${OptionOutputFormat} "${RaspiOSImagePreview}" "${RaspiOSImageSizeAligned}G"
 result=$?
 if (( ${result} != 0 ))
 then
