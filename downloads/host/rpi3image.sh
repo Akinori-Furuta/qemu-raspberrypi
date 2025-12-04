@@ -196,7 +196,7 @@ MyTemp=""
 function PathIsMountPoint() {
 	if [[ -z "$1" ]]
 	then
-		echo "$0.PathIsMountPoint(): WARNING: No argument." 1>&2
+		echo "${MyBase}.PathIsMountPoint(): WARNING: No argument." 1>&2
 		return 1
 	fi
 	"${AWK}" '{print $2}' /proc/mounts  | while read
@@ -261,7 +261,7 @@ function TempDirectoryFind() {
 	do
 		if echo -n "${Temp}" | "${GREP}" -q '[[:space:]]'
 		then
-			echo "$0.TempDirectoryFind(): NOTICE: Skip using temporary directory which has one or more spaces \"${Temp}\"." 1>&2
+			echo "${MyBase}.TempDirectoryFind(): NOTICE: Skip using temporary directory which has one or more spaces \"${Temp}\"." 1>&2
 			continue
 		fi
 
@@ -517,7 +517,7 @@ fi
 function DeviceIsMounted() {
 	if [[ -z "$1" ]]
 	then
-		echo "$0.DeviceIsMounted(): WARNING: No argument." 1>&2
+		echo "${MyBase}.DeviceIsMounted(): WARNING: No argument." 1>&2
 		return 1
 	fi
 	"${AWK}" '{print $1}' /proc/mounts | while read
@@ -690,7 +690,7 @@ function SizeOfBlockDevice() {
 
 	if [[ -z "$1" ]]
 	then
-		echo "$0.SizeOfBlockDevice(): ERROR: No block device path argument." 1>&2
+		echo "${MyBase}.SizeOfBlockDevice(): ERROR: No block device path argument." 1>&2
 		# no echo
 		return 1
 	fi
@@ -701,7 +701,7 @@ function SizeOfBlockDevice() {
 
 	if [[ ! -d "${sys_block}" ]]
 	then
-		echo "$0.SizeOfBlockDevice(): ERROR: Can not find device ${dev_base} in ${sys_block}" 1>&2
+		echo "${MyBase}.SizeOfBlockDevice(): ERROR: Can not find device ${dev_base} in ${sys_block}" 1>&2
 		# no echo
 		return 1
 	fi
@@ -709,7 +709,7 @@ function SizeOfBlockDevice() {
 	count=$( "${CAT}" "${sys_block}/size" )
 	if [[ -z "${count}" ]]
 	then
-		echo "$0.SizeOfBlockDevice(): ERROR: No block count in ${sys_block}/size" 1>&2
+		echo "${MyBase}.SizeOfBlockDevice(): ERROR: No block count in ${sys_block}/size" 1>&2
 		# no echo
 		return 1
 	fi
@@ -730,7 +730,7 @@ function BlkIdLabel() {
 	result=$?
 
 	echo -n "${label}"
-	[[ -n "${Debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device label. dev=\"$1\", label=\"${label}\"" 1>&2
+	[[ -n "${Debug}" ]] && echo "${MyBase}.BlkIdLabel(): DEBUG: Read block device label. dev=\"$1\", label=\"${label}\"" 1>&2
 	return ${result}
 }
 
@@ -772,7 +772,7 @@ function BlkIdType() {
 	result=$?
 
 	echo -n "${type}"
-	[[ -n "${Debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device file system. dev=\"$1\", type=\"${type}\"" 1>&2
+	[[ -n "${Debug}" ]] && echo "${MyBase}.BlkIdLabel(): DEBUG: Read block device file system. dev=\"$1\", type=\"${type}\"" 1>&2
 
 	return ${result}
 }
@@ -824,7 +824,7 @@ function BlockDeviceIsRaspiOS() {
 
 	if [[ -z "$1" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): ERROR: Not argument." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): ERROR: No argument." 1>&2
 		return 1
 	fi
 
@@ -832,7 +832,7 @@ function BlockDeviceIsRaspiOS() {
 
 	if [[ ! -b "${dev_path}" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): ERROR: Not a block device \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): ERROR: Not a block device \"$1\"." 1>&2
 		return 1
 	fi
 
@@ -841,35 +841,35 @@ function BlockDeviceIsRaspiOS() {
 	if ! "${SUDO}" "${FILE}" -s "${dev_path}" | \
 	   "${GREP}" -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_label="$( BlkPartIdLabel "${dev_path}" 1 )"
 	if [[ ! "${part_label}"  == "bootfs" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Partition 1 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_type="$( BlkPartIdType "${dev_path}" 1 )"
 	if [[ ! "${part_type}"  == "vfat" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Partition 1 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_label="$(BlkPartIdLabel "${dev_path}" 2)"
 	if [[ ! "${part_label}"  == "rootfs" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Partition 2 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_type="$(BlkPartIdType "${dev_path}" 2)"
 	if [[ ! "${part_type}"  == "ext4" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Partition 2 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
@@ -879,10 +879,10 @@ function BlockDeviceIsRaspiOS() {
 	then
 		if [[ -z "${OptionMigrate}" ]]
 		then
-			echo "$0.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media \"$1\"." 1>&2
+			echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media \"$1\"." 1>&2
 			return 1
 		else
-			echo "$0.BlockDeviceIsRaspiOS(): NOTICE: There are ${part_num} partitions in media \"$1\", may be added extra partition." 1>&2
+			echo "${MyBase}.BlockDeviceIsRaspiOS(): NOTICE: There are ${part_num} partitions in media \"$1\", may be added extra partition." 1>&2
 		fi
 	fi
 
@@ -994,7 +994,7 @@ function ShowBlockDevice() {
 function UmountBlockDevicePartPath() {
 	if DeviceIsMounted "${1}"
 	then
-		[[ -n "${Debug}" ]] && echo "$0.UmountBlockDevicePart().1: DEBUG: umount \"${1}\"" 1>&2
+		[[ -n "${Debug}" ]] && echo "${MyBase}.UmountBlockDevicePart().1: DEBUG: umount \"${1}\"" 1>&2
 		"${SUDO}" "${UMOUNT}" "${1}"
 		return $?
 	fi
@@ -1013,7 +1013,7 @@ function UmountBlockDeviceWhole() {
 
 	if [[ -z "${1}" ]]
 	then
-		echo "$0.UmountBlockDeviceWhole(): ERROR: Specify path_to_block_device." 1>&2
+		echo "${MyBase}.UmountBlockDeviceWhole(): ERROR: Specify path_to_block_device." 1>&2
 		return 1
 	fi
 
@@ -1071,7 +1071,7 @@ function FsckVolume() {
 	i=0
 	while (( ${i} < ${FSCK_TRIES} ))
 	do
-		echo "$0.FsckVolume().loop=$i: INFO: fsck -f -y \"${1}\"" 1>&2
+		echo "${MyBase}.FsckVolume().loop=$i: INFO: fsck -f -y \"${1}\"" 1>&2
 		"${SUDO}" "${FSCK}" -f -y "${1}" 1>&2
 		result=$?
 		(( ${result} == 0 )) && break
@@ -1093,20 +1093,20 @@ function FsckPart() {
 
 	if [[ -b "${part_path_nbd}" ]]
 	then
-		[[ -n "${Debug}" ]] && echo "$0.FsckPart(): DEBUG: Find partition \"${part_path_nbd}\"."
+		[[ -n "${Debug}" ]] && echo "${MyBase}.FsckPart(): DEBUG: Find partition \"${part_path_nbd}\"."
 		FsckVolume "${part_path_nbd}"
 		return $?
 	else
-		[[ -n "${Debug}" ]] && echo "$0.FsckPart(): DEBUG: Not found partition \"${part_path_nbd}\"."
+		[[ -n "${Debug}" ]] && echo "${MyBase}.FsckPart(): DEBUG: Not found partition \"${part_path_nbd}\"."
 	fi
 
 	if [[ -b "${part_path_scsi}" ]]
 	then
-		[[ -n "${Debug}" ]] && echo "$0.FsckPart(): DEBUG: Find partition \"${part_path_scsi}\"."
+		[[ -n "${Debug}" ]] && echo "${MyBase}.FsckPart(): DEBUG: Find partition \"${part_path_scsi}\"."
 		FsckVolume "${part_path_scsi}"
 		return $?
 	else
-		[[ -n "${Debug}" ]] && echo "$0.FsckPart(): DEBUG: Not found partition \"${part_path_scsi}\"."
+		[[ -n "${Debug}" ]] && echo "${MyBase}.FsckPart(): DEBUG: Not found partition \"${part_path_scsi}\"."
 	fi
 
 	return 1
@@ -1163,7 +1163,7 @@ function GrowPartRaspiOSMedia() {
 
 	if [[ -z "${do_resize}" ]]
 	then
-		echo "$0.GrowPartRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition(s)." 1>&2
+		echo "${MyBase}.GrowPartRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition(s)." 1>&2
 	fi
 
 	return 1
@@ -1211,7 +1211,7 @@ function MountRaspiOSMedia() {
 
 	if [[ -z "${do_mount}" ]]
 	then
-		echo "$0.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 1." 1>&2
+		echo "${MyBase}.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 1." 1>&2
 		return 1
 	fi
 
@@ -1239,7 +1239,7 @@ function MountRaspiOSMedia() {
 
 	if [[ -z "${do_mount}" ]]
 	then
-		echo "$0.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 2." 1>&2
+		echo "${MyBase}.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 2." 1>&2
 		return 1
 	fi
 
