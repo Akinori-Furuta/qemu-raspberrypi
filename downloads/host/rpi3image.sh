@@ -1622,12 +1622,19 @@ if [[ -z "${OptionMigrate}" ]]
 then
 	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
 
-	"${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
-	result=$?
-	if (( ${result} != 0 ))
+	FirstRunMountBootfs="${OptionOutputDirectory}/bootfs/firstrun.sh"
+
+	if [[ -f "${FirstRunMountBootfs}" ]]
 	then
-		echo "${MyBase}: ERROR: Can not change mode bootfs/firstrun.sh." 1>&2
-		exit ${result}
+		"${SUDO}" "${CHMOD}" 600 "${FirstRunMountBootfs}"
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not change mode \"{FirstRunMountBootfs}\"." 1>&2
+			exit ${result}
+		fi
+	else
+		echo "${MyBase}: NOTICE: Not found \"${FirstRunMountBootfs}\", skip changing mode." 1>&2
 	fi
 fi
 
