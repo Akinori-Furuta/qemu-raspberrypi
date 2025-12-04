@@ -55,6 +55,7 @@ ProbeCommand SYNC coreutils		/usr/bin/sync /bin/sync /usr/sbin/sync
 ProbeCommand SLEEP coreutils		/usr/bin/sleep /bin/sleep /usr/sbin/sleep
 ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
 ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
+ProbeCommand DD coreutils		/usr/bin/dd /bin/dd /usr/sbin/dd
 ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
 ProbeCommand LS coreutils		/usr/bin/ls /bin/ls /usr/sbin/ls
 ProbeCommand PWD coreutils		/usr/bin/pwd /bin/pwd /usr/sbin/pwd
