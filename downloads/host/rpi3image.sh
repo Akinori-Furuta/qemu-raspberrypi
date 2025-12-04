@@ -1917,6 +1917,50 @@ EOF
 		fi
 	fi
 
+	XorgConf="/etc/X11/xorg.conf.d/00-fbdev.conf"
+	XorgConfMountEtc="${RootFsExt4Point}${XorgConf}"
+
+	echo "${MyBase}: INFO: Create Xorg configuration file \"${XorgConfMountEtc}\"." 1>&2
+
+	# Place 00-fbdev.conf with file configured trixie ready.
+	"${SUDO}" "${DD}" "of=${XorgConfMountEtc}" << EOF
+Section "Device"
+	Identifier "Card0"
+	Driver "fbdev"
+EndSection
+
+Section "ServerLayout"
+	Identifier	"ServerLayout0"
+	Screen	0 "QEMUFB"
+EndSection
+
+Section	"Screen"
+	Identifier	"QEMUFB"
+	Device		"Card0"
+	Monitor		"QEMUFBPanel"
+	DefaultDepth	24
+	SubSection	"Display"
+		Depth	24
+	EndSubSection
+EndSection
+
+Section	"Monitor"
+	Identifier	"QEMUFBPanel"
+	VertRefresh	60
+EndSection
+EOF
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not place Xorg configuration file \"${XorgConfMountEtc}\"." 1>&2
+		exit ${result}
+	fi
+
+	"${SUDO}" "${CHMOD}" 644 "${XorgConfMountEtc}"
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not change \"${XorgConfMountEtc}\" mode to 644." 1>&2
 		exit ${result}
 	fi
 else
