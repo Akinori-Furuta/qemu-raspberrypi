@@ -282,16 +282,29 @@ function TempDirectoryFind() {
 function TempPathGen() {
 	local	my_body="${MyBodyNoSpace}"
 	local	my_temp
+	local	result
 
 	if [[ -z "${my_body}" ]]
 	then
 		my_body="rpi3image"
 	fi
-	if ! my_temp=$( "${MKTEMP}" -d -p "$( TempDirectoryFind )" "${my_body}-$$-XXXXXXXXXX" )
+
+	my_temp="$( "${MKTEMP}" -d -p "$( TempDirectoryFind )" "${my_body}-$$-XXXXXXXXXX" )"
+	result=$?
+	if (( ${result} != 0 ))
 	then
+		echo "${MyBase}.TempPathGen(): ERROR: Can not create temporary directory at \"${TempDirectoryFind}\"." 1>&2
 		return $?
 	fi
+
 	"${CHMOD}" 700 "${my_temp}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}.TempPathGen(): ERROR: Can not change \"${my_temp}\" mode to 700." 1>&2
+		return ${result}
+	fi
+
 	echo "${my_temp}"
 	return 0
 }
