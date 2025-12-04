@@ -1394,10 +1394,12 @@ then
 		echo "${MyBase}: ERROR: Can not create directory \"${OptionOutputDirectory}\"." 1>&2
 		exit ${result}
 	fi
+
+	"${SUDO}" "${CHOWN}" "${IdUser}:${IdGroup}" "${OptionOutputDirectory}"
 	result=$?
 	if (( ${result} != 0 ))
 	then
-		echo "${MyBase}: ERROR: Can not change \"${OptionOutputDirectory}\" access mode into 700." 1>&2
+		echo "${MyBase}: ERROR: Can not change \"${OptionOutputDirectory}\" owner to \"${IdUser}:${IdGroup}\"." 1>&2
 		exit ${result}
 	fi
 fi
