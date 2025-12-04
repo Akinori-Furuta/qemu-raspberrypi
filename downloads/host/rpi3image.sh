@@ -1407,7 +1407,7 @@ fi
 RaspiOSImagePreviewReady=""
 RaspiOSImagePreview="$( "${MKTEMP}" -p "${OptionOutputDirectory}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.${OptionOutputExt}" )"
 
-${CHMOD} 600 "${RaspiOSImagePreview}"
+"${CHMOD}" 600 "${RaspiOSImagePreview}"
 result=$?
 if (( ${result} != 0 ))
 then
