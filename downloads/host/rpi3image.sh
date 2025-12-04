@@ -1295,7 +1295,7 @@ then
 	exit ${found}
 fi
 
-if [ ! -d "/sys/module/nbd" ]
+if [[ ! -d "/sys/module/nbd" ]]
 then
 	echo "${MyBase}: INFO: Probe nbd kernel module." 1>&2
 	"${SUDO}" "${MODPROBE}" nbd
