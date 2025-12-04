@@ -1364,14 +1364,13 @@ done
 
 if [[ ! -d "${OptionOutputDirectory}" ]]
 then
-	"${MKDIR}" -p "${OptionOutputDirectory}"
+	"${MKDIR}" -m 700 -p "${OptionOutputDirectory}"
 	result=$?
 	if (( ${result} != 0 ))
 	then
 		echo "${MyBase}: ERROR: Can not create directory \"${OptionOutputDirectory}\"." 1>&2
 		exit ${result}
 	fi
-	chmod 700 "${OptionOutputDirectory}"
 	result=$?
 	if (( ${result} != 0 ))
 	then
