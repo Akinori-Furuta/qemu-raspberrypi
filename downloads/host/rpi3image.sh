@@ -129,7 +129,7 @@ ${MyBase}: HELP:     [/dev/RaspberryPiMedia]
 ${MyBase}: HELP:
 ${MyBase}: HELP: -s number Image file size in Gibytes. It should be
 ${MyBase}: HELP:           power of 2 and larger or equal to
-${MyBase}: HELP            Raspberry PiOSmedia capacity.
+${MyBase}: HELP:           Raspberry PiOSmedia capacity.
 ${MyBase}: HELP:           Without this option, resize image file
 ${MyBase}: HELP:           size upto the smallest number of power
 ${MyBase}: HELP:           of 2 Gibytes size which is larger or equal
@@ -148,7 +148,7 @@ ${MyBase}: HELP: -f        Force overwrite existing file(s).
 ${MyBase}: HELP: -h        Show help.
 ${MyBase}: HELP:
 ${MyBase}: HELP: Copy the Raspberry Pi OS media at /dev/RaspberryPiMedia
-${MyBase}: HELP  to virtual machine image files.
+${MyBase}: HELP: to virtual machine image files.
 ${MyBase}: HELP: By default, files are stored into current directory.
 ${MyBase}: HELP: When the option -o ImagePath is specified. Outputs are
 ${MyBase}: HELP: stored according to ImagePath points to as flollows,
