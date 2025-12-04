@@ -430,7 +430,7 @@ then
 	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Check log2 calculation log2(${OptionSizeNum})=${OptionSizeNumLog2}" 1>&2
 	if (( ${OptionSizeNum} != ( 1 << ${OptionSizeNumLog2} ) ))
 	then
-		echo "${MyBase}: The number of -s ${OptionSize} should be power of 2." 1>&2
+		echo "${MyBase}: ERROR: The number of -s ${OptionSize} should be power of 2." 1>&2
 		exit 1
 	fi
 fi
