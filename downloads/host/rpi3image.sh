@@ -96,6 +96,7 @@ then
 fi
 
 Pwd="$( "${PWD}" )"
+
 if [[ -n "${SUDO_UID}" ]]
 then
 	IdUser=${SUDO_UID}
@@ -109,6 +110,7 @@ then
 else
 	IdGroup="$( "${ID}" -g )"
 fi
+
 MyWhich="$( "${WHICH}" "$0" )"
 MyPath="$( "${READLINK}" -f "${MyWhich}" )"
 MyDir="$( "${DIRNAME}" "${MyPath}" )"
