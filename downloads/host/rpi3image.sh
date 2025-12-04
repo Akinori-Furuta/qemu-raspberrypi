@@ -1886,6 +1886,37 @@ EOF
 		exit ${result}
 	fi
 
+	if  (( ${RaspiOsReleaseNo}" >= "${RaspiOsReleaseTrixie} ))
+	then
+		# Follow Trixie changes.
+		# Touch up lightdm.conf
+
+		LightdmConf="/etc/lightdm/lightdm.conf"
+		LightdmConfMountEtc="${RootFsExt4Point}${LightdmConf}"
+
+		echo "${MyBase}: INFO: Modify lightdm configuration file \"${LightdmConfMountEtc}\"." 1>&2
+
+		"${SUDO}" "${PATCH}" "${LightdmConfMountEtc}" << EOF
+--- lightdm.conf	2025-11-25 13:45:47.000000000 +0900
++++ lightdm-qemu.conf	2025-11-30 02:11:13.000000000 +0900
+@@ -26,7 +26,7 @@
+ #lock-memory=true
+ #user-authority-in-system-dir=false
+ #guest-account-script=guest-account
+-#logind-check-graphical=true
++logind-check-graphical=false
+ #log-directory=/var/log/lightdm
+ #run-directory=/var/run/lightdm
+ #cache-directory=/var/cache/lightdm
+EOF
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not apply patch to \"${LightdmConfMountEtc}\"." 1>&2
+			exit ${result}
+		fi
+	fi
+
 		exit ${result}
 	fi
 else
