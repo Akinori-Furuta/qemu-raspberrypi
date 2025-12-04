@@ -524,6 +524,18 @@ then
 	fi
 fi
 
+GitCloned=""
+
+if [[ -d "${MyDir}/.git" ]]
+then
+	GitCloned="${MyDir}"
+fi
+
+if [[ -z "${GitCloned}" && -d "${MyDir}/../../.git" ]]
+then
+	GitCloned="$( "${READLINK}" -f "${MyDir}/../../" )"
+fi
+
 # Check device is used as mount point
 # args path
 # echo none
