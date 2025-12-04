@@ -1767,7 +1767,43 @@ if [[ -z "${DebugCopyOnly}" ]]
 then
 	echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
 
-	"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
+	if [[ -z "${TargetKitPostSetup}" || -z "${TargetKitRaspiConfigQemu}" ]]
+	then
+		"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
+
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
+			exit ${result}
+		fi
+	else
+		TargetKitCopyToMountLocal="${RootFsExt4Point}/var/local"
+
+		echo "${MyBase}: INFO: Copy post setup scripts to \"${TargetKitCopyToMountLocal}\"." 1>&2
+
+		"${SUDO}" "${CP}" --preserve=timestamps \
+			"${TargetKitPostSetup}" \
+			"${TargetKitRaspiConfigQemu}" \
+			"${TargetKitCopyToMountLocal}"
+
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not copy post setup scripts to \"${TargetKitCopyToMountLocal}\"." 1>&2
+			exit ${result}
+		fi
+
+		"${SUDO}" "${CHMOD}" 555 \
+			"${TargetKitCopyToMountLocal}/${TargetKitPostSetup##*/}" \
+			"${TargetKitCopyToMountLocal}/${TargetKitRaspiConfigQemu##*/}"
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not change post setup scripts mode to 555." 1>&2
+			exit ${result}
+		fi
+	fi
 	result=$?
 	if (( ${result} != 0 ))
 	then
