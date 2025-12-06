@@ -1886,19 +1886,17 @@ EOF
 		exit ${result}
 	fi
 
+	LightdmConf="/etc/lightdm/lightdm.conf"
+	LightdmConfMountEtc="${RootFsExt4Point}${LightdmConf}"
+
+	echo "${MyBase}: INFO: Modify lightdm configuration file \"${LightdmConfMountEtc}\"." 1>&2
 	if  (( ${RaspiOsReleaseNo}" >= "${RaspiOsReleaseTrixie} ))
 	then
 		# Follow Trixie changes.
 		# Touch up lightdm.conf
-
-		LightdmConf="/etc/lightdm/lightdm.conf"
-		LightdmConfMountEtc="${RootFsExt4Point}${LightdmConf}"
-
-		echo "${MyBase}: INFO: Modify lightdm configuration file \"${LightdmConfMountEtc}\"." 1>&2
-
 		"${SUDO}" "${PATCH}" "${LightdmConfMountEtc}" << EOF
---- lightdm.conf	2025-11-25 13:45:47.000000000 +0900
-+++ lightdm-qemu.conf	2025-11-30 02:11:13.000000000 +0900
+--- lightdm-orig.conf	2025-11-24 11:09:51.162401933 +0900
++++ lightdm-qemu.conf	2025-12-05 18:42:20.684060125 +0900
 @@ -26,7 +26,7 @@
  #lock-memory=true
  #user-authority-in-system-dir=false
@@ -1908,13 +1906,69 @@ EOF
  #log-directory=/var/log/lightdm
  #run-directory=/var/run/lightdm
  #cache-directory=/var/cache/lightdm
+@@ -99,12 +99,12 @@
+ #xdmcp-manager=
+ #xdmcp-port=177
+ #xdmcp-key=
+-greeter-session=pi-greeter-labwc
++greeter-session=pi-greeter-x
+ greeter-hide-users=false
+ #greeter-allow-guest=true
+ #greeter-show-manual-login=false
+ #greeter-show-remote-login=true
+-user-session=rpd-labwc
++user-session=rpd-x
+ #allow-user-switching=true
+ #allow-guest=true
+ #guest-session=
+@@ -120,7 +120,7 @@
+ autologin-user=rpi-first-boot-wizard
+ #autologin-user-timeout=0
+ #autologin-in-background=false
+-autologin-session=rpd-labwc
++autologin-session=rpd-x
+ #exit-on-failure=false
+ 
+ #
 EOF
-		result=$?
-		if (( ${result} != 0 ))
-		then
-			echo "${MyBase}: ERROR: Can not apply patch to \"${LightdmConfMountEtc}\"." 1>&2
-			exit ${result}
-		fi
+	else
+		# Bookworm or earlier.
+		# Touch up lightdm.conf
+		"${SUDO}" "${PATCH}" "${LightdmConfMountEtc}" << EOF
+--- lightdm-orig.conf	2025-10-01 09:18:04.468000000 +0900
++++ lightdm.conf	2025-12-05 22:23:24.460745071 +0900
+@@ -108,12 +108,12 @@
+ #xdmcp-key=
+ #unity-compositor-command=unity-system-compositor
+ #unity-compositor-timeout=60
+-greeter-session=pi-greeter-labwc
++greeter-session=pi-greeter
+ greeter-hide-users=false
+ #greeter-allow-guest=true
+ #greeter-show-manual-login=false
+ #greeter-show-remote-login=true
+-user-session=LXDE-pi-labwc
++user-session=LXDE-pi-x
+ #allow-user-switching=true
+ #allow-guest=true
+ #guest-session=
+@@ -129,7 +129,7 @@
+ autologin-user=furuta
+ #autologin-user-timeout=0
+ #autologin-in-background=false
+-autologin-session=LXDE-pi-labwc
++autologin-session=LXDE-pi-x
+ #exit-on-failure=false
+ #fallback-test=
+ #fallback-session=
+EOF
+	fi
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not apply patch to \"${LightdmConfMountEtc}\"." 1>&2
+		exit ${result}
 	fi
 
 	XorgConf="/etc/X11/xorg.conf.d/00-fbdev.conf"
