@@ -1963,6 +1963,26 @@ EOF
 		echo "${MyBase}: ERROR: Can not change \"${XorgConfMountEtc}\" mode to 644." 1>&2
 		exit ${result}
 	fi
+
+	for f in \
+		"${RootFsExt4Point}/etc/systemd/system/multi-user.target.wants/rpi-eeprom-update.service" \
+		"${RootFsExt4Point}/etc/systemd/system/multi-user.target.wants/ModemManager.service" \
+		"${RootFsExt4Point}/etc/systemd/system/dev-serial1.device.wants/hciuart.service"
+	do
+		if [[ -f "${f}" || -h "${f}" ]]
+		then
+			echo "${MyBase}: INFO: Disable Raspberry Pi OS service \"${f##*/}\"." 1>&2
+			"${SUDO}" "${RM}" "${f}"
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not remove \"${f}\"." 1>&2
+				exit ${result}
+			fi
+		else
+			[[ -n "${Debug}" ]] && "${MyBase}: DEBUG: Not found \"${f}\"." 1>&2
+		fi
+	done
 else
 	echo "${MyBase}: DEBUG: Skip modifying rootfs." 1>&2
 fi
