@@ -2110,4 +2110,12 @@ if [[ "${RaspiOSArch}" == "aarch64" ]]
 then
 	echo "${MyBase}: INFO: Created Raspberry Pi Model 3B device tree file \"${DtRpi3BNameQemuBlob}\"." 1>&2
 fi
+
+if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
+then
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64.sh\" ." 1>&2
+else
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
+fi
+
 exit 0
