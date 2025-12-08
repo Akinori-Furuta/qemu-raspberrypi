@@ -31,12 +31,12 @@ git checkout follow-trixie
 ./rpi3image.sh /dev/sdX
 # 1st step configuration.
 ./rpi3vm64-1st.sh
-# Configure Raspberry Pi OS on GUI
+# Configure Raspberry Pi OS on GUI.
 # Launch Desktop, then logout and shutdown.
 # Terminate QEMU [CTRL]-[a] [x] after power off
 #  (may be kernel panic).
 # 2nd step configuration.
-./rpi3vm64-1st.sh
+./rpi3vm64-2nd.sh
 # Wait until halt.
 # Terminate QEMU [CTRL]-[a] [x] after halt.
 # Normal operation boot.
@@ -53,7 +53,7 @@ Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
 > There are some restrictions on QEMU emulator.
 >
 > * Disable watchdog timer.
->   * Also disables shutdown driver.
+>   * Also it disables shutdown driver.
 >     When you shutdown Raspberry Pi OS on QEMU,
 >     exit QEMU by typing
 >     **[Ctrl]-[a]**, **[x]** (QEMU monitor control
