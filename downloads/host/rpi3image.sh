@@ -72,7 +72,7 @@ ProbeCommand TR coreutils		/usr/bin/tr /bin/tr /usr/sbin/tr
 ProbeCommand WC coreutils		/usr/bin/wc /bin/wc /usr/sbin/wc
 ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
 ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
-ProbeCommand AWK gawk			/usr/bin/awk /bin/awk /usr/bin/gawk /bin/gawk /usr/sbin/awk /sbin/awk
+ProbeCommand GAWK gawk			/usr/bin/gawk /bin/gawk /usr/bin/awk /bin/awk /usr/sbin/awk /sbin/awk
 ProbeCommand PATCH patch		/usr/bin/patch /bin/patch /usr/sbin/patch
 ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
 ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
@@ -199,7 +199,7 @@ function PathIsMountPoint() {
 		echo "${MyBase}.PathIsMountPoint(): WARNING: No argument." 1>&2
 		return 1
 	fi
-	"${AWK}" '{print $2}' /proc/mounts  | while read
+	"${GAWK}" '{print $2}' /proc/mounts  | while read
 	do
 		if [[ "${REPLY}" == "$1" ]]
 		then
@@ -546,7 +546,7 @@ function DeviceIsMounted() {
 		echo "${MyBase}.DeviceIsMounted(): WARNING: No argument." 1>&2
 		return 1
 	fi
-	"${AWK}" '{print $1}' /proc/mounts | while read
+	"${GAWK}" '{print $1}' /proc/mounts | while read
 	do
 		if [[ "${REPLY}" == "$1" ]]
 		then
@@ -621,7 +621,7 @@ function NbdFindAvailableNode() {
 }
 
 function SizeKiMiGi() {
-	echo $1 | "${AWK}" -e '{
+	echo $1 | "${GAWK}" '{
 		i=0;
 		a=$1;
 		while (a > 1024) {
@@ -649,7 +649,7 @@ function SizeKiMiGi() {
 }
 
 function SizeKMG() {
-	echo $1 | "${AWK}" -e '{
+	echo $1 | "${GAWK}" '{
 		i=0;
 		a=$1;
 		while (a > 1000) {
@@ -935,7 +935,7 @@ function ConvertScsiDevToUSBDev() {
 	sys_block_path="/sys/block/${1}"
 	scsi_link="$( "${READLINK}" "${sys_block_path}/device" )"
 	scsi_hcil="$( "${BASENAME}" "${scsi_link}" )"
-	scsi_host="$( echo "${scsi_hcil}" | "${AWK}" -F ':' '{print $1}' )"
+	scsi_host="$( echo "${scsi_hcil}" | "${GAWK}" -F ':' '{print $1}' )"
 	if [[ -z "${scsi_host}" ]]
 	then
 		return 1
@@ -1046,7 +1046,7 @@ function UmountBlockDeviceWhole() {
 		return 1
 	fi
 
-	for part_path in $( "${SUDO}" "${SFDISK}" -d "${1}" | "${GREP}" '^/dev/' | "${AWK}" '{print $1}' )
+	for part_path in $( "${SUDO}" "${SFDISK}" -d "${1}" | "${GREP}" '^/dev/' | "${GAWK}" '{print $1}' )
 	do
 		UmountBlockDevicePartPath "${part_path}"
 		result=$?
@@ -1552,7 +1552,7 @@ RaspiOsReleaseBookworm=12
 RaspiOsReleaseTrixie=13
 
 RaspiOsReleaseNo=$( "${GREP}" 'VERSION_ID' "${RootFsExt4Point}/etc/os-release" \
-	| "${AWK}" 'BEGIN {FS="="} {print $2}' \
+	| "${GAWK}" 'BEGIN {FS="="} {print $2}' \
 	| "${TR}" -d '"' )
 
 echo "${MyBase}: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2

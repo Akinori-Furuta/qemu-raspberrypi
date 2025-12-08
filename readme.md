@@ -11,55 +11,59 @@ Linux PC 上で QEMU を使って RaspberyPi のイメージを動かすこと�
 Now working in progress on branch `follow-trixie`. To checkout branch `follow-trixie`.
 
 ```bash
+# Install required packages.
+sudo apt install git bridge-utils uml-utilities \
+ qemu-system-common qemu-system qemu-system-arm qemu-utils \
+ parted nbd-client cloud-guest-utils e2fsprogs virt-viewer \
+ device-tree-compiler gawk
+# Clone git repository.
+git clone https://github.com/Akinori-Furuta/qemu-raspberrypi.git
+cd qemu-raspberrypi
+# Checkout branch working with Trixie release.
 git branch -t follow-trixie origin/follow-trixie
 git checkout follow-trixie
+# Setup symbolic links to scripts.
+./setup-rpi3-trixie-64.sh
+# Attach Raspberry Pi OS image media to PC.
+# Find Raspberry Pi OS image media.
+./rpi3image.sh find
+# Convert Raspberry Pi OS image media into eMMC image file.
+./rpi3image.sh /dev/sdX
+# 1st step configuration.
+./rpi3vm64-1st.sh
+# Configure Raspberry Pi OS on GUI
+# Launch Desktop, then logout and shutdown.
+# Terminate QEMU [CTRL]-[a] [x] after power off
+#  (may be kernel panic).
+# 2nd step configuration.
+./rpi3vm64-1st.sh
+# Wait until halt.
+# Terminate QEMU [CTRL]-[a] [x] after halt.
+# Normal operation boot.
+./rpi3vm64.sh
+# Terminate QEMU [CTRL]-[a] [x] after power off (may be kernel panic).
 ```
 
-Currently, the Raspberry Pi OS "trixie" runs on QEMU console mode.
+Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
 
-![Running Raspberry Pi OS Debian 13 (trixie) release](img/run-raspberrypi-trixie-debian13-on-qemu.png)
+![Running Raspberry Pi OS Debian 13 (trixie) release](img/run-raspberrypi-trixie-debian13-on-qemu-gui.png)
 
-To boot the "trixie" anyway. Disable "watchdog" by modifying device tree as follows.
-
-```diff
-"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
---- bcm2710-rpi-3-b.dts	2025-11-19 23:06:31.189266841 +0900
-+++ bcm2710-rpi-3-b-qemu.dts	2025-11-20 01:50:14.622630538 +0900
-@@ -567,7 +567,7 @@
- 				shutdown-gpios = <0x0b 0x00 0x00>;
- 				local-bd-address = [00 00 00 00 00 00];
- 				fallback-bd-address;
--				status = "okay";
-+				status = "disabled";
- 				phandle = <0x3a>;
- 			};
- 		};
-@@ -876,6 +876,7 @@
- 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
- 			clock-names = "v3d\0peri_image\0h264\0isp";
- 			system-power-controller;
-+			status = "disabled";
- 			phandle = <0x2c>;
- 		};
- 
-@@ -1002,6 +1003,7 @@
- 			wifi@1 {
- 				reg = <0x01>;
- 				compatible = "brcm,bcm4329-fmac";
-+				status = "disabled";
- 				phandle = <0x8a>;
- 			};
- 		};
-EOF
-```
 
 > [!note]
-> The diff source above contains following changes,
+> There are some restrictions on QEMU emulator.
 >
-> * Disable Bluhtooth interface via serial port.
 > * Disable watchdog timer.
->   * Also disables shutdown driver. So, shutdown, then exit QEMU by typing **[Ctrl]-[a]**, **[x]** (QEMU monitor control type in sequence to exit) at monitor terminal.
+>   * Also disables shutdown driver.
+>     When you shutdown Raspberry Pi OS on QEMU,
+>     exit QEMU by typing
+>     **[Ctrl]-[a]**, **[x]** (QEMU monitor control
+>     type in sequence to exit) at monitor terminal.
+> * Disable Bluhtooth interface via serial port.
 > * Disable Wifi device on SDIO bus.
+>   * Also disable SDIO contoller which connected to
+>     the WiFi device.
+> * Fix graphical screen resolution to 1024x768.
+>
 
 ## 目次
 

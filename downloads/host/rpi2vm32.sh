@@ -40,7 +40,7 @@ qemu-system-arm \
 -no-reboot \
 -device usb-kbd \
 -device usb-tablet \
--netdev "tap,br=${NicBridge},helper=/usr/lib/qemu/qemu-bridge-helper-suid,id=net0" \
+-netdev "${NetDevOption}" \
 -device "usb-net,netdev=net0,mac=${NicMac}" \
 -display "${DisplayOutput}" \
 "$@"
