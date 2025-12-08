@@ -102,6 +102,67 @@ function RaspiBridgeFind() {
 	return $result
 }
 
+# Get file mode in value
+# echo file mode in decimal value
+# return 0: Success, !=0: Failed
+function FileMode() {
+	local	mode_str
+	local	mode_val
+	local	result
+
+	mode_str=$( stat -c %a "$1" )
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		return ${result}
+	fi
+
+	mode_str="0${mode_str}"
+	mode_val=$(( ${mode_str} + 0 ))
+	echo ${mode_val}
+	return 0
+}
+
+# Get file uid:gid in string uid:gid
+# echo file uid:gid
+# return 0: Success, !=0: Failed
+function FileUidGid() {
+	local	ug
+	local	result
+
+	stat -c %U:%G "$1"
+	# return last command status.
+}
+
+# Find netdev helper
+# echo netdev helper executable path
+# return 0: Success(found), 1: Failed(not found)
+function NetDevHelperFind() {
+	local	helper
+	local	mode_val
+	local	mode_val_usx
+
+	# @note: The qemu-bridge-helper-suid is copied from
+	# qemu-bridge-helper and set uid bit.
+	for helper in \
+		"/usr/lib/qemu/qemu-bridge-helper-suid" \
+		"/usr/lib/qemu/qemu-bridge-helper"
+	do
+		if [ -x "${helper}" ] && [ "$( FileUidGid "${helper}" )" == root:root ]
+		then
+			mode_val=$( FileMode "${helper}" )
+			mode_val_usx=$(( ${mode_val} & 04100 ))
+			if (( ${mode_val_usx} == 04100 ))
+			then
+				echo "${0}: INFO: Find bridge helper \"${helper}\"." 1>&2
+				echo "${helper}"
+			fi
+			return 0
+		fi
+	done
+	return 1
+}
+
 # Find VNC number which is not in use.
 function RaspiVncNumber() {
 	result=1
@@ -168,6 +229,7 @@ function RemoteViewerVersion() {
 [ -z "${NicBridge}"    ] && NicBridge="$( RaspiBridgeFind )"
 [ -z "${NicMacFile}"   ] && NicMacFile="net0_mac.txt"
 [ -z "${NicMacPrefix}" ] && NicMacPrefix="b8:27:eb"
+[ -z "${NetDevHelper}" ] && NetDevHelper="$( NetDevHelperFind )"
 
 if [ -z "${NicMac}" ] && [ -f "${NicMacFile}" ]
 then
@@ -200,6 +262,8 @@ echo "$0: INFO: InitrdFile=${InitrdFile}"
 echo "$0: INFO: DtbFile=${DtbFile}"
 echo "$0: INFO: SdFile=${SdFile}"
 echo "$0: INFO: NicBridge=${NicBridge}"
+echo "$0: INFO: NetDevHelper=${NetDevHelper}"
+echo "$0: INFO: NetDevOption=${NetDevOption}"
 echo "$0: INFO: NicMac=${NicMac}"
 echo "$0: INFO: DisplayOutput=${DisplayOutput}"
 
@@ -236,13 +300,24 @@ then
 	_DriveParam="format=${_DriveFormat},file=${SdFile}"
 fi
 
-if [ -z "${NicBridge}" ]
+if [ -z "${NicBridge}" ] || [ ! -x "${NetDevHelper}" ]
 then
-	echo "$0: ERROR: Need network bridge interface."
-	echo "$0: INFO: Setup network bridge interface."
-	exit 1
+	echo "$0: NOTICE: No bridge network interface."
+	if [ -z "${NetDevOption}" ]
+	then
+		NetDevOption="user,id=net0"
+		echo "$0: NOTICE: Fallback network interface into user mode."
+	else
+		echo "$0: NOTICE: Apply NetDevOption parameter to -netdev option."
+	fi
+else
+	if [ -z "${NetDevOption}" ]
+	then
+		NetDevOption="tap,br=${NicBridge},helper=${NetDevHelper},id=net0"
+	else
+		echo "$0: NOTICE: Apply NetDevOption parameter to -netdev option."
+	fi
 fi
-
 
 if [ -z "${NicMac}" ]
 then
