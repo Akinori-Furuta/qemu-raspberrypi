@@ -107,7 +107,7 @@ Linux PC でこの作業手順で使うコマンドと QEMU を使えるよう�
 sudo apt install curl bridge-utils uml-utilities \
  qemu-system-common qemu-system qemu-system-arm qemu-utils \
  parted nbd-client cloud-guest-utils e2fsprogs virt-viewer \
- device-tree-compiler
+ device-tree-compiler gawk
 ```
 
 ## Raspberry Pi OS SD card image を file image に変換する
