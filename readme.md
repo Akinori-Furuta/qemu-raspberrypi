@@ -63,6 +63,8 @@ Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
 >   * Also disable SDIO contoller which connected to
 >     the WiFi device.
 > * Fix graphical screen resolution to 1024x768.
+> * Disable rpi-eeprom-update.service
+>   * It fails start.
 >
 
 ## 目次
