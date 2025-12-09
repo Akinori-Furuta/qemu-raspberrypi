@@ -58,11 +58,13 @@ Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
 >     exit QEMU by typing
 >     **[Ctrl]-[a]**, **[x]** (QEMU monitor control
 >     type in sequence to exit) at monitor terminal.
-> * Disable Bluhtooth interface via serial port.
+> * Disable Bluetooth interface via serial port.
 > * Disable Wifi device on SDIO bus.
 >   * Also disable SDIO contoller which connected to
 >     the WiFi device.
 > * Fix graphical screen resolution to 1024x768.
+> * Disable rpi-eeprom-update.service
+>   * It fails start.
 >
 
 ## 目次
