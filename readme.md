@@ -8,7 +8,10 @@ Linux PC 上で QEMU を使って RaspberyPi のイメージを動かすこと�
 
 ## Follow Debian 13 (trixie) release Working in progress
 
-Now working in progress on branch `follow-trixie`. To checkout branch `follow-trixie`.
+Now working in progress on branch `follow-trixie`. This branch
+contains scripts they run Raspberry Pi OS Trixie 64bit on
+emulating Raspberry Pi model 3B.
+To checkout branch `follow-trixie`.
 
 ```bash
 # Install required packages.
