@@ -19,10 +19,39 @@ sudo usermod -L rpi-first-boot-wizard
 
 if (( ${RaspiOsReleaseNo} < ${RaspiOsReleaseTrixie} ))
 then
+	echo "$0: INFO: Disable hciuart."
 	sudo systemctl disable hciuart.service
 else
 	echo "$0: INFO: Skip disable hciuart.service."
 fi
 
+BCM2835PowerOffDkms="/usr/src/bcm2835-power-off-dkms-1.0"
+BCM2835PowerOff="bcm2835_power_off"
+BCM2835PowerOffKo="/lib/modules/$(uname -r)/updates/dkms/${BCM2835PowerOff}.ko.xz"
+
+if [[ -d "${BCM2835PowerOffDkms}" ]]
+then
+	echo "$0: INFO: Install dkms, build-essential, and kmod packages."
+	sudo apt install -y dkms build-essential kmod
+	dkms_ready="yes"
+	if [[ ! -f "${BCM2835PowerOffKo}" ]]
+	then
+		echo "$0: INFO: Install dkms driver \"${BCM2835PowerOffDkms}\"."
+		sudo dkms build bcm2835-power-off-dkms/1.0 || dkms_ready=""
+		sudo dkms install bcm2835-power-off-dkms/1.0 || dkms_ready=""
+	else
+		echo "$0: NOTICE: Skip installing dkms driver \"${BCM2835PowerOffDkms}\"."
+	fi
+
+	if [[ -n "${dkms_ready}" ]]
+	then
+		echo "$0: INFO: Install module \"${BCM2835PowerOff}\" into kernel."
+		sudo modprobe "${BCM2835PowerOff}"
+	fi
+fi
+
+echo "$0: INFO: Disable ModemManager."
 sudo systemctl disable ModemManager.service
+
+echo "$0: INFO: Disable rpi-eeprom-update."
 sudo systemctl disable rpi-eeprom-update.service
