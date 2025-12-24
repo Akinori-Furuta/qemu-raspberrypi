@@ -21,6 +21,8 @@ else
 KERNELDIR ?= $(kernel_source_dir)
 endif
 
+CFLAGS += -Wall
+
 # note: At first invocation obj-m is ignored.
 #       At second invocation from kbuild, obj-m is
 #       source file(s) list to build .ko.
