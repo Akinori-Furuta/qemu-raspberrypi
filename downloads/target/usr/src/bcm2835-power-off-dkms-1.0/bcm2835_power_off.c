@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Simple power off driver for Broadcom BCM2835 emulated by QEMU
- * Based on bcm2835-pm.c and bcm2835_wdt.c.
- * One up bcm2835-pm.c and bcm2835_wdt.c into simple power off driver.
- * Turn Multi Function Driver(MFD) into Single function driver.
+ * Simple power off and restart driver for Broadcom BCM2835
+ * emulated by QEMU Based on drivers/mfd/bcm2835-pm.c,
+ * drivers/watchdog/bcm2835_wdt.c, and drivers/firmware/raspberrypi.c
+ * One up these drivers into simple power off and restart driver.
  *
- * This driver binds to the PM block and setup pm_power_off function.
- * Do not touch watchdog registers.
+ * This driver binds to the PM block and setup pm_power_off and
+ * restart_handler function.
  */
 
 #include <linux/types.h>
 #include <linux/atomic.h>
 #include <linux/module.h>
+#include <linux/notifier.h>
 #include <linux/delay.h>
 #include <linux/regmap.h>
 #include <linux/io.h>
@@ -19,6 +20,7 @@
 #include <linux/of_platform.h>
 #include <linux/platform_device.h>
 #include <linux/pm.h>
+#include <linux/reboot.h>
 
 #define PM_RSTC				0x1c
 #define PM_RSTS				0x20
@@ -38,7 +40,9 @@
 /* Boot from partition 63 will power off.
  *  Partiton 63 is a special partition to initiate halt.
  */
+#define PM_BOOT_PART_AUTO_SCAN		(0)
 #define	PM_BOOT_PART_FROM_HALT		(63)
+#define	PM_BOOT_PART_MAX		(63)
 
 typedef void (pm_power_off_func_t)(void);
 
@@ -46,11 +50,14 @@ struct bcm2835_pm_poff {
 	struct device	*dev;
 	void __iomem	*base;
 	pm_power_off_func_t	*saved_pm_power_off;
-	bool		removed;
+	bool		removed_power_off;
+	bool		removed_restart;
 };
 
 /* Static context used by bcm2835_pm_poff_handler() */
 static struct bcm2835_pm_poff bcm2835_pm_poff_single;
+
+/* Common hardware access part. */
 
 /*
  * The Raspberry Pi firmware uses the RSTS register to know which partiton
@@ -86,6 +93,8 @@ static void __bcm2835_pm_poff_restart(struct bcm2835_pm_poff *pm, u8 partition)
 	mdelay(1);
 }
 
+/* Power off part */
+
 /*
  * We can't really power off, but if we do the normal reset scheme, and
  * indicate to bootcode.bin not to reboot, then most of the chip will be
@@ -103,7 +112,7 @@ static void bcm2835_pm_poff_handler(void)
 		return;	/* Or shall we painc? */
 	}
 
-	if (pm->removed) {
+	if (pm->removed_power_off) {
 		/* Some one remember us after removed module,
 		 * and call us.
 		 */
@@ -113,10 +122,104 @@ static void bcm2835_pm_poff_handler(void)
 	__bcm2835_pm_poff_restart(pm, PM_BOOT_PART_FROM_HALT);
 }
 
-static int bcm2835_pm_poff_handle_power_off(struct bcm2835_pm_poff *pm)
+static void bcm2835_pm_poff_handoff_power_off(struct bcm2835_pm_poff *pm)
+{
+	struct device *dev = pm->dev;
+	pm_power_off_func_t *cur_pm_power_off;
+
+	cur_pm_power_off = cmpxchg(&pm_power_off,
+		bcm2835_pm_poff_handler,	/* old */
+		pm->saved_pm_power_off		/* new (restore value). */
+	);
+
+	if (cur_pm_power_off != bcm2835_pm_poff_handler) {
+		/* Another driver handles power off driver. */
+		dev_warn(dev, "Another driver handles pm_power_off().\n");
+	}
+	dev_info(dev, "Removed power off handler.\n");
+}
+
+
+static int bcm2835_pm_poff_overtake_power_off(struct bcm2835_pm_poff *pm)
 {
 	struct device *dev;
 	pm_power_off_func_t *priv_pm_power_off;
+
+	dev = pm->dev;
+
+	priv_pm_power_off = xchg(&pm_power_off, bcm2835_pm_poff_handler);
+	pm->saved_pm_power_off = priv_pm_power_off;
+	if (priv_pm_power_off) {
+		/* Someone already handles power off. */
+		dev_notice(dev, "Someone already handles power off, we override it.\n");
+	}
+
+	return 0;
+}
+
+/* Reboot part. */
+
+/*
+ * Reboot callback.
+ * note: Ignore enum reboot_mode mode
+ */
+static int bcm2835_pm_poff_restart_handler(struct notifier_block *nb,
+				      unsigned long mode,
+				      void *data)
+{
+	struct bcm2835_pm_poff *pm = &bcm2835_pm_poff_single;
+	unsigned long val = PM_BOOT_PART_AUTO_SCAN;
+	u8 partition = PM_BOOT_PART_AUTO_SCAN;
+
+	if (pm->dev == NULL) {
+		pr_warn("%s: Invalid device context. mode=0x%lx\n",
+			__func__,
+			mode
+		);
+		/* We can't handle, but we hope continue. */
+		return 0;
+	}
+
+	if (pm->removed_restart) {
+		pr_warn("%s: Called after removed. mode=0x%lx\n",
+			__func__,
+			mode
+		);
+
+		return 0;
+	}
+
+	if (data) {
+		int items;
+
+		items = sscanf(data, "%lu", &val);
+
+		if (items == 0) {
+			/* It's not a unsigned long value. */
+			val = PM_BOOT_PART_AUTO_SCAN;
+		}
+
+		if (val > PM_BOOT_PART_MAX) {
+			/* Invalid partition number. */
+			val = PM_BOOT_PART_AUTO_SCAN;
+		}
+		partition = (__force u8)val;
+	}
+
+	__bcm2835_pm_poff_restart(pm, partition);
+	/* may be reboot process started before come here. */
+	return NOTIFY_DONE;
+}
+
+static struct notifier_block bcm2835_pm_poff_restart_nb = {
+	.notifier_call = bcm2835_pm_poff_restart_handler,
+};
+
+/* Probe/Rmove part */
+
+static int bcm2835_pm_poff_save_context(struct bcm2835_pm_poff *pm)
+{
+	struct device *dev;
 
 	dev = pm->dev;
 	if (bcm2835_pm_poff_single.dev != NULL) {
@@ -132,13 +235,6 @@ static int bcm2835_pm_poff_handle_power_off(struct bcm2835_pm_poff *pm)
 
 	/* Save context as static singleton. */
 	bcm2835_pm_poff_single = *pm;
-
-	priv_pm_power_off = xchg(&pm_power_off, bcm2835_pm_poff_handler);
-	pm->saved_pm_power_off = priv_pm_power_off;
-	if (priv_pm_power_off) {
-		/* Someone already handles power off. */
-		dev_notice(dev, "Someone already handles power off, it's overrided.\n");
-	}
 
 	return 0;
 }
@@ -213,36 +309,63 @@ static int bcm2835_pm_poff_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	ret = bcm2835_pm_poff_save_context(pm);
+	if (ret) {
+		/* We have already prepared static singleton context. */
+		return ret;
+	}
+
 	if (of_device_is_system_power_controller(np)) {
 		/* We have system power control. */
-		ret = bcm2835_pm_poff_handle_power_off(pm);
-		if (ret != 0) {
+		ret = bcm2835_pm_poff_overtake_power_off(pm);
+		if (ret) {
 			/* Can't handle power off. */
 			return ret;
 		}
 		dev_info(dev, "Installed power off handler.\n");
+
+		ret = register_restart_handler(&bcm2835_pm_poff_restart_nb);
+		if (ret != 0) {
+			/* Can not register restart handler. */
+			dev_err(dev, "Can not register restart handler. ret=%d\n",
+				ret
+			);
+			goto out_recover_poff_handler;
+		}
+		dev_info(dev, "Registered restart handler.\n");
 	}
 
 	return 0;
+
+out_recover_poff_handler:
+	bcm2835_pm_poff_single.removed_power_off = true;
+	wmb();
+	bcm2835_pm_poff_handoff_power_off(pm);
+	bcm2835_pm_poff_single.removed_restart = true;
+	wmb();
+
+	return ret;
 }
 
 static void bcm2835_pm_poff_remove(struct platform_device *pdev)
 {
 	struct bcm2835_pm_poff *pm = platform_get_drvdata(pdev);
-	struct device *dev = &(pdev->dev);
-	pm_power_off_func_t *cur_pm_power_off;
+	struct device *dev;
 
-	cur_pm_power_off = cmpxchg(&pm_power_off,
-		bcm2835_pm_poff_handler,	/* old */
-		pm->saved_pm_power_off		/* new (restore value). */
-	);
+	dev = pm->dev;
 
-	if (cur_pm_power_off != bcm2835_pm_poff_handler) {
-		/* Another driver handles power off driver. */
-		dev_warn(dev, "Another driver handles pm_power_off().\n");
-	}
-	bcm2835_pm_poff_single.removed = true;
-	dev_info(dev, "Removed.\n");
+	bcm2835_pm_poff_single.removed_power_off = true;
+	wmb();
+	bcm2835_pm_poff_handoff_power_off(pm);
+
+	bcm2835_pm_poff_single.removed_restart = true;
+	wmb();
+	/* note: If we call unregister_restart_handler() with notifier block
+	 *       which is not registered. we will get -ENOENT and
+	 *       nothing is changed.
+	 */
+	unregister_restart_handler(&bcm2835_pm_poff_restart_nb);
+	dev_info(dev, "Removed restart handler.\n");
 	/* note: Managed resource pm will be freed by drivers/base */
 }
 
