@@ -1979,8 +1979,8 @@ EOF
 		# Bookworm or earlier.
 		# Touch up lightdm.conf
 		"${SUDO}" "${PATCH}" "${LightdmConfMountEtc}" << EOF
---- lightdm-orig.conf	2025-10-01 09:18:04.468000000 +0900
-+++ lightdm.conf	2025-12-05 22:23:24.460745071 +0900
+--- lightdm.conf.orig	2025-12-20 02:01:00.245755276 +0900
++++ lightdm.conf	2025-12-20 02:08:24.677867337 +0900
 @@ -108,12 +108,12 @@
  #xdmcp-key=
  #unity-compositor-command=unity-system-compositor
@@ -1997,7 +1997,7 @@ EOF
  #allow-guest=true
  #guest-session=
 @@ -129,7 +129,7 @@
- autologin-user=furuta
+ autologin-user=rpi-first-boot-wizard
  #autologin-user-timeout=0
  #autologin-in-background=false
 -autologin-session=LXDE-pi-labwc
