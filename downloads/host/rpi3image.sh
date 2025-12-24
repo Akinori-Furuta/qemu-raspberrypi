@@ -1346,33 +1346,45 @@ do
 	fi
 done
 
-if [[ -z "${TargetKit}" ]]
+TargetKitFilesExec=( \
+	/var/local/post-setup.sh \
+	/var/local/raspi-config-qemu.sh \
+)
+
+TargetKitFiles=( \
+	${TargetKitFilesExec[*]} \
+	/usr/src/bcm2835-power-off-dkms-1.0/bcm2835_power_off.c \
+	/usr/src/bcm2835-power-off-dkms-1.0/dkms.conf \
+	/usr/src/bcm2835-power-off-dkms-1.0/Makefile \
+)
+
+TargetKitFrom="${GitCloned}/downloads/target"
+TargetKitFromGit="yes"
+
+for f in ${TargetKitFiles[*]}
+do
+	f_from="${TargetKitFrom}${f}"
+	if [[ ! -f "${f_from}" ]]
+	then
+		echo "${MyBase}: NOTICE: Can not find target kit file \"${f_from}\"." 1>&2
+		TargetKitFromGit=""
+	fi
+done
+
+if [[ -z "${DebugCopyOnly}" ]]
 then
-	echo "${MyBase}: NOTICE: Can not find target kit rpios32bit-target-kit.tar.gz or rpios64bit-target-kit.tar.gz" 1>&2
-
-	target_kit_post_setup="${GitCloned}/downloads/target/var/local/post-setup.sh"
-	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Search git cloned target kit post_setup=\"${target_kit_post_setup}\"." 1>&2
-	if [[ -f "${target_kit_post_setup}" ]]
+	if [[ -n "${TargetKitFromGit}" ]]
 	then
-		TargetKitPostSetup="${target_kit_post_setup}"
-		echo "${MyBase}: INFO: Use git cloned target kit \"${TargetKitPostSetup}\"." 1>&2
+		echo "${MyBase}: INFO: Use git cloned target kit." 1>&2
+	else
+		if [[ -n "${TargetKit}" ]]
+		then
+			echo "${MyBase}: INFO: Use target kit \"${TargetKit}\"." 1>&2
+		else
+			echo "${MyBase}: ERROR: Can not find target kit .tar.gz or files." 1>&2
+			exit 1
+		fi
 	fi
-
-	target_kit_raspi_config_qemu="${GitCloned}/downloads/target/var/local/raspi-config-qemu.sh"
-	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Search git cloned target kit raspi_config_qemu=\"${target_kit_raspi_config_qemu}\"." 1>&2
-	if [[ -f "${target_kit_raspi_config_qemu}" ]]
-	then
-		TargetKitRaspiConfigQemu="${target_kit_raspi_config_qemu}"
-		echo "${MyBase}: INFO: Use git cloned target kit \"${TargetKitRaspiConfigQemu}\"." 1>&2
-	fi
-
-	if [[ -z "${TargetKitPostSetup}" || -z "${TargetKitRaspiConfigQemu}" ]]
-	then
-		echo "${MyBase}: ERROR: Can not find target kit files post-setup.sh and raspi-config-qemu.sh" 1>&2
-		exit 1
-	fi
-else
-	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
 fi
 
 echo "${MyBase}: INFO: Unmount \"${RaspiMedia}\"." 1>&2
@@ -1668,8 +1680,8 @@ then
 	#  Disable watchdog and also power off device (may be PMIC).
 	#  Disable WiFi on SDIO bus.
 	"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
---- bcm2710-rpi-3-b.dts	2025-12-03 20:52:28.115354511 +0900
-+++ bcm2710-rpi-3-b-qemu.dts	2025-12-03 22:13:27.262886074 +0900
+--- bcm2710-rpi-3-b.dts	2025-12-09 01:03:29.282524500 +0900
++++ bcm2710-rpi-3-b-qemu.dts	2025-12-13 22:38:50.123397200 +0900
 @@ -567,7 +567,7 @@
  				shutdown-gpios = <0x0b 0x00 0x00>;
  				local-bd-address = [00 00 00 00 00 00];
@@ -1679,11 +1691,20 @@ then
  				phandle = <0x3a>;
  			};
  		};
+@@ -868,7 +868,7 @@
+ 		};
+ 
+ 		watchdog@7e100000 {
+-			compatible = "brcm,bcm2835-pm\0brcm,bcm2835-pm-wdt";
++			compatible = "brcm,bcm2835-pm-power-off";
+ 			#power-domain-cells = <0x01>;
+ 			#reset-cells = <0x01>;
+ 			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
 @@ -876,6 +876,7 @@
  			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
  			clock-names = "v3d\0peri_image\0h264\0isp";
  			system-power-controller;
-+			status = "disabled";
++			status = "okay";
  			phandle = <0x2c>;
  		};
  
@@ -1767,41 +1788,64 @@ if [[ -z "${DebugCopyOnly}" ]]
 then
 	echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
 
-	if [[ -z "${TargetKitPostSetup}" || -z "${TargetKitRaspiConfigQemu}" ]]
+	if [[ -n "${TargetKitFromGit}" ]]
 	then
-		"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
+		for f in ${TargetKitFiles[*]}
+		do
+			f_from="${TargetKitFrom}${f}"
+			f_to="${RootFsExt4Point}${f}"
+			d_to="${f_to%/*}"
 
-		result=$?
-		if (( ${result} != 0 ))
-		then
-			echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
-			exit ${result}
-		fi
+			echo "${MyBase}: INFO: Copy file \"${f_from}\" to \"${f_to}\"." 1>&2
+
+			if [[ ! -d "${d_to}" ]]
+			then
+				"${SUDO}" "${MKDIR}" -p "${d_to}"
+
+				result=$?
+				if (( ${result} != 0 ))
+				then
+					echo "${MyBase}: ERROR: Can not create directory \"${d_to}\"." 1>&2
+					exit ${result}
+				fi
+			fi
+
+			"${SUDO}" "${CP}" --preserve=timestamps,mode "${f_from}" "${f_to}"
+
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not copy file \"${f_from}\" to \"${f_to}\"." 1>&2
+				exit ${result}
+			fi
+		done
+
+		for f in ${TargetKitFilesExec[*]}
+		do
+			f_to="${RootFsExt4Point}${f}"
+
+			echo "${MyBase}: INFO: Set execute mode bit \"${f_to}\"." 1>&2
+
+			"${SUDO}" "${CHMOD}" 755 "${f_to}"
+
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not set execute mode bit \"${f_to}\"." 1>&2
+				exit ${result}
+			fi
+		done
 	else
-		TargetKitCopyToMountLocal="${RootFsExt4Point}/var/local"
-
-		echo "${MyBase}: INFO: Copy post setup scripts to \"${TargetKitCopyToMountLocal}\"." 1>&2
-
-		"${SUDO}" "${CP}" --preserve=timestamps \
-			"${TargetKitPostSetup}" \
-			"${TargetKitRaspiConfigQemu}" \
-			"${TargetKitCopyToMountLocal}"
-
-		result=$?
-		if (( ${result} != 0 ))
+		if [[ -n "${TargetKit}" ]]
 		then
-			echo "${MyBase}: ERROR: Can not copy post setup scripts to \"${TargetKitCopyToMountLocal}\"." 1>&2
-			exit ${result}
-		fi
+			"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
 
-		"${SUDO}" "${CHMOD}" 555 \
-			"${TargetKitCopyToMountLocal}/${TargetKitPostSetup##*/}" \
-			"${TargetKitCopyToMountLocal}/${TargetKitRaspiConfigQemu##*/}"
-		result=$?
-		if (( ${result} != 0 ))
-		then
-			echo "${MyBase}: ERROR: Can not change post setup scripts mode to 555." 1>&2
-			exit ${result}
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
+				exit ${result}
+			fi
 		fi
 	fi
 
@@ -1935,8 +1979,8 @@ EOF
 		# Bookworm or earlier.
 		# Touch up lightdm.conf
 		"${SUDO}" "${PATCH}" "${LightdmConfMountEtc}" << EOF
---- lightdm-orig.conf	2025-10-01 09:18:04.468000000 +0900
-+++ lightdm.conf	2025-12-05 22:23:24.460745071 +0900
+--- lightdm.conf.orig	2025-12-20 02:01:00.245755276 +0900
++++ lightdm.conf	2025-12-20 02:08:24.677867337 +0900
 @@ -108,12 +108,12 @@
  #xdmcp-key=
  #unity-compositor-command=unity-system-compositor
@@ -1953,7 +1997,7 @@ EOF
  #allow-guest=true
  #guest-session=
 @@ -129,7 +129,7 @@
- autologin-user=furuta
+ autologin-user=rpi-first-boot-wizard
  #autologin-user-timeout=0
  #autologin-in-background=false
 -autologin-session=LXDE-pi-labwc
