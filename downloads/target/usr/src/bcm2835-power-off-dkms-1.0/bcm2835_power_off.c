@@ -351,6 +351,7 @@ static void bcm2835_pm_poff_remove(struct platform_device *pdev)
 {
 	struct bcm2835_pm_poff *pm = platform_get_drvdata(pdev);
 	struct device *dev;
+	int ret;
 
 	dev = pm->dev;
 
@@ -364,9 +365,19 @@ static void bcm2835_pm_poff_remove(struct platform_device *pdev)
 	 *       which is not registered. we will get -ENOENT and
 	 *       nothing is changed.
 	 */
-	unregister_restart_handler(&bcm2835_pm_poff_restart_nb);
-	dev_info(dev, "Removed restart handler.\n");
-	/* note: Managed resource pm will be freed by drivers/base */
+	ret = unregister_restart_handler(&bcm2835_pm_poff_restart_nb);
+	if (ret) {
+		/* May be notifier block chain broken. */
+		dev_warn(dev, "Can not remove restart handler. ret=%d\n",
+			ret
+		);
+	} else {
+		/* Found our handler and removed it. */
+		dev_info(dev, "Removed restart handler.\n");
+	}
+	/* note: Managed resources pm and iomap will
+	 * be freed by drivers/base.
+	 */
 }
 
 static struct platform_driver bcm2835_pm_poff_driver = {
