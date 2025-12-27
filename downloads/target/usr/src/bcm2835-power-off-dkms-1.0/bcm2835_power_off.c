@@ -58,6 +58,11 @@ struct bcm2835_pm_poff {
 /* Static context used by bcm2835_pm_poff_handler() */
 static struct bcm2835_pm_poff bcm2835_pm_poff_single;
 
+#define	REBOOT_HOLD_OFF_MS_DEF	(10)
+static uint hold_off_ms = REBOOT_HOLD_OFF_MS_DEF;
+module_param(hold_off_ms, uint, 0644);
+MODULE_PARM_DESC(hold_off_ms, "mdelay time after initiated reboot in milli seconds");
+
 /* Common hardware access part. */
 
 /*
@@ -91,7 +96,7 @@ static void __bcm2835_pm_poff_restart(struct bcm2835_pm_poff *pm, u8 partition)
 	writel_relaxed(val, base + PM_RSTC);
 
 	/* No sleeping, possibly atomic. */
-	mdelay(1);
+	mdelay(hold_off_ms);
 }
 
 /* Power off part */
