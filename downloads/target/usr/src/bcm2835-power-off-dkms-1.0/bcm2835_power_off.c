@@ -343,8 +343,13 @@ static int bcm2835_pm_poff_probe(struct platform_device *pdev)
 			goto out_recover_poff_handler;
 		}
 		dev_info(dev, "Registered restart handler.\n");
+	} else {
+		/* Match to device tree compatible,
+		 * but without system-power-controller.
+		 */
+		dev_notice(dev, "This module does NOTHING, put device tree property system-power-controller.\n"
+		);
 	}
-
 	return 0;
 
 out_recover_poff_handler:
