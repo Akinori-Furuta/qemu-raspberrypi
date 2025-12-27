@@ -55,8 +55,70 @@ struct bcm2835_pm_poff {
 	bool		removed_restart;
 };
 
+#define	WDOG_TICKS_PER_1SEC	(65536)
+#define	WDOG_TICKS_MAX		(PM_WDOG_TIME_SET)
+#define	WDOG_PERIOD_US_MAX	(((u64)WDOG_TICKS_MAX * 1000000) / WDOG_TICKS_PER_1SEC)
+#define	WDOG_RECIPROCAL_SHIFT	(16)
+
+#define	FIXED_POINT_MULDIV_U64(a, m, d, s) \
+	((((u64)(a) * (((u64)(m) << (s)) / (d))) \
+		+ ((u64)1 << ((s) - 1))) >> (s))
+
+#define WDOG_USECS_TO_TICKS(us)	\
+	FIXED_POINT_MULDIV_U64(us, WDOG_TICKS_PER_1SEC, 1000000, \
+		WDOG_RECIPROCAL_SHIFT)
+
 /* Static context used by bcm2835_pm_poff_handler() */
 static struct bcm2835_pm_poff bcm2835_pm_poff_single;
+
+static int bcm2835_pm_poff_bark_us_set(const char *val, const struct kernel_param *kp)
+{	int	ret;
+	uint	*us_ptr;
+	uint	us;
+	uint	us_saved;
+	u32	tick;
+
+	us_ptr = (__force uint *)(kp->arg);
+	if (!us_ptr) {
+		/* NULL points parameter variable. */
+		return -ENODEV;
+	}
+
+	us_saved = *us_ptr;
+	ret = kstrtouint(val, 0, (uint *)(kp->arg));
+	if (ret) {
+		/* parse error. */
+		return ret;
+	}
+
+	us = *us_ptr;
+	if (us > WDOG_PERIOD_US_MAX) {
+		/* Too large period. */
+		pr_err("%s: Store too large value to bark_us. max=%lu\n",
+			__func__,
+			(unsigned long)WDOG_PERIOD_US_MAX
+		);
+		*us_ptr = us_saved;
+		return -ERANGE;
+	}
+
+	tick = WDOG_USECS_TO_TICKS(us);
+	pr_info("%s: Update bark reboot time. bark_us=%u, tick=%u\n",
+		__func__,
+		us,
+		tick
+	);
+	return ret;
+}
+
+#define	WDOG_BARK_US_DEF	(150)
+static uint bark_us = WDOG_BARK_US_DEF;
+static struct kernel_param_ops bark_us_ops = {
+	.set = bcm2835_pm_poff_bark_us_set,
+	.get = param_get_uint,
+};
+module_param_cb(bark_us, &bark_us_ops, &bark_us, 0644);
+MODULE_PARM_DESC(bark_us, "Write watchdog register then bark reboot time in micro seconds");
 
 #define	REBOOT_HOLD_OFF_MS_DEF	(10)
 static uint hold_off_ms = REBOOT_HOLD_OFF_MS_DEF;
@@ -74,6 +136,10 @@ static void __bcm2835_pm_poff_restart(struct bcm2835_pm_poff *pm, u8 partition)
 {
 	u32 val, rsts;
 	void __iomem *base = pm->base;
+	u32 ticks;
+
+	/* Calculate ticks to expire watchdog. */
+	ticks = WDOG_USECS_TO_TICKS(bark_us);
 
 	/* map bits as follows,
 	 * partition:    x  x  x  x  x b5 b4 b3 b2 b1 b0
@@ -88,8 +154,7 @@ static void __bcm2835_pm_poff_restart(struct bcm2835_pm_poff *pm, u8 partition)
 	val |= PM_PASSWORD | rsts;
 	writel_relaxed(val, base + PM_RSTS);
 
-	/* use a timeout of 10 ticks (~150us) */
-	writel_relaxed(10 | PM_PASSWORD, base + PM_WDOG);
+	writel_relaxed(ticks | PM_PASSWORD, base + PM_WDOG);
 	val = readl_relaxed(base + PM_RSTC);
 	val &= PM_RSTC_WRCFG_CLR;
 	val |= PM_PASSWORD | PM_RSTC_WRCFG_FULL_RESET;
@@ -329,6 +394,12 @@ static int bcm2835_pm_poff_probe(struct platform_device *pdev)
 		/* We have already prepared static singleton context. */
 		return ret;
 	}
+
+	dev_info(dev, "Module parameter. bark_us=%u, bark_ticks=%u, hold_off_ms=%u\n",
+		bark_us,
+		(unsigned)WDOG_USECS_TO_TICKS(bark_us),
+		hold_off_ms
+	);
 
 	if (of_device_is_system_power_controller(np)) {
 		/* We have system power control. */
