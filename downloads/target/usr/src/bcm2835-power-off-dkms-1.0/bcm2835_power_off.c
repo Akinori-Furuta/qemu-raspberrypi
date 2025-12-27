@@ -21,6 +21,7 @@
 #include <linux/platform_device.h>
 #include <linux/pm.h>
 #include <linux/reboot.h>
+#include <linux/version.h>
 
 #define PM_RSTC				0x1c
 #define PM_RSTS				0x20
@@ -245,7 +246,16 @@ static int bcm2835_pm_poff_get_pdata(struct platform_device *pdev,
 	struct device *dev = &(pdev->dev);
 	void __iomem *base;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,1,75)
+	/* See commit 79de65ac39d75ef68062d6a1fd0d719015af0898 */
 	if (of_property_present(dev->of_node, "reg-names")) {
+#else /* LINUX_VERSION_CODE >= KERNEL_VERSION(6,1,75) */
+	/* note: reg-names is string list property,
+	 * To check if there is reg-names property,
+	 * read it as bool.
+	 */
+	if (of_property_read_bool(dev->of_node, "reg-names")) {
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(6,1,75) */
 		/* There is(are) named iomem resource(s). */
 		base = devm_platform_ioremap_resource_byname(pdev, "pm");
 		if (IS_ERR(base)) {
@@ -347,7 +357,12 @@ out_recover_poff_handler:
 	return ret;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,11,0)
+/* See commit 0edb555a65d1ef047a9805051c36922b52a38a9d */
 static void bcm2835_pm_poff_remove(struct platform_device *pdev)
+#else /* LINUX_VERSION_CODE >= KERNEL_VERSION(6,11,0) */
+static int bcm2835_pm_poff_remove(struct platform_device *pdev)
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(6,11,0) */
 {
 	struct bcm2835_pm_poff *pm = platform_get_drvdata(pdev);
 	struct device *dev;
@@ -378,6 +393,12 @@ static void bcm2835_pm_poff_remove(struct platform_device *pdev)
 	/* note: Managed resources pm and iomap will
 	 * be freed by drivers/base.
 	 */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,11,0)
+	/* See commit 0edb555a65d1ef047a9805051c36922b52a38a9d */
+	/* return nothing. */
+#else /* LINUX_VERSION_CODE >= KERNEL_VERSION(6,11,0) */
+	return 0 /* Will be ignored. */;
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(6,11,0) */
 }
 
 static struct platform_driver bcm2835_pm_poff_driver = {
