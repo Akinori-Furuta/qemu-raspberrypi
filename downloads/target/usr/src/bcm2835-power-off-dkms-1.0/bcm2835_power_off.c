@@ -10,6 +10,7 @@
  */
 
 #include <linux/types.h>
+#include <linux/spinlock.h>
 #include <linux/atomic.h>
 #include <linux/module.h>
 #include <linux/notifier.h>
@@ -127,9 +128,12 @@ MODULE_PARM_DESC(hold_off_ms, "mdelay time after initiated reboot in milli secon
 
 /* Common hardware access part. */
 
+static DEFINE_SPINLOCK(bcm2835_pm_poff_wdog_lock);
+
 /*
  * The Raspberry Pi firmware uses the RSTS register to know which partiton
  * to boot from. The partiton value is spread into bits 0, 2, 4, 6, 8, 10.
+ * @pre spin lock bcm2835_pm_poff_wdog_lock
  */
 
 static void __bcm2835_pm_poff_restart(struct bcm2835_pm_poff *pm, u8 partition)
@@ -160,7 +164,7 @@ static void __bcm2835_pm_poff_restart(struct bcm2835_pm_poff *pm, u8 partition)
 	val |= PM_PASSWORD | PM_RSTC_WRCFG_FULL_RESET;
 	writel_relaxed(val, base + PM_RSTC);
 
-	/* No sleeping, possibly atomic. */
+	/* No sleeping, here is atomic context. */
 	mdelay(hold_off_ms);
 }
 
@@ -174,6 +178,7 @@ static void __bcm2835_pm_poff_restart(struct bcm2835_pm_poff *pm, u8 partition)
 static void bcm2835_pm_poff_handler(void)
 {
 	struct bcm2835_pm_poff *pm = &bcm2835_pm_poff_single;
+	unsigned long flags;
 
 	if (!(pm->base)) {
 		pr_warn("%s: Called before probe.\n", __func__);
@@ -190,7 +195,9 @@ static void bcm2835_pm_poff_handler(void)
 		pr_warn("%s: Called after removed.\n", __func__);
 	}
 
+	spin_lock_irqsave(&bcm2835_pm_poff_wdog_lock, flags);
 	__bcm2835_pm_poff_restart(pm, PM_BOOT_PART_FROM_HALT);
+	spin_unlock_irqrestore(&bcm2835_pm_poff_wdog_lock, flags);
 }
 
 static void bcm2835_pm_poff_handoff_power_off(struct bcm2835_pm_poff *pm)
@@ -241,6 +248,7 @@ static int bcm2835_pm_poff_restart_handler(struct notifier_block *nb,
 	struct bcm2835_pm_poff *pm = &bcm2835_pm_poff_single;
 	unsigned long val = PM_BOOT_PART_AUTO_SCAN;
 	u8 partition = PM_BOOT_PART_AUTO_SCAN;
+	unsigned long flags;
 
 	if (pm->dev == NULL) {
 		pr_warn("%s: Invalid device context. mode=0x%lx\n",
@@ -277,8 +285,18 @@ static int bcm2835_pm_poff_restart_handler(struct notifier_block *nb,
 		partition = (__force u8)val;
 	}
 
+	/* note: All other CPUs may be halted. see kernel_restart() and
+	 *       migrate_to_reboot_cpu().
+	 * Disable interrupt(s) for a while, some drivers left IRQ line
+	 * active. We noticed DWC (USB OTG) controller driver may hang at
+	 * rebooting due to handle IRQ without device context.
+	 */
+	spin_lock_irqsave(&bcm2835_pm_poff_wdog_lock, flags);
+
 	__bcm2835_pm_poff_restart(pm, partition);
 	/* may be reboot process started before come here. */
+	spin_unlock_irqrestore(&bcm2835_pm_poff_wdog_lock, flags);
+
 	return NOTIFY_DONE;
 }
 
