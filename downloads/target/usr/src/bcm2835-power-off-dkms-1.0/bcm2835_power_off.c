@@ -112,7 +112,7 @@ static int bcm2835_pm_poff_bark_us_set(const char *val, const struct kernel_para
 	return ret;
 }
 
-#define	WDOG_BARK_US_DEF	(150)
+#define	WDOG_BARK_US_DEF	(15)
 static uint bark_us = WDOG_BARK_US_DEF;
 static struct kernel_param_ops bark_us_ops = {
 	.set = bcm2835_pm_poff_bark_us_set,
@@ -121,7 +121,7 @@ static struct kernel_param_ops bark_us_ops = {
 module_param_cb(bark_us, &bark_us_ops, &bark_us, 0644);
 MODULE_PARM_DESC(bark_us, "Write watchdog register then bark reboot time in micro seconds");
 
-#define	REBOOT_HOLD_OFF_MS_DEF	(10)
+#define	REBOOT_HOLD_OFF_MS_DEF	(1)
 static uint hold_off_ms = REBOOT_HOLD_OFF_MS_DEF;
 module_param(hold_off_ms, uint, 0644);
 MODULE_PARM_DESC(hold_off_ms, "mdelay time after initiated reboot in milli seconds");
