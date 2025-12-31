@@ -17,12 +17,16 @@ sudo usermod -L rpi-first-boot-wizard
 
 # Disable services, they don't work well on emulator.
 
+linux_headers_pkg=""
+
 if (( ${RaspiOsReleaseNo} < ${RaspiOsReleaseTrixie} ))
 then
 	echo "$0: INFO: Disable hciuart."
 	sudo systemctl disable hciuart.service
+	linux_headers_pkg="linux-headers"
 else
 	echo "$0: INFO: Skip disable hciuart.service."
+	linux_headers_pkg="linux-headers-rpi-v8"
 fi
 
 BCM2835PowerOffDkms="/usr/src/bcm2835-power-off-dkms-1.0"
@@ -31,8 +35,8 @@ BCM2835PowerOffKo="/lib/modules/$(uname -r)/updates/dkms/${BCM2835PowerOff}.ko.x
 
 if [[ -d "${BCM2835PowerOffDkms}" ]]
 then
-	echo "$0: INFO: Install dkms, linux-headers, build-essential, and kmod packages."
-	sudo apt install -y dkms linux-headers build-essential kmod
+	echo "$0: INFO: Install dkms, ${linux_headers_pkg}, build-essential, and kmod packages."
+	sudo apt install -y dkms "${linux_headers_pkg}" build-essential kmod
 	dkms_ready="yes"
 	if [[ ! -f "${BCM2835PowerOffKo}" ]]
 	then
