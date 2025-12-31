@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Simple power off and restart driver for Broadcom BCM2835
- * emulated by QEMU Based on drivers/mfd/bcm2835-pm.c,
- * drivers/watchdog/bcm2835_wdt.c, and drivers/firmware/raspberrypi.c
+ * emulated by QEMU Based on following sources,
+ *  drivers/mfd/bcm2835-pm.c
+ *  drivers/watchdog/bcm2835_wdt.c
+ *  drivers/firmware/raspberrypi.c
+ *  drivers/usb/host/dwc_otg/dwc_otg_regs.h
+ *  drivers/usb/host/dwc_otg/dwc_otg_cil.c
+ *  drivers/usb/host/dwc_common_port/dwc_common_linux.c
  * One up these drivers into simple power off and restart driver.
  *
  * This driver binds to the PM block and setup pm_power_off and
@@ -16,6 +21,7 @@
 #include <linux/notifier.h>
 #include <linux/delay.h>
 #include <linux/regmap.h>
+#include <linux/ioport.h>
 #include <linux/io.h>
 #include <linux/of_address.h>
 #include <linux/of_platform.h>
@@ -51,6 +57,7 @@ typedef void (pm_power_off_func_t)(void);
 struct bcm2835_pm_poff {
 	struct device	*dev;
 	void __iomem	*base;
+	void __iomem	*dwc_base;
 	pm_power_off_func_t	*saved_pm_power_off;
 	bool		removed_power_off;
 	bool		removed_restart;
@@ -235,6 +242,157 @@ static int bcm2835_pm_poff_overtake_power_off(struct bcm2835_pm_poff *pm)
 	return 0;
 }
 
+/* DWC OTG controller section. */
+
+/** DWC_otg Core registers .
+ * The dwc_otg_core_global_regs structure defines the size
+ * and relative field offsets for the Core Global registers.
+ */
+struct /* aliased */ dwc_otg_core_global_regs {
+	/** OTG Control and Status Register.  <i>Offset: 000h</i> */
+	volatile uint32_t gotgctl;
+	/** OTG Interrupt Register.	 <i>Offset: 004h</i> */
+	volatile uint32_t gotgint;
+	/**Core AHB Configuration Register.	 <i>Offset: 008h</i> */
+	volatile uint32_t gahbcfg;
+
+#define DWC_GLBINTRMASK		0x0001
+#define DWC_DMAENABLE		0x0020
+#define DWC_NPTXEMPTYLVL_EMPTY	0x0080
+#define DWC_NPTXEMPTYLVL_HALFEMPTY	0x0000
+#define DWC_PTXEMPTYLVL_EMPTY	0x0100
+#define DWC_PTXEMPTYLVL_HALFEMPTY	0x0000
+
+	/**Core USB Configuration Register.	 <i>Offset: 00Ch</i> */
+	volatile uint32_t gusbcfg;
+	/**Core Reset Register.	 <i>Offset: 010h</i> */
+	volatile uint32_t grstctl;
+	/**Core Interrupt Register.	 <i>Offset: 014h</i> */
+	volatile uint32_t gintsts;
+	/**Core Interrupt Mask Register.  <i>Offset: 018h</i> */
+	volatile uint32_t gintmsk;
+	/**Receive Status Queue Read Register (Read Only).	<i>Offset: 01Ch</i> */
+	volatile uint32_t grxstsr;
+	/**Receive Status Queue Read & POP Register (Read Only).  <i>Offset: 020h</i>*/
+	volatile uint32_t grxstsp;
+	/**Receive FIFO Size Register.	<i>Offset: 024h</i> */
+	volatile uint32_t grxfsiz;
+	/**Non Periodic Transmit FIFO Size Register.  <i>Offset: 028h</i> */
+	volatile uint32_t gnptxfsiz;
+	/**Non Periodic Transmit FIFO/Queue Status Register (Read
+	 * Only). <i>Offset: 02Ch</i> */
+	volatile uint32_t gnptxsts;
+	/**I2C Access Register.	 <i>Offset: 030h</i> */
+	volatile uint32_t gi2cctl;
+	/**PHY Vendor Control Register.	 <i>Offset: 034h</i> */
+	volatile uint32_t gpvndctl;
+	/**General Purpose Input/Output Register.  <i>Offset: 038h</i> */
+	volatile uint32_t ggpio;
+	/**User ID Register.  <i>Offset: 03Ch</i> */
+	volatile uint32_t guid;
+	/**Synopsys ID Register (Read Only).  <i>Offset: 040h</i> */
+	volatile uint32_t gsnpsid;
+	/**User HW Config1 Register (Read Only).  <i>Offset: 044h</i> */
+	volatile uint32_t ghwcfg1;
+	/**User HW Config2 Register (Read Only).  <i>Offset: 048h</i> */
+	volatile uint32_t ghwcfg2;
+#define DWC_SLAVE_ONLY_ARCH 0
+#define DWC_EXT_DMA_ARCH 1
+#define DWC_INT_DMA_ARCH 2
+
+#define DWC_MODE_HNP_SRP_CAPABLE	0
+#define DWC_MODE_SRP_ONLY_CAPABLE	1
+#define DWC_MODE_NO_HNP_SRP_CAPABLE		2
+#define DWC_MODE_SRP_CAPABLE_DEVICE		3
+#define DWC_MODE_NO_SRP_CAPABLE_DEVICE	4
+#define DWC_MODE_SRP_CAPABLE_HOST	5
+#define DWC_MODE_NO_SRP_CAPABLE_HOST	6
+
+	/**User HW Config3 Register (Read Only).  <i>Offset: 04Ch</i> */
+	volatile uint32_t ghwcfg3;
+	/**User HW Config4 Register (Read Only).  <i>Offset: 050h</i>*/
+	volatile uint32_t ghwcfg4;
+	/** Core LPM Configuration register <i>Offset: 054h</i>*/
+	volatile uint32_t glpmcfg;
+	/** Global PowerDn Register <i>Offset: 058h</i> */
+	volatile uint32_t gpwrdn;
+	/** Global DFIFO SW Config Register  <i>Offset: 05Ch</i> */
+	volatile uint32_t gdfifocfg;
+	/** ADP Control Register  <i>Offset: 060h</i> */
+	volatile uint32_t adpctl;
+	/** Reserved  <i>Offset: 064h-0FFh</i> */
+	volatile uint32_t reserved39[39];
+	/** Host Periodic Transmit FIFO Size Register. <i>Offset: 100h</i> */
+	volatile uint32_t hptxfsiz;
+	/** Device Periodic Transmit FIFO#n Register if dedicated fifos are disabled,
+		otherwise Device Transmit FIFO#n Register.
+	 * <i>Offset: 104h + (FIFO_Number-1)*04h, 1 <= FIFO Number <= 15 (1<=n<=15).</i> */
+	volatile uint32_t dtxfsiz[15];
+};
+
+/**
+ * This union represents the bit fields of the Core AHB Configuration
+ * Register (GAHBCFG). Set/clear the bits using the bit fields then
+ * write the <i>d32</i> value to the register.
+ */
+union /* aliased */ gahbcfg_data {
+	/** raw register data */
+	uint32_t d32;
+	/** register bits */
+	struct {
+		unsigned glblintrmsk:1;
+#define DWC_GAHBCFG_GLBINT_ENABLE		1
+
+		unsigned hburstlen:4;
+#define DWC_GAHBCFG_INT_DMA_BURST_SINGLE	0
+#define DWC_GAHBCFG_INT_DMA_BURST_INCR		1
+#define DWC_GAHBCFG_INT_DMA_BURST_INCR4		3
+#define DWC_GAHBCFG_INT_DMA_BURST_INCR8		5
+#define DWC_GAHBCFG_INT_DMA_BURST_INCR16	7
+
+		unsigned dmaenable:1;
+#define DWC_GAHBCFG_DMAENABLE			1
+		unsigned reserved:1;
+		unsigned nptxfemplvl_txfemplvl:1;
+		unsigned ptxfemplvl:1;
+#define DWC_GAHBCFG_TXFEMPTYLVL_EMPTY		1
+#define DWC_GAHBCFG_TXFEMPTYLVL_HALFEMPTY	0
+		unsigned reserved9_20:12;
+		unsigned remmemsupp:1;
+		unsigned notialldmawrit:1;
+		unsigned ahbsingle:1;
+		unsigned reserved24_31:8;
+	} b;
+};
+
+/**
+ * This function disables the controller's Global Interrupt in the AHB Config
+ * register.
+ *
+ * @param core_if Programming view of DWC_otg controller.
+ */
+static void dwc_otg_restart_disable_global_interrupts(
+	struct bcm2835_pm_poff *pm)
+{
+	struct /* aliased */ dwc_otg_core_global_regs *core_regs;
+	u32 reg;
+	union /* aliased */ gahbcfg_data ahbcfg = {.d32 = 0 };
+
+	core_regs = pm->dwc_base;
+	if (!core_regs) {
+		/* We don't know DWC OTG controller address. */
+		return;
+	}
+
+	ahbcfg.b.glblintrmsk = 1;	/* Disable interrupts */
+
+	dev_info(pm->dev, "Disable DWC USB-OTG interrupt.\n");
+	reg = readl(&(core_regs->gahbcfg));
+	reg &= ~ahbcfg.d32;
+	writel(reg, &(core_regs->gahbcfg));
+	wmb();
+}
+
 /* Reboot part. */
 
 /*
@@ -292,7 +450,6 @@ static int bcm2835_pm_poff_restart_handler(struct notifier_block *nb,
 	 * rebooting due to handle IRQ without device context.
 	 */
 	spin_lock_irqsave(&bcm2835_pm_poff_wdog_lock, flags);
-
 	__bcm2835_pm_poff_restart(pm, partition);
 	/* may be reboot process started before come here. */
 	spin_unlock_irqrestore(&bcm2835_pm_poff_wdog_lock, flags);
@@ -328,10 +485,18 @@ static int bcm2835_pm_poff_save_context(struct bcm2835_pm_poff *pm)
 	return 0;
 }
 
+/* Resource "pm", watchdog/boot from selected partition. */
+#define	BCM2835_PM_POFF_DT_REGS_PM		(0)
+/* Resource "asb", not used. */
+#define	BCM2835_PM_POFF_DT_REGS_ASB		(1)
+/* Resource "usb0base", DWC OTG controller. */
+#define	BCM2835_PM_POFF_DT_REGS_USB0BASE	(2)
+
 static int bcm2835_pm_poff_get_pdata(struct platform_device *pdev,
 				struct bcm2835_pm_poff *pm)
 {
 	struct device *dev = &(pdev->dev);
+	struct resource *res;
 	void __iomem *base;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6,1,75)
@@ -357,21 +522,82 @@ static int bcm2835_pm_poff_get_pdata(struct platform_device *pdev,
 		}
 		pm->base = base;
 
+		/* note: To bypass checking a memory region already in use,
+		 *       Use platform_get_resource_byname(),
+		 *       and devm_ioremap() directly.
+		 */
+		res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "usb0base");
+		if (!res) {
+			/* No resource (physical {address, size})
+			 * referring to DWC USB-OTG.
+			 */
+			dev_notice(dev, "Skip masking DWC USB-OTG interrupt at rebooting.\n"
+			);
+		} else {
+			/* We will mask DWG USB-OTG controller interrupt at rebooting. */
+			base = devm_ioremap(&(pdev->dev),
+				res->start, resource_size(res)
+			);
+			if (!base) {
+				/* Can't get virtual address to
+				 * access DWC USB-OTC controller.
+				 */
+				dev_notice(dev, "Skip masking DWC USB-OTG interrupt at rebooting, can not map aliased virtual address.\n"
+				);
+			} else {
+				/* We get aliased virtual address to
+				 * access DWC USB-OTG controller.
+				 */
+				pm->dwc_base = base;
+			}
+		}
+
 		return 0;
 	}
 
 	/* If no 'reg-names' property is found we can assume
 	 * we're using old DTB, read reg property by index.
 	 */
-	base = devm_platform_ioremap_resource(pdev, 0);
+	base = devm_platform_ioremap_resource(pdev,
+		BCM2835_PM_POFF_DT_REGS_PM
+	);
 	if (IS_ERR(base)) {
 		int	err;
 
 		err = PTR_ERR(base);
-		dev_err(dev, "No IOMEM resource index 0. err=%d\n", err);
+		dev_err(dev, "No IOMEM resource index %d. err=%d\n",
+			BCM2835_PM_POFF_DT_REGS_PM,
+			err
+		);
 		return err;
 	}
 	pm->base = base;
+
+	res = platform_get_resource(pdev, IORESOURCE_MEM,
+		BCM2835_PM_POFF_DT_REGS_USB0BASE
+	);
+	if (!res) {
+		dev_notice(dev, "No mem resource, skip masking DWC USB-OTG interrupt at rebooting. index=%d\n",
+			BCM2835_PM_POFF_DT_REGS_USB0BASE
+		);
+	} else {
+		base = devm_ioremap(&(pdev->dev),
+			res->start, resource_size(res)
+		);
+		if (!base) {
+			/* Can't get virtual address to
+			 * access DWC USB-OTC controller.
+			 */
+			dev_notice(dev, "Skip masking DWC USB-OTG interrupt at rebooting, can not map mem resource. index=%d.\n",
+				BCM2835_PM_POFF_DT_REGS_USB0BASE
+			);
+		} else {
+			/* We get aliased virtual address to
+			 * access DWC USB-OTG controller.
+			 */
+			pm->dwc_base = base;
+		}
+	}
 
 	return 0;
 }
@@ -456,6 +682,14 @@ out_recover_poff_handler:
 	return ret;
 }
 
+static void bcm2835_pm_poff_shutdown(struct platform_device *pdev)
+{
+	struct bcm2835_pm_poff *pm = platform_get_drvdata(pdev);
+
+	/* Shutdown DWC USB-OTG controller. */
+	dwc_otg_restart_disable_global_interrupts(pm);
+}
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6,11,0)
 /* See commit 0edb555a65d1ef047a9805051c36922b52a38a9d */
 static void bcm2835_pm_poff_remove(struct platform_device *pdev)
@@ -502,6 +736,7 @@ static int bcm2835_pm_poff_remove(struct platform_device *pdev)
 
 static struct platform_driver bcm2835_pm_poff_driver = {
 	.probe		= bcm2835_pm_poff_probe,
+	.shutdown	= bcm2835_pm_poff_shutdown,
 	.remove		= bcm2835_pm_poff_remove,
 	.driver	= {
 		.name =	"bcm2835-pm-power-off",
