@@ -31,8 +31,8 @@ BCM2835PowerOffKo="/lib/modules/$(uname -r)/updates/dkms/${BCM2835PowerOff}.ko.x
 
 if [[ -d "${BCM2835PowerOffDkms}" ]]
 then
-	echo "$0: INFO: Install dkms, build-essential, and kmod packages."
-	sudo apt install -y dkms build-essential kmod
+	echo "$0: INFO: Install dkms, linux-headers, build-essential, and kmod packages."
+	sudo apt install -y dkms linux-headers build-essential kmod
 	dkms_ready="yes"
 	if [[ ! -f "${BCM2835PowerOffKo}" ]]
 	then
