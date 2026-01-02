@@ -2071,7 +2071,8 @@ EOF
 	for f in \
 		"${RootFsExt4Point}/etc/systemd/system/multi-user.target.wants/rpi-eeprom-update.service" \
 		"${RootFsExt4Point}/etc/systemd/system/multi-user.target.wants/ModemManager.service" \
-		"${RootFsExt4Point}/etc/systemd/system/dev-serial1.device.wants/hciuart.service"
+		"${RootFsExt4Point}/etc/systemd/system/dev-serial1.device.wants/hciuart.service" \
+		"${RootFsExt4Point}/etc/systemd/system/sysinit.target.wants/rpi-resize.service"
 	do
 		if [[ -f "${f}" || -h "${f}" ]]
 		then
