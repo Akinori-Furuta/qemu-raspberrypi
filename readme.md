@@ -110,7 +110,8 @@ sudo /var/local/post-setup.sh
 sudo /sbin/init 0
 ```
 
->[!note] post-setup.sh does following setups,
+>[!note]
+> post-setup.sh does following setups,
 >
 > * Install power-off and reboot dkms driver bcm2835_power_off.
 > * Disable ModemManager.service.
