@@ -2164,7 +2164,7 @@ fi
 
 if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
 then
-	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64.sh\" ." 1>&2
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
 else
 	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
 fi
