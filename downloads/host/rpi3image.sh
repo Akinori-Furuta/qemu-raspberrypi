@@ -1680,8 +1680,8 @@ then
 	#  Disable watchdog and also power off device (may be PMIC).
 	#  Disable WiFi on SDIO bus.
 	"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
---- bcm2710-rpi-3-b.dts	2025-12-09 01:03:29.282524500 +0900
-+++ bcm2710-rpi-3-b-qemu.dts	2025-12-13 22:38:50.123397200 +0900
+--- bcm2710-rpi-3-b.dts	2025-12-25 10:51:23.364072307 +0900
++++ bcm2710-rpi-3-b-qemu.dts	2025-12-30 22:38:54.216640118 +0900
 @@ -567,7 +567,7 @@
  				shutdown-gpios = <0x0b 0x00 0x00>;
  				local-bd-address = [00 00 00 00 00 00];
@@ -1691,7 +1691,7 @@ then
  				phandle = <0x3a>;
  			};
  		};
-@@ -868,7 +868,7 @@
+@@ -868,14 +868,19 @@
  		};
  
  		watchdog@7e100000 {
@@ -1699,8 +1699,14 @@ then
 +			compatible = "brcm,bcm2835-pm-power-off";
  			#power-domain-cells = <0x01>;
  			#reset-cells = <0x01>;
- 			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
-@@ -876,6 +876,7 @@
+-			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
+-			reg-names = "pm\0asb";
++			/* PM, ASB, DWC-USB-OTG IP block addresses and sizes.
++			 * The address and size of DWC-USB-OTG is
++			 * aliased with usb@7e980000.
++			 */
++			reg = <0x7e100000 0x114 0x7e00a000 0x24 0x7e980000 0x10000>;
++			reg-names = "pm\0asb\0usb0base";
  			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
  			clock-names = "v3d\0peri_image\0h264\0isp";
  			system-power-controller;
@@ -1708,7 +1714,7 @@ then
  			phandle = <0x2c>;
  		};
  
-@@ -991,7 +992,7 @@
+@@ -991,7 +996,7 @@
  			dma-names = "rx-tx";
  			brcm,overclock-50 = <0x00>;
  			non-removable;
@@ -1717,7 +1723,7 @@ then
  			pinctrl-names = "default";
  			pinctrl-0 = <0x1b>;
  			bus-width = <0x04>;
-@@ -1002,6 +1003,7 @@
+@@ -1002,6 +1007,7 @@
  			wifi@1 {
  				reg = <0x01>;
  				compatible = "brcm,bcm4329-fmac";
@@ -1725,7 +1731,7 @@ then
  				phandle = <0x8a>;
  			};
  		};
-@@ -1091,7 +1093,7 @@
+@@ -1091,7 +1097,7 @@
  				compatible = "brcm,bcm2835-virtgpio";
  				gpio-controller;
  				#gpio-cells = <0x02>;
@@ -2065,7 +2071,8 @@ EOF
 	for f in \
 		"${RootFsExt4Point}/etc/systemd/system/multi-user.target.wants/rpi-eeprom-update.service" \
 		"${RootFsExt4Point}/etc/systemd/system/multi-user.target.wants/ModemManager.service" \
-		"${RootFsExt4Point}/etc/systemd/system/dev-serial1.device.wants/hciuart.service"
+		"${RootFsExt4Point}/etc/systemd/system/dev-serial1.device.wants/hciuart.service" \
+		"${RootFsExt4Point}/etc/systemd/system/sysinit.target.wants/rpi-resize.service"
 	do
 		if [[ -f "${f}" || -h "${f}" ]]
 		then
@@ -2157,7 +2164,7 @@ fi
 
 if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
 then
-	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64.sh\" ." 1>&2
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
 else
 	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
 fi
