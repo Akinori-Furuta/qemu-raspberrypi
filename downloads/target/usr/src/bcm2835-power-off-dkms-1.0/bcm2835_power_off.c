@@ -46,7 +46,7 @@
 
 /* Boot partition number(s). */
 /* Boot from partition 63 will power off.
- *  Partiton 63 is a special partition to initiate halt.
+ *  Partition 63 is a special partition to initiate halt.
  */
 #define PM_BOOT_PART_AUTO_SCAN		(0)
 #define	PM_BOOT_PART_FROM_HALT		(63)
@@ -138,8 +138,8 @@ MODULE_PARM_DESC(hold_off_ms, "mdelay time after initiated reboot in milli secon
 static DEFINE_SPINLOCK(bcm2835_pm_poff_wdog_lock);
 
 /*
- * The Raspberry Pi firmware uses the RSTS register to know which partiton
- * to boot from. The partiton value is spread into bits 0, 2, 4, 6, 8, 10.
+ * The Raspberry Pi firmware uses the RSTS register to know which partition
+ * to boot from. The partition value is spread into bits 0, 2, 4, 6, 8, 10.
  * @pre spin lock bcm2835_pm_poff_wdog_lock
  */
 
