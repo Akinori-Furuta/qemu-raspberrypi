@@ -99,8 +99,8 @@ Debian GNU/Linux 13 raspberrypi-host ttyAMA1
 
 My IP address is 10.0.2.15 fec0::30cb:bc27:a7a3:5e9a
 
-raspberrypi-host login: RaspberryPiUserName
-Password: RaspberryPiPassword
+PiHostName login: PiUserName
+Password: PiUserPassword
 ```
 
 Run the post setup and shutdwon on the QEMU console/monitor terminal.
