@@ -414,7 +414,7 @@ static int bcm2835_pm_poff_restart_handler(struct notifier_block *nb,
 			mode
 		);
 		/* We can't handle, but we hope continue. */
-		return 0;
+		return NOTIFY_DONE;
 	}
 
 	if (pm->removed_restart) {
@@ -423,7 +423,7 @@ static int bcm2835_pm_poff_restart_handler(struct notifier_block *nb,
 			mode
 		);
 
-		return 0;
+		return NOTIFY_DONE;
 	}
 
 	if (data) {
