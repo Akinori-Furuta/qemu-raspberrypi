@@ -38,7 +38,7 @@ Setup symbolic links to scripts.
 ./setup-rpi3-trixie-64.sh
 ```
 
-Attach Raspberry Pi OS image media to PC.
+Attach a Raspberry Pi OS image media to PC.
 Find Raspberry Pi OS image media path.
 
 ```bash
@@ -59,7 +59,7 @@ rpi3image.sh: INFO: /dev/sdb.SIZE=14.9Gi/16.0G bytes
 
 > The above example output says the path to media is /dev/sdb.
 
-Convert Raspberry Pi OS image media into eMMC image file.
+Convert the Raspberry Pi OS image media into an eMMC image file.
 
 ```bash
 ./rpi3image.sh /dev/sdX
@@ -74,11 +74,11 @@ First step configuration.
 Wait until done configuration process.
 
 >[!tip]
-> You will see "login: " prompt, but leave it. Do not login.
+> You will see `login: ` prompt, but leave it. Do not login.
 
 You will see reboot kernel log as follows,
 
-```bash
+```text
 [  OK  ] Reached target reboot.target - System Reboot.
 [ 1175.220219] reboot: Restarting system
 [ 1175.228158] Reboot failed -- System halted
