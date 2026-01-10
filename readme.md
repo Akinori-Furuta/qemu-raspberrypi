@@ -13,6 +13,8 @@ This branch contains scripts they run Raspberry Pi OS
 Trixie 64bit on the QEMU emulating Raspberry Pi model 3B.
 To try branch `follow-trixie`,
 
+[Create a Raspberry Pi OS image media. To see parameters and procedures in detail, follow this link.](https://github.com/Akinori-Furuta/qemu-raspberrypi/blob/follow-trixie/en/pi-imager.md)
+
 Install required packages.
 
 ```bash
