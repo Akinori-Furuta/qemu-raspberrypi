@@ -6,7 +6,7 @@ To run the Raspberry Pi OS on the QEMU, create eMMC image file
 by following steps,
 
 * Create Raspberry Pi OS image media
-  * Raspberry Pi imager
+  * Run Raspberry Pi imager
 * Convert media image into file
   * Modify files in image file
     * Automatically done by scripts
@@ -24,7 +24,7 @@ Prepare following items.
 * A removable storage media
   * All data on storage media will be erased
   * 8Gbytes or more capacity
-    * Raspberry Pi OS uses about 6Gbytes of rootfs partiton.
+    * Raspberry Pi OS uses about 6Gbytes of rootfs partition.
   * Micro SD cards, SD cards, or Thumb USB memories
     * May use other kind of USB connected storage devices
 
@@ -39,7 +39,7 @@ Attach a removable storage media to write Raspberry Pi OS image.
 
 ```bash
 # Assume downloaded the imager into ~/Downloads directory,
-# and x and y are minor version numbes.
+# and x and y are minor version numbers.
 cd ~/Downloads
 chmod +x imager_2.x.y_amd64.AppImage
 ./imager_2.x.y_amd64.AppImage
@@ -126,7 +126,10 @@ Select "Enable SSH" as On. Select "Authentication mechanism" as "Use password au
 
 ![Customization: SSH authentication](../img/trixie-07-customisation-ssh-authenticationi.png)
 
-If you run the QEMU emulator with user mode network (build-in NAT). Configure rpi3vm64.conf `NetDevOption` variable. For example, seting `NetDevOption="user,id=net0,hostfwd=tcp::2022-:22"` forwards connection to host port 2022 to guest port 22.
+If you run the QEMU emulator with user mode network (build-in NAT).
+Configure rpi3vm64.conf `NetDevOption` variable. For example,
+setting `NetDevOption="user,id=net0,hostfwd=tcp::2022-:22"`
+forwards connection to host port 2022 to guest port 22.
 
 ### Customization: Raspberry Pi Connect
 
