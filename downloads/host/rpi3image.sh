@@ -1630,6 +1630,17 @@ then
 	exit ${result}
 fi
 
+UserDataFile="${OptionOutputDirectory}/bootfs/user-data"
+echo "${MyBase}: INFO: Change \"${UserDataFile}\" mode to 700." 1>&2
+"${SUDO}" "${CHMOD}" 600 "${UserDataFile}"
+result=$?
+if (( ${result} != 0 ))
+then
+	echo "${MyBase}: ERROR: Can not change \"${UserDataFile}\" mode." 1>&2
+	exit ${result}
+fi
+
+
 if [[ -z "${OptionMigrate}" ]]
 then
 	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
