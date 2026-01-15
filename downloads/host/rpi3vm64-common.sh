@@ -8,9 +8,19 @@ MyTemp=""
 
 # At exit procedure
 function ExitProc() {
+	if command -v ExitProcMainPre > /dev/null
+	then
+		ExitProcMainPre
+	fi
+
 	if [ -n "${MyTemp}" ] && [ -d "${MyTemp}" ]
 	then
 		rm -rf "${MyTemp}"
+	fi
+
+	if command -v ExitProcMainPost > /dev/null
+	then
+		ExitProcMainPost
 	fi
 }
 
