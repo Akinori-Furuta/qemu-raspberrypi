@@ -78,6 +78,12 @@ ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
 ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
 ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
 ProbeCommand STAT coreutils		/usr/bin/stat /bin/stat /usr/sbin/stat
+# Will be use
+ProbeCommand FATCAT fatcat		/usr/bin/fatcat /bin/fatcat /usr/sbin/fatcat /sbin/fatcat
+ProbeCommand ZCATR gzip			/usr/bin/zcat /bin/zcat /usr/sbin/zcat /sbin/zcat
+ProbeCommand STRINGS binutils		/usr/bin/strings /bin/strings /usr/sbin/strings /sbin/strings
+ProbeCommand HEAD coreutils		/usr/bin/head /bin/head /usr/sbin/head /sbin/head
+ProbeCommand DATE coreutils		/usr/bin/date /bin/date /usr/sbin/date /sbin/date
 
 if [[ -n "${BASENAME}" ]]
 then
