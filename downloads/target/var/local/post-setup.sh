@@ -29,29 +29,45 @@ else
 	linux_headers_pkg="linux-headers-rpi-v8"
 fi
 
+echo "$0: INFO: Install dkms, ${linux_headers_pkg}, build-essential, and kmod packages."
+sudo apt install -y dkms "${linux_headers_pkg}" build-essential kmod
+
 BCM2835PowerOffDkms="/usr/src/bcm2835-power-off-dkms-1.0"
 BCM2835PowerOff="bcm2835_power_off"
-BCM2835PowerOffKo="/lib/modules/$(uname -r)/updates/dkms/${BCM2835PowerOff}.ko.xz"
+ModuleBaseDir="/lib/modules"
+
+kernel_version="$(uname -r)"
+arch="$(uname -m)"
 
 if [[ -d "${BCM2835PowerOffDkms}" ]]
 then
-	echo "$0: INFO: Install dkms, ${linux_headers_pkg}, build-essential, and kmod packages."
-	sudo apt install -y dkms "${linux_headers_pkg}" build-essential kmod
-	dkms_ready="yes"
-	if [[ ! -f "${BCM2835PowerOffKo}" ]]
-	then
-		echo "$0: INFO: Install dkms driver \"${BCM2835PowerOffDkms}\"."
-		sudo dkms build bcm2835-power-off-dkms/1.0 || dkms_ready=""
-		sudo dkms install bcm2835-power-off-dkms/1.0 || dkms_ready=""
-	else
-		echo "$0: NOTICE: Skip installing dkms driver \"${BCM2835PowerOffDkms}\"."
-	fi
+	( cd "${ModuleBaseDir}" ; ls ) | while read
+	do
+		if [[ ! -d "${ModuleBaseDir}/${REPLY}" ]]
+		then
+			continue
+		fi
 
-	if [[ -n "${dkms_ready}" ]]
-	then
-		echo "$0: INFO: Install module \"${BCM2835PowerOff}\" into kernel."
-		sudo modprobe "${BCM2835PowerOff}"
-	fi
+		dkms_ready="yes"
+		BCM2835PowerOffKo="/lib/modules/${REPLY}/updates/dkms/${BCM2835PowerOff}.ko.xz"
+
+		if [[ ! -f "${BCM2835PowerOffKo}" ]]
+		then
+			kernel_arch="${REPLY}/${arch}"
+			echo "$0: INFO: Install dkms driver \"${BCM2835PowerOffDkms}\" to ${kernel_arch}."
+			sudo dkms build bcm2835-power-off-dkms/1.0 -k "${kernel_arch}" || dkms_ready=""
+			sudo dkms install bcm2835-power-off-dkms/1.0 -k "${kernel_arch}" || dkms_ready=""
+		else
+			echo "$0: NOTICE: Skip installing dkms driver \"${BCM2835PowerOffDkms}\" to ${kernel_arch}."
+		fi
+
+		if [[ ( -n "${dkms_ready}" ) && ( "${REPLY}" == "${kernel_version}" ) ]]
+		then
+			echo "$0: INFO: Install module \"${BCM2835PowerOff}\" into kernel."
+			sudo modprobe "${BCM2835PowerOff}"
+		fi
+	done
+
 fi
 
 echo "$0: INFO: Disable ModemManager."
