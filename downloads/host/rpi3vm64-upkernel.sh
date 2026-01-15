@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
-# Copy this script to same directory
-# which contains SD card Raspberry Pi OS image file *.img and bootfs/*
+# Update bootfs/kernel8.img and bootfs/Initramfs8 from SDCard/eMMC
+# image file SdFile.
 
 export PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
 
