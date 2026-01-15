@@ -21,7 +21,7 @@ Install required packages.
 sudo apt install git bridge-utils uml-utilities \
  qemu-system-common qemu-system qemu-system-arm qemu-utils \
  parted nbd-client cloud-guest-utils e2fsprogs virt-viewer \
- device-tree-compiler gawk
+ device-tree-compiler gawk fatcat gzip binutils diffutils
 ```
 
 Clone git repository.
