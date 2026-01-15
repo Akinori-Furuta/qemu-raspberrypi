@@ -1640,7 +1640,6 @@ then
 	exit ${result}
 fi
 
-
 if [[ -z "${OptionMigrate}" ]]
 then
 	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
