@@ -177,7 +177,7 @@ do
 	kernel_version_cur="$( KernelVersion "${KernelFile}" )"
 	if (( ( $? != 0 ) || ( ${repeat_count} > 0 ) ))
 	then
-		kernel_version_cur="$( date '%y%m%d%H%M%S' )-$( cat /proc/sys/kernel/random/uuid )"
+		kernel_version_cur="$( date '+%y%m%d%H%M%S' )-$( cat /proc/sys/kernel/random/uuid )"
 	fi
 	repeat_count=$(( ${repeat_count} + 1 ))
 	KernelFileBackup="${KernelFileName}-${kernel_version_cur}${KernelFileExt}"
