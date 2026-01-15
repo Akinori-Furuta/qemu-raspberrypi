@@ -152,6 +152,12 @@ then
 	exit 1
 fi
 
+if cmp -s "${KernelFile}" "${Kernel8Temp}" && cmp -s "${InitrdFile}" "${Initrd8Temp}"
+then
+	echo "${MyBase}: NOTICE: Current kernel \"${KernelFile}\" and initrd \"${InitrdFile}\" files are same as /bootfs/* files."
+	exit 1
+fi
+
 # Get kernel version string
 # arg PathToKernelFile
 # echo kernel version string

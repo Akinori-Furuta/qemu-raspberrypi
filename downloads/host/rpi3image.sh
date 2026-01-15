@@ -84,6 +84,7 @@ ProbeCommand ZCATR gzip			/usr/bin/zcat /bin/zcat /usr/sbin/zcat /sbin/zcat
 ProbeCommand STRINGS binutils		/usr/bin/strings /bin/strings /usr/sbin/strings /sbin/strings
 ProbeCommand HEAD coreutils		/usr/bin/head /bin/head /usr/sbin/head /sbin/head
 ProbeCommand DATE coreutils		/usr/bin/date /bin/date /usr/sbin/date /sbin/date
+ProbeCommand CMP diffutils		/usr/bin/cmp /bin/cmp /usr/sbin/cmp /sbin/cmp
 
 if [[ -n "${BASENAME}" ]]
 then
