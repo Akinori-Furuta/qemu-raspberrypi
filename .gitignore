@@ -5,3 +5,4 @@ rpi3vm64-2nd.sh
 rpi3vm64-common.sh
 rpi3vm64.conf
 rpi3vm64.sh
+rpi3vm64-upkernel.sh

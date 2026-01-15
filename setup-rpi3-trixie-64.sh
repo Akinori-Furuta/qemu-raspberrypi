@@ -3,7 +3,8 @@
 for f in "downloads/host/rpi3image.sh" \
 	 "downloads/host/rpi3vm64.conf" \
 	 "downloads/host/rpi3vm64-common.sh" \
-	 "downloads/host/rpi3vm64.sh"
+	 "downloads/host/rpi3vm64.sh" \
+	 "downloads/host/rpi3vm64-upkernel.sh"
 do
 	if [[ ! -f "${f}" ]]
 	then
@@ -35,3 +36,5 @@ echo "$0: HELP:                Login and run \"sudo /var/local/post-setup.sh; \\
 echo "$0: HELP:                sudo /sbin/init 0\"."
 echo "$0: HELP: normal-boot: ./rpi3vm64.sh"
 echo "$0: HELP:                Normal operation."
+echo "$0: HELP: copy-kernel: ./rpi3vm64-upkernel.sh"
+echo "$0: HELP:                Copy kernel and initrd files from SDCard/eMMC image file to bootfs/."
