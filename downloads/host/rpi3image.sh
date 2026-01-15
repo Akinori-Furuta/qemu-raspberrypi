@@ -553,7 +553,7 @@ function DeviceIsMounted() {
 			echo yes
 			break
 		fi
-	done | "${GREP}" -q 'yes'
+	done | read && [[ "${REPLY}" == yes ]]
 	return $?
 }
 
