@@ -125,14 +125,6 @@ Now, ready to run the Raspberry Pi OS on the QEMU emulator.
 ./rpi3vm64.sh
 ```
 
-To exit the Raspberry Pi OS emulation,
-
-|Command|qemu-system-aarch64 option|Action|kernel sequence|
-|---|---|---|---|
-|/sbin/init 0||Terminate|power off|
-|/sbin/reboot|-no-reboot (rpi3vm64.sh default)|Terminate|reboot|
-|/sbin/reboot|without -no-reboot|Reboot|reboot|
-
 Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
 
 ![Running Raspberry Pi OS Debian 13 (trixie) release](img/run-raspberrypi-trixie-debian13-on-qemu-gui.png)
@@ -148,6 +140,14 @@ Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
 > * Fix graphical screen resolution to 1024x768.
 > * Disable rpi-eeprom-update.service
 > * Disable virtgpio driver
+
+To exit the Raspberry Pi OS emulation,
+
+|Command|qemu-system-aarch64 option|Action|kernel sequence|
+|---|---|---|---|
+|/sbin/init 0||Terminate|power off|
+|/sbin/reboot|-no-reboot (rpi3vm64.sh default)|Terminate|reboot|
+|/sbin/reboot|without -no-reboot|Reboot|reboot|
 
 ## 目次
 
