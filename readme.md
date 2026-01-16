@@ -149,6 +149,28 @@ To exit the Raspberry Pi OS emulation,
 |/sbin/reboot|-no-reboot (rpi3vm64.sh default)|Terminate|reboot|
 |/sbin/reboot|without -no-reboot|Reboot|reboot|
 
+After updating kernel in emulated Raspberry Pi OS, exit the QEMU emulation and run following command on host PC.
+
+```bash
+./rpi3vm64-upkernel.sh
+```
+
+`./rpi3vm64-upkernel.sh` updates boots/kernel8.img and bootfs/initramfs8 by following steps.
+
+* Extract bootfs partition from the SDCard/eMMC ($SDFile) image.
+* Copy kernel8.img and initramfs8 files from the extracted
+  partition to temporary files.
+* Compare current kernel8.img and initramfs8 under host bootfs/
+  directory with the temporary files extracted above.
+  * If compared files are same to the temporary files,
+    do nothing and exit.
+* Backup current kernel8.img and initramfs8.
+  * Copy kernel8.img to kernel8-$(uname -r).img.
+  * Copy initramfs8 to initramfs8-$(uname -r).img.
+  * The _$(uname -r)_ string is picked from kernel8.img.
+* Move the temporary files to kernel8.img and initramfs8.
+  * If failed moving, try revert kernel8.img and initramfs8.
+
 ## 目次
 
 * [Network Bridge を QEMU 向けに構成する](jp/bridge.md)
