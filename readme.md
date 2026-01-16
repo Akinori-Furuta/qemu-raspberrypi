@@ -75,7 +75,7 @@ First step configuration.
 
 Wait until done configuration process.
 
->[!tip]
+> [!TIP]
 > You will see `login: ` prompt, but leave it. Do not login.
 
 You will see reboot kernel log as follows,
@@ -112,13 +112,12 @@ sudo /var/local/post-setup.sh
 sudo /sbin/init 0
 ```
 
->[!note]
+> [!NOTE]
 > post-setup.sh does following setups,
 >
 > * Install power-off and reboot dkms driver bcm2835_power_off.
 > * Disable ModemManager.service.
 > * Disable rpi-eeprom-update.service.
->
 
 Now, ready to run the Raspberry Pi OS on the QEMU emulator.
 
@@ -138,7 +137,7 @@ Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
 
 ![Running Raspberry Pi OS Debian 13 (trixie) release](img/run-raspberrypi-trixie-debian13-on-qemu-gui.png)
 
-> [!note]
+> [!NOTE]
 > There are some restrictions on QEMU emulator.
 >
 > * Disable watchdog timer.
@@ -149,7 +148,6 @@ Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
 > * Fix graphical screen resolution to 1024x768.
 > * Disable rpi-eeprom-update.service
 > * Disable virtgpio driver
->
 
 ## 目次
 
