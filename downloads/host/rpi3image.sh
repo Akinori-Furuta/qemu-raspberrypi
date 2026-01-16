@@ -1638,13 +1638,16 @@ then
 fi
 
 UserDataFile="${OptionOutputDirectory}/bootfs/user-data"
-echo "${MyBase}: INFO: Change \"${UserDataFile}\" mode to 700." 1>&2
-"${SUDO}" "${CHMOD}" 600 "${UserDataFile}"
-result=$?
-if (( ${result} != 0 ))
+if [[ -f "${UserDataFile}" ]]
 then
-	echo "${MyBase}: ERROR: Can not change \"${UserDataFile}\" mode." 1>&2
-	exit ${result}
+	echo "${MyBase}: INFO: Change \"${UserDataFile}\" mode to 700." 1>&2
+	"${SUDO}" "${CHMOD}" 600 "${UserDataFile}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not change \"${UserDataFile}\" mode." 1>&2
+		exit ${result}
+	fi
 fi
 
 if [[ -z "${OptionMigrate}" ]]
