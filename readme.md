@@ -76,7 +76,7 @@ First step configuration.
 Wait until done configuration process.
 
 > [!TIP]
-> You will see `login: ` prompt, but leave it. Do not login.
+> You will see `login:` prompt, but leave it. Do not login.
 
 You will see reboot kernel log as follows,
 
