@@ -1363,17 +1363,21 @@ TargetKitFilesExec=( \
 	/var/local/raspi-config-qemu.sh \
 )
 
-TargetKitFiles=( \
-	${TargetKitFilesExec[*]} \
+TargetKitFilesDkmsTrixie=( \
 	/usr/src/bcm2835-power-off-dkms-1.0/bcm2835_power_off.c \
 	/usr/src/bcm2835-power-off-dkms-1.0/dkms.conf \
 	/usr/src/bcm2835-power-off-dkms-1.0/Makefile \
 )
 
+TargetKitFilesAll=( \
+	${TargetKitFilesExec[*]} \
+	${TargetKitFilesDkmsTrixie[*]} \
+)
+
 TargetKitFrom="${GitCloned}/downloads/target"
 TargetKitFromGit="yes"
 
-for f in ${TargetKitFiles[*]}
+for f in ${TargetKitFilesAll[*]}
 do
 	f_from="${TargetKitFrom}${f}"
 	if [[ ! -f "${f_from}" ]]
@@ -1821,6 +1825,20 @@ then
 
 	if [[ -n "${TargetKitFromGit}" ]]
 	then
+		if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
+		then
+			# Trixie or later
+			TargetKitFiles=( \
+				${TargetKitFilesExec[*]} \
+				${TargetKitFilesDkmsTrixie[*]} \
+			)
+		else
+			# Bookworm or earlier
+			TargetKitFiles=( \
+				${TargetKitFilesExec[*]} \
+			)
+		fi
+
 		for f in ${TargetKitFiles[*]}
 		do
 			f_from="${TargetKitFrom}${f}"
