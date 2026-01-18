@@ -78,7 +78,7 @@ ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
 ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
 ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
 ProbeCommand STAT coreutils		/usr/bin/stat /bin/stat /usr/sbin/stat
-# Will be use
+ProbeCommand LN coreutils		/usr/bin/ln /bin/ln /usr/sbin/ln /sbin/ln
 # Will be use FATCAT, ZCAT, STRINGS, HEAD, CMP
 ProbeCommand FATCAT fatcat		/usr/bin/fatcat /bin/fatcat /usr/sbin/fatcat /sbin/fatcat
 ProbeCommand ZCAT gzip			/usr/bin/zcat /bin/zcat /usr/sbin/zcat /sbin/zcat
