@@ -120,6 +120,8 @@ else
 fi
 
 MyWhich="$( "${WHICH}" "$0" )"
+MyWhichPath="$( "${DIRNAME}" "${MyWhich}" )"
+MyWhichDir="$( "${DIRNAME}" "${MyWhichPath}" )"
 MyPath="$( "${READLINK}" -f "${MyWhich}" )"
 MyDir="$( "${DIRNAME}" "${MyPath}" )"
 MyBody="${MyBase%.*}"
