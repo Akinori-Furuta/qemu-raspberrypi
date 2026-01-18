@@ -128,6 +128,8 @@ MyBody="${MyBase%.*}"
 MyBodyNoSpace="$( echo -n ${MyBody} | "${TR}" -s '\000-\040' '_')"
 MyBodyNoSuffix="${MyBody%%-*}"
 
+Now="$( "${DATE}" +%y%m%d%H%M%S )"
+
 RaspiOSImagePrefix="raspios"
 
 function Help() {
