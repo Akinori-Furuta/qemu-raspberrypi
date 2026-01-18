@@ -2191,6 +2191,77 @@ if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
 then
 	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
 else
+	Rpi3vm641StConf="${MyDir}/rpi3vm64-1st.conf"
+
+	if [[ -f "${Rpi3vm641StConf}" ]]
+	then
+		Rpi3vm641StConfBackup="${MyWhichDir}/rpi3vm64-1st-${Now}.conf.backup"
+		echo "${MyBase}: INFO: Backup configuration file \"${Rpi3vm641StConf}\" to \"${Rpi3vm641StConfBackup}\"." 1>&2
+		"${MV}" --backup=t "${Rpi3vm641StConf}" "${Rpi3vm641StConfBackup}"
+	fi
+
+	echo "${MyBase}: INFO: Create configuration file \"${Rpi3vm641StConf}\" to run bookworm release." 1>&2
+	"${CAT}" > "${Rpi3vm641StConf}" << EOF
+Append="console=ttyAMA1,115200 console=tty1\\
+ root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\\
+ dwc_otg.fiq_fsm_enable=0\\
+ bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\\
+ init=/usr/lib/raspberrypi-sys-mods/firstboot\\
+ systemd.run=/boot/firstrun.sh\\
+ systemd.run_success_action=reboot\\
+ systemd.unit=kernel-command-line.target\\
+"
+EOF
+	result=$?
+	if (( $? != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not create configuration file \"${Rpi3vm641StConf}\" ." 1>&2
+		exit ${result}
+	fi
+
+	Rpi3vm641StConfLinkFrom="${MyWhichDir}/rpi3vm64-1st.conf"
+
+	if ! "${LN}" -s "${Rpi3vm641StConf}" "${Rpi3vm641StConfLinkFrom}"
+	then
+		echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm641StConfLinkFrom}\" to configuration file \"${Rpi3vm641StConf}\" ." 1>&2
+		exit ${result}
+	fi
+
+	Rpi3vm642ndConf="${MyDir}/rpi3vm64-2nd.conf"
+
+	if [[ -f "${Rpi3vm642ndConf}" ]]
+	then
+		Rpi3vm642ndConfBackup="${MyWhichDir}/rpi3vm64-2nd-${Now}.conf.backup"
+		echo "${MyBase}: INFO: Backup configuration file \"${Rpi3vm642ndConf}\" to \"${Rpi3vm642ndConfBackup}\"." 1>&2
+		"${MV}" --backup=t "${Rpi3vm642ndConf}" "${Rpi3vm642ndConfBackup}"
+	fi
+
+	echo "${MyBase}: INFO: Create configuration file \"${Rpi3vm642ndConf}\" to run bookworm release." 1>&2
+	"${CAT}" > "${Rpi3vm642ndConf}" << EOF
+Append="console=ttyAMA1,115200 console=tty1\\
+ root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\\
+ dwc_otg.fiq_fsm_enable=0\\
+ bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\\
+ systemd.run=/boot/firmware/firstrun.sh\\
+ systemd.run_success_action=reboot\\
+ systemd.unit=kernel-command-line.target\\
+"
+EOF
+	result=$?
+	if (( $? != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not create configuration file \"${Rpi3vm642ndConf}\" ." 1>&2
+		exit ${result}
+	fi
+
+	Rpi3vm642ndConfLinkFrom="${MyWhichDir}/rpi3vm64-2nd.conf"
+
+	if ! "${LN}" -s "${Rpi3vm641StConf}" "${Rpi3vm642ndConfLinkFrom}"
+	then
+		echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm642ndConfLinkFrom}\" to configuration file \"${Rpi3vm642ndConf}\" ." 1>&2
+		exit ${result}
+	fi
+
 	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
 fi
 
