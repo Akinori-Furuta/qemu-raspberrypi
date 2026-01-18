@@ -29,18 +29,18 @@ else
 	linux_headers_pkg="linux-headers-rpi-v8"
 fi
 
-echo "$0: INFO: Install dkms, ${linux_headers_pkg}, build-essential, and kmod packages."
-sudo apt install -y dkms "${linux_headers_pkg}" build-essential kmod
-
 BCM2835PowerOffDkms="/usr/src/bcm2835-power-off-dkms-1.0"
 BCM2835PowerOff="bcm2835_power_off"
 ModuleBaseDir="/lib/modules"
 
-kernel_version="$(uname -r)"
-arch="$(uname -m)"
-
 if [[ -d "${BCM2835PowerOffDkms}" ]]
 then
+	echo "$0: INFO: Install dkms, ${linux_headers_pkg}, build-essential, and kmod packages."
+	sudo apt install -y dkms "${linux_headers_pkg}" build-essential kmod
+
+	kernel_version="$(uname -r)"
+	arch="$(uname -m)"
+
 	( cd "${ModuleBaseDir}" ; ls ) | while read
 	do
 		if [[ ! -d "${ModuleBaseDir}/${REPLY}" ]]
