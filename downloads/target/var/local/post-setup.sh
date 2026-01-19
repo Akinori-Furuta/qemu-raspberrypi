@@ -29,6 +29,12 @@ else
 	linux_headers_pkg="linux-headers-rpi-v8"
 fi
 
+echo "$0: INFO: Disable ModemManager."
+sudo systemctl disable ModemManager.service
+
+echo "$0: INFO: Disable rpi-eeprom-update."
+sudo systemctl disable rpi-eeprom-update.service
+
 BCM2835PowerOffDkms="/usr/src/bcm2835-power-off-dkms-1.0"
 BCM2835PowerOff="bcm2835_power_off"
 ModuleBaseDir="/lib/modules"
@@ -69,9 +75,3 @@ then
 	done
 
 fi
-
-echo "$0: INFO: Disable ModemManager."
-sudo systemctl disable ModemManager.service
-
-echo "$0: INFO: Disable rpi-eeprom-update."
-sudo systemctl disable rpi-eeprom-update.service
