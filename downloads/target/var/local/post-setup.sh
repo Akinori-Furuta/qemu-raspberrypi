@@ -50,10 +50,10 @@ then
 
 		dkms_ready="yes"
 		BCM2835PowerOffKo="/lib/modules/${REPLY}/updates/dkms/${BCM2835PowerOff}.ko.xz"
+		kernel_arch="${REPLY}/${arch}"
 
 		if [[ ! -f "${BCM2835PowerOffKo}" ]]
 		then
-			kernel_arch="${REPLY}/${arch}"
 			echo "$0: INFO: Install dkms driver \"${BCM2835PowerOffDkms}\" to ${kernel_arch}."
 			sudo dkms build bcm2835-power-off-dkms/1.0 -k "${kernel_arch}" || dkms_ready=""
 			sudo dkms install bcm2835-power-off-dkms/1.0 -k "${kernel_arch}" || dkms_ready=""
