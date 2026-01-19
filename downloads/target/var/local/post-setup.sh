@@ -42,7 +42,19 @@ ModuleBaseDir="/lib/modules"
 if [[ -d "${BCM2835PowerOffDkms}" ]]
 then
 	echo "$0: INFO: Install dkms, ${linux_headers_pkg}, build-essential, and kmod packages."
-	sudo apt install -y dkms "${linux_headers_pkg}" build-essential kmod
+
+	retries=0
+	while ! sudo apt install -y dkms "${linux_headers_pkg}" build-essential kmod
+	do
+		retries=$(( ${retries} + 1 ))
+		if (( ${retries} <= 3 ))
+		then
+			echo "$0: NOTICE: Retry install. retries=${retries}"
+		else
+			echo "$0: ERROR: Can not install package(s)."
+			exit 1
+		fi
+	done
 
 	kernel_version="$(uname -r)"
 	arch="$(uname -m)"
