@@ -82,6 +82,14 @@ then
 		fi
 
 		dkms_ready="yes"
+
+		build_link="/lib/modules/${REPLY}/build"
+		if [[ ! -e "${build_link}" ]]
+		then
+			echo "$0: NOTICE: No headers to build a dkms driver. kernel_version=\"${REPLY}\"."
+			continue
+		fi
+
 		BCM2835PowerOffKo="/lib/modules/${REPLY}/updates/dkms/${BCM2835PowerOff}.ko.xz"
 		kernel_arch="${REPLY}/${arch}"
 
