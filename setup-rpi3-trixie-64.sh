@@ -12,7 +12,7 @@ do
 		exit 1
 	fi
 	link_from="${f##*/}"
-	if [[ ( ! -h "${link_from}" ) || ( ! -f "${link_from}" ) ]]
+	if [[ ( ! -h "${link_from}" ) && ( ! -f "${link_from}" ) ]]
 	then
 		ln -s "${f}" "${link_from}"
 	fi
@@ -21,7 +21,7 @@ done
 link_to="downloads/host/rpi3vm64.sh"
 for link_from in "rpi3vm64-1st.sh" "rpi3vm64-2nd.sh"
 do
-	if [[ ( ! -h "${link_from}" ) || ( ! -f "${link_from}" )  ]]
+	if [[ ( ! -h "${link_from}" ) && ( ! -f "${link_from}" )  ]]
 	then
 		ln -s "${link_to}" "${link_from}"
 	fi
