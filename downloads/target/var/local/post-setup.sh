@@ -109,5 +109,4 @@ then
 			sudo modprobe "${BCM2835PowerOff}"
 		fi
 	done
-
 fi
