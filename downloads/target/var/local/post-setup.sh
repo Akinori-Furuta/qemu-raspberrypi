@@ -75,6 +75,7 @@ then
 			echo "$0: INFO: Install dkms driver \"${BCM2835PowerOffDkms}\" to ${kernel_arch}."
 			sudo dkms build bcm2835-power-off-dkms/1.0 -k "${kernel_arch}" || dkms_ready=""
 			sudo dkms install bcm2835-power-off-dkms/1.0 -k "${kernel_arch}" || dkms_ready=""
+			sync
 		else
 			echo "$0: NOTICE: Already installed dkms driver \"${BCM2835PowerOffDkms}\" to ${kernel_arch}."
 		fi
