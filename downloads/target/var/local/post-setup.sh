@@ -10,6 +10,8 @@ RaspiOsReleaseNo=$( grep 'VERSION_ID' "/etc/os-release" \
 	| awk 'BEGIN {FS="="} {print $2}' \
 	| tr -d '"' )
 
+KernelArch="$(uname -m)"
+
 # Remove first run script, it contains password and pass phrase.
 rm -f /boot/firmware/firstrun.sh
 # Lock user rpi-first-boot-wizard
