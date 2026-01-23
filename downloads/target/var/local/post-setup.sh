@@ -28,7 +28,20 @@ then
 	linux_headers_pkg="linux-headers"
 else
 	echo "$0: INFO: Skip disable hciuart.service."
-	linux_headers_pkg="linux-headers-rpi-v8"
+	case "${KernelArch}" in
+	(armv6l)
+		linux_headers_pkg="linux-headers-rpi-v6"
+		;;
+	(armv7l)
+		linux_headers_pkg="linux-headers-rpi-v7"
+		;;
+	(aarch64|armv8l)
+		linux_headers_pkg="linux-headers-rpi-v8"
+		;;
+	(*)
+		linux_headers_pkg="linux-headers"
+		;;
+	esac
 fi
 
 echo "$0: INFO: Disable ModemManager."
