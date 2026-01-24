@@ -184,8 +184,13 @@ EOF
 	exit 1
 }
 
+# 64bit virtual machine
 DtRpi3BName="bcm2710-rpi-3-b"
 DtRpi3BNameQemu="bcm2710-rpi-3-b-qemu"
+
+# 32bit virtual machine
+DtRpi2BName="bcm2709-rpi-2-b"
+DtRpi2BNameQemu="bcm2709-rpi-2-b-qemu"
 
 NBDDisconnectWait1=3
 NBDDisconnectWait2=5
@@ -1681,34 +1686,66 @@ fi
 
 echo "${MyBase}: INFO: Modify device tree." 1>&2
 
-DtRpi3BNameSource="${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts"
-
-"${DTC}" -I dtb -O dts -o "${DtRpi3BNameSource}" "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not disassemble device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb\"." 1>&2
-	exit ${result}
-fi
-
 DtRpi3BNameQemuSource="${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dts"
-DtRpi3BNameQemuBlob="${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dtb"
+DtRpi2BNameQemuSource="${OptionOutputDirectory}/bootfs/${DtRpi2BNameQemu}.dts"
 
-"${CP}" -p "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" "${DtRpi3BNameQemuSource}"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not copy device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts\"." 1>&2
-	exit ${result}
-fi
+DtRpiCycle=4
+DtRpiOrigBlob=0
+DtRpiDisasm=1
+DtRpiMod=2
+DtRpiQemuBlob=3
+
+# List[ ( Index % 4 ) == 0 ] := Device Tree blob from Original Raspberry Pi OS image
+# List[ ( Index % 4 ) == 1 ] := Device Tree source disassembled above
+# List[ ( Index % 4 ) == 2 ] := Device Tree source modified above
+# List[ ( Index % 4 ) == 3 ] := Device Tree blob assembled above
+
+DtRpiBlobSourceList=( \
+	"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" \
+	"${DtRpi3BNameQemuSource}" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dtb" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi2BName}.dtb" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi2BName}.dts" \
+	"${DtRpi2BNameQemuSource}" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi2BNameQemu}.dtb" \
+)
+DtRpiBlobSourceListNum=${#DtRpiBlobSourceList[*]}
+
+
+i=0
+while (( i < ${DtRpiBlobSourceListNum} ))
+do
+	dtb_orig="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiOrigBlob} ))]}";
+	dts_orig="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiDisasm}   ))]}";
+	dts_qemu="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiMod}      ))]}";
+
+	if [[ -f "${dtb_orig}" ]]
+	then
+		if ! "${DTC}" -I dtb -O dts -o "${dts_orig}" "${dtb_orig}"
+		then
+			echo "${MyBase}: ERROR: Can not disassemble device tree blob \"${dtb_orig}\"." 1>&2
+			exit 1
+		fi
+
+		if ! "${CP}" -p "${dts_orig}" "${dts_qemu}"
+		then
+			echo "${MyBase}: ERROR: Can not copy device tree source \"${dts_orig}\" to \"{dts_qemu}\"." 1>&2
+			exit 1
+		fi
+	fi
+
+	i=$(( ${i} + ${DtRpiCycle} ))
+done
 
 if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
 then
 	# Trixie or later
+	#  64bit virtual machine
 	#  Disable bluetooth serial interface
 	#  Disable watchdog and also power off device (may be PMIC).
 	#  Disable WiFi on SDIO bus.
-	"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
+	[[ ! -f "${DtRpi3BNameQemuSource}" ]] || "${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
 --- bcm2710-rpi-3-b.dts	2025-12-25 10:51:23.364072307 +0900
 +++ bcm2710-rpi-3-b-qemu.dts	2025-12-30 22:38:54.216640118 +0900
 @@ -567,7 +567,7 @@
@@ -1770,6 +1807,65 @@ then
  			};
  		};
 EOF
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch trixie to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+		exit ${result}
+	fi
+
+	#  32bit virtual machine
+	#  Disable watchdog and also power off device (may be PMIC).
+	[[ ! -f "${DtRpi2BNameQemuSource}" ]] || "${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+--- bcm2709-rpi-2-b.dts	2026-01-24 19:00:46.298018427 +0900
++++ bcm2709-rpi-2-b-qemu.dts	2026-01-24 21:28:15.520371422 +0900
+@@ -530,11 +530,12 @@
+ 			interrupts = <0x02 0x18>;
+ 			clocks = <0x08 0x14>;
+ 			status = "okay";
+-			dmas = <0x09 0x2000000d>;
+-			dma-names = "rx-tx";
++			brcm,force-pio = <0x01>;
++			/* dmas = <0x09 0x2000000d>; */
++			/* dma-names = "rx-tx"; */
+ 			bus-width = <0x04>;
+ 			brcm,overclock-50 = <0x00>;
+-			brcm,pio-limit = <0x01>;
++			brcm,pio-limit = <0x7fffffff>;
+ 			firmware = <0x06>;
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <0x0a>;
+@@ -808,15 +809,20 @@
+ 		};
+ 
+ 		watchdog@7e100000 {
+-			compatible = "brcm,bcm2835-pm\0brcm,bcm2835-pm-wdt";
++			compatible = "brcm,bcm2835-pm-power-off";
+ 			#power-domain-cells = <0x01>;
+ 			#reset-cells = <0x01>;
+-			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
+-			reg-names = "pm\0asb";
++			/* PM, ASB, DWC-USB-OTG IP block addresses and sizes.
++			 * The address and size of DWC-USB-OTG is
++			 * aliased with usb@7e980000.
++			 */
++			reg = <0x7e100000 0x114 0x7e00a000 0x24 0x7e980000 0x10000>;
++			reg-names = "pm\0asb\0usb0base";
+ 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
+ 			clock-names = "v3d\0peri_image\0h264\0isp";
+ 			system-power-controller;
+ 			phandle = <0x27>;
++			status = "okay";
+ 		};
+ 
+ 		rng@7e104000 {
+EOF
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch trixie to device tree source \"${DtRpi2BNameQemuSource}\"." 1>&2
+		exit ${result}
+	fi
 else
 	# Bookworm or earlier
 	#  Disable bluetooth serial interface
@@ -1786,30 +1882,37 @@ else
  			};
  		};
 EOF
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch bookworm to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+		exit ${result}
+	fi
 fi
 
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not patch device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
-	exit ${result}
-fi
+i=0
+while (( i < ${DtRpiBlobSourceListNum} ))
+do
+	dts_qemu="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiMod}      ))]}";
+	dtb_qemu="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiQemuBlob} ))]}";
 
-"${DTC}" -I dts -O dtb -o "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not compile device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
-	exit ${result}
-fi
+	if [[ -f "${dts_qemu}" ]]
+	then
+		if ! "${DTC}" -I dts -O dtb -o "${dtb_qemu}" "${dts_qemu}"
+		then
+			echo "${MyBase}: ERROR: Can not assemble device tree \"${dts_qemu}\"." 1>&2
+			exit 1
+		fi
 
-"${CHMOD}" "644" "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}" "${DtRpi3BNameSource}"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not change one of or more \"${DtRpi3BNameQemuBlob}\", \"${DtRpi3BNameQemuSource}\", or \"${DtRpi3BNameSource}\" mode to 644." 1>&2
-	exit ${result}
-fi
+		if ! "${CHMOD}" "644" "${dts_qemu}" "${dtb_qemu}"
+		then
+			echo "${MyBase}: ERROR: Can not change mode \"${dts_qemu}\" or \"${dtb_qemu}\"." 1>&2
+			exit 1
+		fi
+	fi
+
+	i=$(( ${i} + ${DtRpiCycle} ))
+done
 
 "${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${OptionOutputDirectory}/bootfs"
 result=$?
