@@ -2,7 +2,79 @@
 # SPDX-License-Identifier: BSD-2-Clause
 # Copy this script to same directory
 # which contains SD card Raspberry Pi OS image file *.img and bootfs/*
-# Source this file from rpivm32-1st.sh, rpivm32-2nd.sh or rpivm32.sh
+# Source this file from rpi2vm32-1st.sh, rpi2vm32-2nd.sh or rpi2vm32.sh
+
+MyTemp=""
+
+# At exit procedure
+function ExitProc() {
+	if command -v ExitProcMainPre > /dev/null
+	then
+		ExitProcMainPre
+	fi
+
+	if [ -n "${MyTemp}" ] && [ -d "${MyTemp}" ]
+	then
+		rm -rf "${MyTemp}"
+	fi
+
+	if command -v ExitProcMainPost > /dev/null
+	then
+		ExitProcMainPost
+	fi
+}
+
+trap ExitProc EXIT
+
+# Find Temporary Directory.
+function TempDirectoryFind() {
+	local Temp
+
+	for Temp in /run/user/$(id -u) /dev/shm /ramdisk "${TMP}" "${TEMP}" /tmp
+	do
+		if [ -z "${Temp}" ]
+		then
+			continue
+		fi
+		if [ -d "${Temp}" ] && \
+		   [ -r "${Temp}" ] && [ -w "${Temp}" ] && [ -x "${Temp}" ]
+		then
+			break
+		fi
+	done
+	echo "${Temp}"
+}
+
+# Generate random value.
+function HashedRamdom() {
+	( cat /proc/sys/kernel/random/uuid; date +%s.%N ) | sha256sum | cut -f 1 -d ' '
+}
+
+MyTemp="$( TempDirectoryFind )/${MyBody}-$$-$( HashedRamdom )"
+MyTempReady=
+
+# Prepare Temporal directory.
+function TempDirectoryPrepare() {
+	if [ -n "${MyTempReady}" ]
+	then
+		return 0
+	fi
+	while ! mkdir "${MyTemp}"
+	do
+		MyTemp="$( TempDirectoryFind )/${MyBody}-$$-$( HashedRamdom )"
+	done
+
+	chmod 700 "${MyTemp}"
+	[ -n "${debug}" ] && echo "$0.TempDirectoryPrepare: DEBUG: Create temporal directory. MyTemp=\"${MyTemp}\"" 1>&2
+	MyTempReady=yes
+	return 0
+}
+
+# Detect File Type
+function QemuImgType() {
+	[ -n "${debug}" ] && echo "$0.QemuImgType: DEBUG: Detect image file type. file=\"$1\"" 1>&2
+	qemu-img info "$1"  | grep -i 'file[[:space:]]\+format' | sed  's/^.*:[[:space:]]*//'
+}
 
 # Find Raspberry Pi OS SD card image file
 # Assume image file contains following blocks,
@@ -10,18 +82,47 @@
 #  partition 1 (bootfs)
 #  partition 2 (rootfs)
 function RaspiImgFind() {
-	ls *.img | grep -v -i '^swap' | \
+	[ -n "${debug}" ] && echo "$0.RaspiImgFind: DEBUG: RaspiImgFind() enter." 1>&2
+	(ls *.img *.qcow *.qcow2 2>/dev/null ) | grep -v -i '^swap' | sort | \
 	(	sub_result=1
 		sd_file_list=()
 		sd_file_index=0
 
 		while read
 		do
-			if file -L "${REPLY}" | \
-			     grep -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
+			[ -n "${debug}" ] && echo "$0.RaspiImgFind: DEBUG: Check file. REPLY=\"${REPLY}\"" 1>&2
+			if [ -w "${REPLY}" ]
 			then
-				sd_file_list[${sd_file_index}]="${REPLY}"
-				sd_file_index=$(( ${sd_file_index} + 1 ))
+				if file -L "${REPLY}" | \
+				   grep -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
+				then
+					sd_file_list[${sd_file_index}]="${REPLY}"
+					sd_file_index=$(( ${sd_file_index} + 1 ))
+				else
+					if file -L "${REPLY}" | \
+					   grep -q -i 'QCOW'
+					then
+						TempDirectoryPrepare
+						TempFileBody="$( basename "${REPLY}" | tr -d '[:space:]' )"
+						TempFileBody="${TempFileBody%.*}-$( HashedRamdom ).img"
+						TempImg="${MyTemp}/${TempFileBody}"
+						touch "${TempImg}"
+						chmod 600 "${TempImg}"
+						qcow_type=$( QemuImgType "${REPLY}" )
+						qemu-img dd -f ${qcow_type} -O raw bs=512 count=4096 \
+						        "if=${REPLY}" "of=${TempImg}"
+
+						if file "${TempImg}" | \
+						   grep -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
+						then
+							sd_file_list[${sd_file_index}]="${REPLY}"
+							sd_file_index=$(( ${sd_file_index} + 1 ))
+						fi
+						rm "${TempImg}"
+					fi
+				fi
+			else
+				echo "$0: INFO: Skip read only file \"${REPLY}\"" 1>&2
 			fi
 		done
 
@@ -46,7 +147,9 @@ function RaspiImgFind() {
 		fi
 		exit ${sub_result}
 	)
-	return $?
+	sub_result=$?
+	[ -n "${debug}" ] && echo "$0.RaspiImgFind: DEBUG: RaspiImgFind() exit." 1>&2
+	return ${sub_result}
 }
 
 # Generate ethernet MAC address
@@ -224,7 +327,7 @@ function RemoteViewerVersion() {
 
 [ -z "${KernelFile}"   ] && KernelFile="bootfs/kernel7.img"
 [ -z "${InitrdFile}"   ] && InitrdFile="bootfs/initramfs7"
-[ -z "${DtbFile}"      ] && DtbFile="bootfs/bcm2709-rpi-2-b.dtb"
+[ -z "${DtbFile}"      ] && DtbFile="bootfs/bcm2709-rpi-2-b-qemu.dtb"
 [ -z "${SdFile}"       ] && SdFile="$( RaspiImgFind )"
 [ -z "${NicBridge}"    ] && NicBridge="$( RaspiBridgeFind )"
 [ -z "${NicMacFile}"   ] && NicMacFile="net0_mac.txt"
@@ -281,9 +384,10 @@ fi
 
 if [ -z "${SdFile}" ]
 then
-	echo "$0: ERROR: Can not find Raspberry Pi OS image file *.img in ${MyDir} directory."
+	echo "$0: ERROR: Can not find Raspberry Pi OS image file *.img *.qcow *.qcow2"
+	echo "$0: ERROR: in ${MyDir} directory."
 	echo "$0: INFO: Note, Following file name patterns are reserved special purpose,"
-	echo "$0: INFO:  swap*.img - Ignore case, reserved for swap file."
+	echo "$0: INFO:  swap*.img swap*.qcow swap*.qcow2 - Ignore case, reserved for swap file."
 	exit 1
 fi
 
@@ -294,9 +398,9 @@ then
 	_DriveParam="format=raw,file=${SdFile}"
 fi
 
-if file -L "${SdFile}" | grep -q QCOW
+if file -L "${SdFile}" | grep -q -i QCOW
 then
-	_DriveFormat=$( qemu-img info "${SdFile}"  | grep -i 'file[[:space:]]\+format' | sed  's/^.*:[[:space:]]*//' )
+	_DriveFormat=$( QemuImgType "${SdFile}" )
 	_DriveParam="format=${_DriveFormat},file=${SdFile}"
 fi
 

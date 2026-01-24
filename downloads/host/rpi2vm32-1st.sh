@@ -25,21 +25,20 @@ then
 	source "${CommonFile}"
 fi
 
+[[ -z "${Append}" ]] && \
+Append="console=ttyAMA0,115200 console=tty1\
+ root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\
+ dwc_otg.fiq_fsm_enable=0\
+ bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\
+"
+
 qemu-system-arm \
 -machine raspi2b \
 -kernel "${KernelFile}" \
 -initrd "${InitrdFile}" \
 -dtb "${DtbFile}" \
 -drive "${_DriveParam}" \
--append "console=ttyAMA0,115200 console=tty1\
- root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\
- dwc_otg.fiq_fsm_enable=0\
- bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\
- init=/usr/lib/raspberrypi-sys-mods/firstboot\
- systemd.run=/boot/firstrun.sh\
- systemd.run_success_action=reboot\
- systemd.unit=kernel-command-line.target\
-" \
+-append "${Append}" \
 -serial mon:stdio \
 -no-reboot \
 -device usb-kbd \
