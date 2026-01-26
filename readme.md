@@ -129,7 +129,8 @@ Now, ready to run the Raspberry Pi OS on the QEMU emulator.
 ./rpi3vm64.sh
 ```
 
-Currently, the Raspberry Pi OS "trixie" graphical desktop runs on QEMU.
+Currently, the Raspberry Pi OS "trixie" graphical desktop
+runs on QEMU.
 
 ![Running Raspberry Pi OS Debian 13 (trixie) release](img/run-raspberrypi-trixie-debian13-on-qemu-gui.png)
 
@@ -153,25 +154,28 @@ To exit the Raspberry Pi OS emulation,
 |/sbin/reboot|-no-reboot (rpi3vm64.sh default)|Terminate|reboot|
 |/sbin/reboot|without -no-reboot|Reboot|reboot|
 
-After updating kernel in emulated Raspberry Pi OS, exit the QEMU emulation and run following command on host PC.
+After updating kernel in emulated Raspberry Pi OS,
+exit the QEMU emulation and run following command
+on the host PC.
 
 ```bash
 ./rpi3vm64-upkernel.sh
 ```
 
-`./rpi3vm64-upkernel.sh` updates boots/kernel8.img and bootfs/initramfs8 by following steps.
+`./rpi3vm64-upkernel.sh` updates bootfs/kernel8.img and bootfs/initramfs8 by following steps.
 
-* Extract bootfs partition from the SDCard/eMMC ($SDFile) image.
+* Extract bootfs (/boot/firmware) partition from the
+  SDCard/eMMC ($SDFile) image.
 * Copy kernel8.img and initramfs8 files from the extracted
   partition to temporary files.
-* Compare current kernel8.img and initramfs8 under host bootfs/
-  directory with the temporary files extracted above.
+* Compare current kernel8.img and initramfs8 under host
+  bootfs/ directory with the temporary files extracted above.
   * If compared files are same to the temporary files,
     do nothing and exit.
 * Backup current kernel8.img and initramfs8.
-  * Copy kernel8.img to kernel8-$(uname -r).img.
-  * Copy initramfs8 to initramfs8-$(uname -r).img.
-  * The _$(uname -r)_ string is picked from kernel8.img.
+  * Copy the kernel8.img to kernel8-_$(uname -r)_.img.
+  * Copy the initramfs8 to initramfs8-_$(uname -r)_.img.
+  * The _$(uname -r)_ string is picked from current kernel8.img.
 * Move the temporary files to kernel8.img and initramfs8.
   * If failed moving, try revert kernel8.img and initramfs8.
 
