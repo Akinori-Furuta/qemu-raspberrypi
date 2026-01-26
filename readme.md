@@ -10,7 +10,7 @@ Linux PC 上で QEMU を使って RaspberyPi のイメージを動かすこと�
 
 Now working in progress on branch `follow-trixie`.
 This branch contains scripts they run Raspberry Pi OS
-Trixie 64bit on the QEMU emulating Raspberry Pi model 3B.
+Trixie 64bit [(32bit)](./readme-trixie32.md) on the QEMU emulating Raspberry Pi model 3B (2B for 32bit).
 To try branch `follow-trixie`,
 
 [Create a Raspberry Pi OS image media. To see parameters and procedures in detail, follow this link.](https://github.com/Akinori-Furuta/qemu-raspberrypi/blob/follow-trixie/en/pi-imager.md)
