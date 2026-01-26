@@ -99,7 +99,7 @@ Second step configuration.
 Login to Raspberry Pi on the QEMU console/monitor terminal.
 
 ```text
-Debian GNU/Linux 13 raspberrypi-host ttyAMA1
+Debian GNU/Linux 13 PiHostName ttyAMA1
 
 My IP address is 10.0.2.15 fec0::30cb:bc27:a7a3:5e9a
 
