@@ -7,11 +7,10 @@ imager="downloads/host/rpi3image.sh"
 		ln -s "${imager}" "${link_from}"
 	fi
 
-#	 "downloads/host/rpi2vm32-upkernel.sh"
-
 for f in "downloads/host/rpi2vm32.conf" \
 	 "downloads/host/rpi2vm32-common.sh" \
-	 "downloads/host/rpi2vm32.sh"
+	 "downloads/host/rpi2vm32.sh" \
+	 "downloads/host/rpi2vm32-upkernel.sh"
 do
 	if [[ ! -f "${f}" ]]
 	then
