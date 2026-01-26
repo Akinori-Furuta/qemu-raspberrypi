@@ -61,7 +61,9 @@ rpi3image.sh: INFO: /dev/sdb.SIZE=14.9Gi/16.0G bytes
 
 > The above example output says the path to media is /dev/sdb.
 
-Convert the Raspberry Pi OS image media into an eMMC image file.
+Convert the Raspberry Pi OS image media into an eMMC/SDCard
+image file. Replace the block device node `/dev/sdX` with
+the node which is attached Raspberry Pi OS image media.
 
 ```bash
 ./rpi3image.sh /dev/sdX
