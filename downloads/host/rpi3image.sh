@@ -2308,10 +2308,8 @@ then
 	echo "${MyBase}: INFO: Created Raspberry Pi Model 3B device tree file \"${DtRpi3BNameQemuBlob}\"." 1>&2
 fi
 
-if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
+if (( ${RaspiOsReleaseNo} < ${RaspiOsReleaseTrixie} ))
 then
-	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
-else
 	Rpi3vm641StConf="${MyDir}/rpi3vm64-1st.conf"
 
 	if [[ -f "${Rpi3vm641StConf}" ]]
@@ -2382,8 +2380,18 @@ EOF
 		echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm642ndConfLinkFrom}\" to configuration file \"${Rpi3vm642ndConf}\" ." 1>&2
 		exit ${result}
 	fi
-
-	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
 fi
+
+case "${MyBase}" in
+(rpi3*)
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
+	;;
+(rpi2*)
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi2vm32-1st.sh\" ." 1>&2
+	;;
+(*)
+	echo "${MyBase}: INFO: Done convert media image to file." 1>&2
+	;;
+esac
 
 exit 0
