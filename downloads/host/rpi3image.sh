@@ -1909,6 +1909,8 @@ do
 			echo "${MyBase}: ERROR: Can not change mode \"${dts_qemu}\" or \"${dtb_qemu}\"." 1>&2
 			exit 1
 		fi
+
+		echo "${MyBase}: INFO: Created device tree file \"${dtb_qemu}\"." 1>&2
 	fi
 
 	i=$(( ${i} + ${DtRpiCycle} ))
@@ -2303,10 +2305,6 @@ then
 fi
 
 echo "${MyBase}: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
-if [[ "${RaspiOSArch}" == "aarch64" ]]
-then
-	echo "${MyBase}: INFO: Created Raspberry Pi Model 3B device tree file \"${DtRpi3BNameQemuBlob}\"." 1>&2
-fi
 
 if (( ${RaspiOsReleaseNo} < ${RaspiOsReleaseTrixie} ))
 then
