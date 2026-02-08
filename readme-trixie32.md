@@ -38,6 +38,7 @@ Install packages to run scripts.
 ```bash
 sudo apt install git bridge-utils uml-utilities \
  qemu-system-common qemu-system qemu-system-arm qemu-utils \
+ qemu-system-modules-spice \
  parted nbd-client cloud-guest-utils e2fsprogs virt-viewer \
  device-tree-compiler gawk fatcat gzip binutils diffutils
 ```
