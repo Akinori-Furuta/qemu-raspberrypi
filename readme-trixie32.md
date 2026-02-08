@@ -16,7 +16,7 @@ Raspberry Pi imager with parameters as following table.
 
 |Item|Choice or Example|Referred as|Note|
 |----|----|----|----|
-|Media capacity|8Gbytes or more||Initial rootfs uses 4.4Gibytes spaces|
+|Media capacity|8Gbytes or more||Initial rootfs uses 4.3Gibytes spaces|
 |Pi device|Raspberry Pi 2||emulate model 2B on QEMU|
 |Operating System|Raspbery Pi OS (32-bit)||Debian release 13 (trixie)|
 |host name|rpi2b-trixie32|_PiHostName_|Network host name. To resolve network address by name, use _PiHostName_.local and bridge interface|
