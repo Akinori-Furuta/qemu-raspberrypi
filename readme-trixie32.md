@@ -50,9 +50,6 @@ Clone git repository.
 ```bash
 git clone https://github.com/Akinori-Furuta/qemu-raspberrypi.git
 cd qemu-raspberrypi
-# Checkout branch working with Trixie release.
-git branch -t follow-trixie origin/follow-trixie
-git checkout follow-trixie
 ```
 
 Setup symbolic links to scripts.
