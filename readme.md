@@ -1,21 +1,70 @@
-# QEMU 上で RaspberryPi のイメージファイルを動かすまでにすること
+# Run Raspberry Pi OS on QEMU Emulator
 
-## はじめに
+## Introduction
 
-Linux PC 上で QEMU を使って RaspberyPi のイメージを動かすことができるまでを目標に設定、知っておいた方が良いことをまとめていくリポジトリを作る予定です。
+This repository contains scripts and driver to run
+Raspberry Pi OS Trixie 64bit[^1] on Linux QEMU emulator.
 
-順次書き足していく予定です。構成の見直しでリンクが大幅に変わる可能性もあります。
+[^1]: 32bit version is supported experimentally.
 
-## Follow Debian 13 (trixie) release Working in progress
+The following table shows Requirements.
 
-Now working in progress on branch `follow-trixie`.
-This branch contains scripts they run Raspberry Pi OS
-Trixie 64bit [(32bit)](./readme-trixie32.md) on the QEMU emulating Raspberry Pi model 3B (2B for 32bit).
-To try branch `follow-trixie`,
+### Host Machine Requirements
 
-[Create a Raspberry Pi OS image media. To see parameters and procedures in detail, follow this link.](https://github.com/Akinori-Furuta/qemu-raspberrypi/blob/follow-trixie/en/pi-imager.md)
+|Item|Requires|Note|
+|----|--------|----|
+|CPU cores|>= 4C/4T[^2]|>=8 threads (better)|
+|CPU bits|64||
+|CPU clock|>= 3.0GHz|Using a i5-4440 4C/4T 3.1GHz host CPU, the host CPU load achieves 40-60% when running a terminal on the GUI desktop.|
+|Memory|>= 6Gibytes|A process emulating Raspberry Pi OS uses 4.4Gibytes.|
+|Storage size|>= MediaSize+|At one virtual machine, see [Appendex](#appendex-required-free-storage-size)|
+|OS|Ubuntu 24.04 or later|Include delivered distributions, need QEMU 8.2.2 or later version package|
 
-Install required packages.
+[^2]: nC/mT = n Cores, m Threads
+
+### Bootable Raspberry Pi OS Image Requirements
+
+|Item|Requires|Note|
+|----|--------|----|
+|Media|SD, Micro SD, USB thumb Memories, and Removable drives|Create a bootable Raspberry Pi OS image|
+|Media size|> 8Gbytes|Raspberry Pi OS files uses 6Gbytes space|
+
+## Index
+
+### Run 64bit Raspberry Pi OS trixie
+
+Following list shows steps to run Raspberry Pi OS Trixie 64bit on
+QEMU emulator.
+
+* (Optional) [Network Settings (link to other page)](./en/bridge.md)
+  * If you want use networks directory from QEMU virtual machines,
+    [setup a bridge (TAP) in Linux Kernel network layer](./en/bridge.md).
+    Otherwise (skip network settings), virtual machines connect
+    netowork via NAT (called "user mode").
+* [Create a Image Media (link to other page)](./en/pi-imager.md)
+  * Use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
+* [Install Required Packages](#install-required-packages)
+* [Clone Git Repository](#clone-git-repository)
+* [Copy Image From Bootable Media](#copy-image-from-bootable-media)
+  * Requires root (privileged) account
+* [Initial Setup](#raspberry-pi-os-initial-setup)
+  * Run virtual machine twice
+    * Setup host name, account, and initial services.
+    * Setup a dkms driver to run on QEMU emulator.
+* [Run Normally](#run-normally)
+* [After Updating Kernel](#after-updating-kernel)
+  * Reflect updated kernel and initramfs image files to
+    host files.
+
+### Run 32bit Raspberry Pi OS trixie
+
+If you are interested in running 32bit version of Raspberry Pi OS,
+follow link to
+[Run Raspberry Pi OS trixie 32bit on emulated Raspberry Pi 2 model B](./readme-trixie32.md).
+
+## Install Required Packages
+
+To install required packages, run following command.
 
 ```bash
 sudo apt install git bridge-utils uml-utilities \
@@ -25,7 +74,9 @@ sudo apt install git bridge-utils uml-utilities \
  device-tree-compiler gawk fatcat gzip binutils diffutils
 ```
 
-Clone git repository.
+## Clone Git Repository
+
+Clone git repository from github.
 
 ```bash
 git clone https://github.com/Akinori-Furuta/qemu-raspberrypi.git
@@ -40,6 +91,8 @@ Setup symbolic links to scripts.
 ```bash
 ./setup-rpi3-trixie-64.sh
 ```
+
+## Copy Image From Bootable Media
 
 Attach a Raspberry Pi OS image media to PC.
 Find Raspberry Pi OS image media path.
@@ -70,7 +123,11 @@ the node which is attached Raspberry Pi OS image media.
 ./rpi3image.sh /dev/sdX
 ```
 
-First step configuration.
+## Raspberry Pi OS Initial Setup
+
+### First step
+
+Run Raspberry Pi OS first initial setup in a QEMU virtual machine.
 
 ```bash
 ./rpi3vm64-1st.sh
@@ -91,13 +148,17 @@ You will see reboot kernel log as follows,
 
 Type **[CTRL]-[a]** **[x]** to terminate the QEMU emulator.
 
-Second step configuration.
+### Second Step
+
+Run second step configuration.
 
 ```bash
 ./rpi3vm64-2nd.sh
 ```
 
 Login to Raspberry Pi on the QEMU console/monitor terminal.
+Use Username and Password customized at Raspberry Pi Imager
+as _PiUserName_ and _PiUserPassword_.
 
 ```text
 Debian GNU/Linux 13 PiHostName ttyAMA1
@@ -124,6 +185,8 @@ sudo /sbin/init 0
 > * Disable ModemManager.service.
 > * Disable rpi-eeprom-update.service.
 
+## Run Normally
+
 Now, ready to run the Raspberry Pi OS on the QEMU emulator.
 
 ```bash
@@ -147,13 +210,17 @@ runs on QEMU.
 > * Disable rpi-eeprom-update.service
 > * Disable virtgpio driver
 
-To exit the Raspberry Pi OS emulation,
+To exit Raspberry Pi OS emulation,
+
+Type command described in following table.
 
 |Command|qemu-system-aarch64 option|Action|kernel sequence|
 |---|---|---|---|
 |/sbin/init 0||Terminate|power off|
 |/sbin/reboot|-no-reboot (rpi3vm64.sh default)|Terminate|reboot|
 |/sbin/reboot|without -no-reboot|Reboot|reboot|
+
+## After Updating Kernel
 
 After updating kernel in emulated Raspberry Pi OS,
 exit the QEMU emulation and run following command
@@ -209,16 +276,3 @@ to boot Raspberry Pi OS. These Files are,
   * Initial: 300kibytes
 * Document and misc files
   * Initial: 4Mibytes
-## 目次
-
-* [Network Bridge を QEMU 向けに構成する](jp/bridge.md)
-* [QEMU で実行する Rasiberry Pi イメージファイルをスクリプトを使って作る](jp/rpi-image-script.md)
-  * [QEMU で実行する Rasiberry Pi イメージファイルを作る (お勧めしませんが手作業でする場合はこちらを参照して下さい)](jp/rpi-image.md)
-* Raspberry Pi OS の初期設定を行う
-  * [32bit OS の場合](jp/config-rpi.md)
-  * [64bit OS の場合](jp/config-rpi-64.md)
-* [apt upgrade をした後の対応](jp/follow-upgrade.md)
-
-github 上で文書を書いていく練習も兼ねています。物足りなさや記述の稚拙さがあると思います。
-
-![Raspberry pi OS 32bit on QEMU](img/raspberrypi-os-desktop.jpg)
