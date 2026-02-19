@@ -180,6 +180,34 @@ on the host PC.
 * Move the temporary files to kernel8.img and initramfs8.
   * If failed moving, try revert kernel8.img and initramfs8.
 
+## Appendex: Required Free Storage Size
+
+The "Storage size" consists of Sum of File sizes they are needed
+to boot Raspberry Pi OS. These Files are,
+
+* eMMC(Bootable SD card) image file
+  * Initial: More than the size of bootable media size
+    which is created by Raspberry Pi Imager
+    * Size is round up to 2^i GiBytes {i | Positive Integer}
+      * It may becomes 8Gi, 16Gi, 32Gi, ... bytes
+  * Recommend use "`raw`" format,
+    using "`qcow`", or "`qcow2`" formats results poor performance.
+  * On some smart file systems they support sparse file,
+    or compressed store, actual file size on storage device may be
+    smaller than file size.
+* Files in bootfs
+  * Kernel, Initramfs files
+    * Initial: 63Mibytes
+    * Gains: +32Mibytes at every kernel updates
+      * These files are will be updated and kept backup files.
+  * Other files
+    * Initial: 26Mibytes
+* Files in .git
+  * Initial: 4Mibytes
+* Files scritps and settings
+  * Initial: 300kibytes
+* Document and misc files
+  * Initial: 4Mibytes
 ## 目次
 
 * [Network Bridge を QEMU 向けに構成する](jp/bridge.md)
