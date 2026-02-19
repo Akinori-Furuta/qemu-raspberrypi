@@ -163,7 +163,8 @@ on the host PC.
 ./rpi3vm64-upkernel.sh
 ```
 
-`./rpi3vm64-upkernel.sh` updates bootfs/kernel8.img and bootfs/initramfs8 by following steps.
+`./rpi3vm64-upkernel.sh` updates bootfs/kernel8.img and bootfs/initramfs8
+by following steps.
 
 * Extract bootfs (/boot/firmware) partition from the
   SDCard/eMMC ($SDFile) image.
