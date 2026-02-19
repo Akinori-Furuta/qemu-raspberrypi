@@ -169,7 +169,8 @@ runs on QEMU.
 > * Fix graphical screen resolution to 1024x768.
 > * Disable rpi-eeprom-update.service
 
-To exit the Raspberry Pi OS emulation,
+To exit the Raspberry Pi OS emulation, following tables shows
+commands on emulated Raspberry Pi OS, and actions.
 
 |Command|qemu-system-aarch64 option|Action|kernel sequence|
 |---|---|---|---|
