@@ -7,7 +7,7 @@ Raspberry Pi 2 model B. Now experimental release,
 may be unstable and slower than [emulating 64bit OS](./readme.md).
 
 To try running Raspberry Pi OS Trixie 32bit on QEMU,
-follow procedures as follows.
+follow steps as bellow.
 
 ## Create a Raspberry Pi OS 32bit image media
 
@@ -157,7 +157,8 @@ Now, ready to run the Raspberry Pi OS on the QEMU emulator.
 ./rpi2vm32.sh
 ```
 
-Currently, the Raspberry Pi OS "trixie" 32bit graphical desktop runs on QEMU.
+Currently, the Raspberry Pi OS "trixie" 32bit graphical desktop
+runs on QEMU.
 
 > [!NOTE]
 > There are some restrictions on QEMU emulator.
@@ -176,13 +177,15 @@ To exit the Raspberry Pi OS emulation,
 |/sbin/reboot|-no-reboot (rpi2vm32.sh default)|Terminate|reboot|
 |/sbin/reboot|without -no-reboot|Reboot|reboot|
 
-After updating kernel in emulated Raspberry Pi OS, exit the QEMU emulation and run following command on the host PC.
+After updating kernel in emulated Raspberry Pi OS,
+exit the QEMU emulation and run following command on the host PC.
 
 ```bash
 ./rpi2vm32-upkernel.sh
 ```
 
-`./rpi2vm32-upkernel.sh` updates bootfs/kernel7.img and bootfs/initramfs7 by following steps.
+`./rpi2vm32-upkernel.sh` updates bootfs/kernel7.img and bootfs/initramfs7
+by following steps.
 
 * Extract bootfs (/boot/firmware) partition from the SDCard/eMMC ($SDFile) image.
 * Copy kernel7.img and initramfs7 files from the extracted
