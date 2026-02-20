@@ -31,7 +31,7 @@ The following table shows Requirements.
 
 ## Index
 
-### Run 64bit Raspberry Pi OS trixie
+### Run 64bit Raspberry Pi OS Trixie
 
 Following list shows steps to run Raspberry Pi OS Trixie 64bit on
 QEMU emulator.
@@ -56,7 +56,7 @@ QEMU emulator.
   * Reflect updated kernel and initramfs image files to
     host files.
 
-### Run 32bit Raspberry Pi OS trixie
+### Run 32bit Raspberry Pi OS Trixie
 
 If you are interested in running 32bit version of Raspberry Pi OS,
 follow link to
@@ -122,7 +122,7 @@ the node which is attached Raspberry Pi OS image media.
 
 ## Raspberry Pi OS Initial Setup
 
-### First step
+### First Step
 
 Run Raspberry Pi OS first initial setup in a QEMU virtual machine.
 
@@ -166,7 +166,7 @@ PiHostName login: PiUserName
 Password: PiUserPassword
 ```
 
-Run the post setup and shutdwon on the QEMU console/monitor terminal.
+Run the post setup and shutdown on the QEMU console/monitor terminal.
 
 ```bash
 sudo /var/local/post-setup.sh
@@ -207,9 +207,8 @@ runs on QEMU.
 > * Disable rpi-eeprom-update.service
 > * Disable virtgpio driver
 
-To exit Raspberry Pi OS emulation,
-
-Type command described in following table.
+To exit Raspberry Pi OS emulation,type command described in
+following table.
 
 |Command|qemu-system-aarch64 option|Action|kernel sequence|
 |---|---|---|---|
@@ -227,8 +226,8 @@ on the host PC.
 ./rpi3vm64-upkernel.sh
 ```
 
-`./rpi3vm64-upkernel.sh` updates bootfs/kernel8.img and bootfs/initramfs8
-by following steps.
+[`./rpi3vm64-upkernel.sh`](./downloads/host/rpi3vm64-upkernel.sh)
+updates bootfs/kernel8.img and bootfs/initramfs8 by following steps.
 
 * Extract bootfs (/boot/firmware) partition from the
   SDCard/eMMC ($SDFile) image.
@@ -239,13 +238,13 @@ by following steps.
   * If compared files are same to the temporary files,
     do nothing and exit.
 * Backup current kernel8.img and initramfs8.
+  * The _$(uname -r)_ string is picked from current kernel8.img.
   * Copy the kernel8.img to kernel8-_$(uname -r)_.img.
   * Copy the initramfs8 to initramfs8-_$(uname -r)_.img.
-  * The _$(uname -r)_ string is picked from current kernel8.img.
 * Move the temporary files to kernel8.img and initramfs8.
   * If failed moving, try revert kernel8.img and initramfs8.
 
-## Appendex: Required Free Storage Size
+## Appendix: Required Free Storage Size
 
 The "Storage size" consists of Sum of File sizes they are needed
 to boot Raspberry Pi OS. These Files are,
@@ -253,7 +252,7 @@ to boot Raspberry Pi OS. These Files are,
 * eMMC(Bootable SD card) image file
   * Initial: More than the size of bootable media size
     which is created by Raspberry Pi Imager
-    * Size is round up to 2^i GiBytes {i | Positive Integer}
+    * Its size is round up to 2^i GiBytes { i | Positive Integer }
       * It may becomes 8Gi, 16Gi, 32Gi, ... bytes
   * Recommend use "`raw`" format,
     using "`qcow`", or "`qcow2`" formats results poor performance.
@@ -261,7 +260,7 @@ to boot Raspberry Pi OS. These Files are,
     or compressed store, actual file size on storage device may be
     smaller than file size.
 * Files in bootfs
-  * Kernel, Initramfs files
+  * Kernel, and Initramfs files
     * Initial: 63Mibytes
     * Gains: +32Mibytes at every kernel updates
       * These files are will be updated and kept backup files.

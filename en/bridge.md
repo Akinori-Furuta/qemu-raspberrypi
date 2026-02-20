@@ -63,9 +63,9 @@ will be configured.
   + [QEMU Networking](https://wiki.qemu.org/Documentation/Networking)
   + [QEMU Helper Networking](https://wiki.qemu.org/Features/HelperNetworking)
 
-## Setup network bridge by nmcli
+## Setup Network Bridge by nmcli
 
-### Test nmcli availability
+### Test nmcli Availability
 
 In this section, setup "Software Implemented Bridge"
 (hereafter Bridge) in the Linux kernel network stack by
@@ -73,7 +73,7 @@ In this section, setup "Software Implemented Bridge"
 
 > [!TIP]
 > If you prefer traditional UNIX interface files under
-> /etc/network, [Use networking service instead of nmcli](#Use-networking-service-instead-of-nmcli)
+> /etc/network, [Use networking service instead of nmcli](#use-the-networking-service-instead-of-nmcli)
 
 First, test `nmcli` command is available.
 
@@ -133,13 +133,13 @@ you when reconnecting ssh to server after some network failures.
 
 If `nmcli` command isn't available or fails with some
 error like following output,
-it's better to [modify files under /etc/network and configure networking service](#use-networking-service-instead-of-nmcli).
+it's better to [modify files under `/etc/network` and configure networking service](#use-the-networking-service-instead-of-nmcli).
 
 ```text
 Error: NetworkManager is not running.
 ```
 
-### Get network configurations by nmcli
+### Get Network Configurations by nmcli
 
 Prepare a USB (Plug and Play extension) or
 PCIe(Some extension card fixing inside machine case)
@@ -166,7 +166,7 @@ If you will access the QEMU host from remote during
 following procedures, establish remote login now.
 
 Connect a USB (PnP extension) Network Interface to
-machine.
+your QEMU host machine.
 
 Type `nmcli` command, take a notes of Network Interfaces.
 
@@ -311,7 +311,7 @@ generated connection named similar to "`Wired connection` _N_".
 > |GUI (Advanced Network Configuration)|Name \| Connection name|
 > |nmcli (man page)|id \| ID \| con-name|
 > |nmcli conn show (list style)|NAME|
-> |nmcli conn show \| edit \| modify (detail style)|connection.id|
+> |nmcli conn show \| edit \| modify (detail style)|connection\.id|
 >
 > I think the manuals, documents and outputs about
 > Network Manger aren't well polished.
@@ -459,7 +459,7 @@ Following table shows properties `bridge.stp` and `ipv4.method` to `bridge-brnm0
 |setting property|value|description|
 |----------------|-----|-----------|
 |`bridge.stp`|`no`|Disable STP (Spanning Tree Protocol) at the Bridge `brnm0`. The STP avoids packet looping storm in loop topology hopping bridges. The STP detects loop topology and logically opens loop topology (topology becomes tree). There is no complicated topology around the Bridge `brnm0`. Here, choose `no` to this option.|
-|`ipv4.method`|`disabled`|To use Bridge `brnm0` and slave device `enx645aedf3f6d5` dedicated to QEMU virtual machines. The host machine network services (for example, sshd, smbd, and so on.) don't establish connection from/to remote via device `enx645aedf3f6d5`. [See pros and cons](#assign-ip-address-to-bridge-pros-and-cons).|
+|`ipv4.method`|`disabled`|To use Bridge `brnm0` and slave device `enx645aedf3f6d5` dedicated to QEMU virtual machines. The host machine network services (for example, sshd, smbd, and so on.) don't establish connection from/to remote via device `enx645aedf3f6d5`. [See pros and cons](#assign-an-ip-address-to-a-bridge-pros-and-cons).|
 
 Check configurations by `nmcli`.
 
@@ -523,7 +523,7 @@ Compare with your connection.
 + [nmcli conn show bridge-slave-enx645aedf3f6d5](../snippets/nmcli-conn-show-bridge-slave-enx645aedf3f6d5.txt)
 
 Properties named by character \[a-z.-\] like `connection.id`,
-they are configured with `nmcli` command.
+they are configured by `nmcli` command.
 
 Properties named by character \[A-Z.-\], they are dynamically updated.
 
@@ -559,11 +559,12 @@ sudo nmcli conn down bridge-slave-enx645aedf3f6d5; sleep 1; sudo nmcli conn up b
 
 All settings updated and added here are saved, and applied after reboot.
 
-## Setup QEMU Bridge helper
+## Setup QEMU Bridge Helper
 
 To manipulate a Bridge in the Linux Kernel, it requires root privilege.
-Without any helpers, connecting a Bridge to QEMU virtual machine,
-run qemu emulator as root privilege.
+Without any helpers, run QEMU emulator as root privilege and
+connect a Bridge to QEMU virtual machine.
+
 The QEMU package `qemu-system-common` offers `qemu-bridge-helper`
 tool to use a Bridge from non privileged user
 (QEMU emulator application). To see more details read
@@ -594,7 +595,7 @@ qemu-system-common: /usr/lib/qemu/qemu-bridge-helper
 If you get path other than `/usr/lib/qemu/qemu-bridge-helper`,
 you read it as what you get exactly.
 
-### Configure Bridge device to manipulate by qemu-bridge-helper
+### Configure Bridge Device to Manipulate by qemu-bridge-helper
 
 Specify a Bridge device using from QEMU emulator in
 `/etc/qemu/bridge.conf`. The bridge.conf file allows QEMU emulator
@@ -614,7 +615,7 @@ like following example.
 allow brnm0
 ```
 
-### Create qemu-bridge-helper executable file with setuid bit
+### Create qemu-bridge-helper Executable File with setuid Bit
 
 Copy `/usr/lib/qemu/qemu-bridge-helper` to
 `/usr/lib/qemu/qemu-bridge-helper-suid` and set mode bit setuid.
@@ -734,18 +735,18 @@ The `-device` option specifies,
 + Assign netdeivce Id `net0` (specified above)
 + Set MAC address `40:54:00:52:20:03`
 
-## (Optional) Assign IPv4 address to Bridge by nmcli
+## (Optional) Assign an IPv4 Address to a Bridge by nmcli
 
-It's optional that assgining IP address to the Bridge `brnm0`.
+It's optional that assgining a IP address to the Bridge `brnm0`.
 So skip this section if you aren't intended to
 access host machine via a Bridge.
-Assume that your network maintained by DHCP server.
+Here assume that your network maintained by DHCP server.
 
-### Assign IP address to Bridge pros and cons
+### Assign an IP Address to a Bridge Pros and Cons
 
-Comparing assign or not assgin IP address to a Bridge.
+Comparing assign or not assgin a IPv4 address to a Bridge.
 
-+ Doesn't assign IP address to a Bridge (set ipv4.method disabled,
++ Doesn't assign a IPv4 address to a Bridge (set ipv4.method disabled,
   use two Network Interface, one for host machine, another one for
   QEMU virtual machines)
   + Pros
@@ -760,7 +761,7 @@ Comparing assign or not assgin IP address to a Bridge.
       + Can use a USB or PCI (directory connected native bus) interfaces.
   + Cons
     + Need a physical Network Interface dedicated to QEMU virtual machines.
-+ Assign IP address to a Bridge (set ipv4.method auto or manual,
++ Assign a IPv4 address to a Bridge (set ipv4.method auto or manual,
   connection from/to host services and connection from/to virtual
   machines shares same Network Interface)
   + Pros
@@ -770,14 +771,15 @@ Comparing assign or not assgin IP address to a Bridge.
     + When accidentaly operation on the Bridge is failed, you may lose
       accessing way to host machine from remotes.
     + Merged traffics host and virtual machines and they affects each other.
-      + Need large traffic speed and capaciy on connected hub port.
+      + Need large traffic speed and capaciy capability on the
+        connected hub port.
       + Transfer speed get down.
       + Turn around time get more longer.
       + Connection becomes unstable.
 
-### Assign a Bridge to IP address
+### Assign an IP Address to a Bridge
 
-To assign a IPv4 address to a Bridge, type following commands,
+To assign an IPv4 address to a Bridge, type following commands,
 
 ```bash
 # Enable DHCP IPv4 configuration on connection bridge-brnm0 (applies to brnm0)
@@ -794,7 +796,7 @@ After avobe operation are done, the host machine has
 two addresses on one network segment. You can still
 login from/to remotes. You can establish new connection.
 
-## Use networking service instead of nmcli
+## Use the networking Service Instead of nmcli
 
 You can configure a Bridge by placeing files under
 `/etc/network/interfaces.d`. The networking service
@@ -1006,7 +1008,7 @@ The following table shows the parameters in two files,
 |option|value|description|
 |------|-----|-----------|
 |`inet`|`manual`|Do not assign a IPv4 address to the Bridge. Other options are `dhcp`: assign a IPv4 address offered by DHCP server, `static`: assign fixed IPv4 address to the Bridge.|
-|`bridge_ports`|`enx000ec6c150f4`|The interface name of USB-Ethernet converter dedicated QEMU virtual machines.|
+|`bridge_ports`|`enx000ec6c150f4`|The interface name of USB-Ethernet converter dedicated to QEMU virtual machines.|
 |`bridge_stp`|`off`|Do not enable STP(Spanning Tree Protocol). There is no loop topology, set it to `off`.|
 |`bridge_maxwait`|`10`|Wait `10` seconds the interface `enx000ec6c150f4` becomes active. After loaded networking service, the service starts waiting interface(s) is/are ready. For most cases, this time related booting process. This time should be more than probe-initialize-ready_to_user_space(-linkup) time. This time may get longer under high loads.|
 
@@ -1077,7 +1079,7 @@ enx000ec6c150f4: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 -- snip --
 ```
 
-## Options to QEMU emulator when configured a Bridge by /etc/network/interfaces.d/*
+## Options to QEMU Emulator when Configured a Bridge by /etc/network/interfaces.d/*
 
 It's same as using nmcli command.
 
@@ -1085,7 +1087,7 @@ It's same as using nmcli command.
 + [Use QEMU bridge helper](#using-qemu-bridge-helper-suid).
   + Read the Bridge name`brnm0` as `br0`.
 
-## Assign a IPv4 address to a Bridge configured by /etc/network/interfaces
+## Assign an IPv4 Address to a Bridge Configured by /etc/network/interfaces
 
 Edit the `inet manual` option into `inet dhcp` in the `iface` line.
 The following text shows edited
@@ -1124,4 +1126,4 @@ ifconfig -a
 
 The Bridge has an IPv4 address which is same segment `enp3s0`.
 Still you can connect from/to the host machine.
-[Pros and Cons are same as Bridge configured by nmcli](#assign-ip-address-to-bridge-pros-and-cons).
+[Pros and Cons are same as Bridge configured by nmcli](#assign-an-ip-address-to-a-bridge-pros-and-cons).

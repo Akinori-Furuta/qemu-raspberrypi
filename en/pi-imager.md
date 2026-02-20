@@ -28,9 +28,9 @@ Prepare following items.
   * Micro SD cards, SD cards, or Thumb USB memories
     * May use other kind of USB connected storage devices
 
-## Configure and Create a media
+## Configure and Create a Media
 
-### Run Raspberry Pi imager
+### Run Raspberry Pi Imager
 
 Attach a removable storage media to write Raspberry Pi OS image.
 
@@ -54,7 +54,7 @@ The following table shows Raspberry Pi imager selections and parameters.
 |Pi device|Raspberry Pi 3||emulate model 3B on QEMU|
 |Operating System|Raspbery Pi OS (64-bit)||Debian release 13 (trixie)|
 |host name|rpi3b-trixie64|_PiHostName_|Network host name. To resolve network address by name, use _PiHostName_.local and bridge interface|
-|Capital city|City of your location||Now matter what this selection, initial system locale (the LANG environment value) is fixed to en_GB.UTF-8|
+|Capital city|City of your location||No matter what this selection, initial system locale (the LANG environment value) is fixed to en_GB.UTF-8|
 |Time zone|Time zone to use||Automatically selected by "Capital city"|
 |Keyboard layout|Same as host keyboard|||
 |Username|pi|_PiUserName_||

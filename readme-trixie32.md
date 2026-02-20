@@ -134,7 +134,7 @@ PiHostName login: PiUserName
 Password: PiUserPassword
 ```
 
-Run the post setup and shutdwon on the QEMU console/monitor terminal.
+Run the post setup and shutdown on the QEMU console/monitor terminal.
 
 ```bash
 sudo /var/local/post-setup.sh
@@ -142,7 +142,8 @@ sudo /sbin/init 0
 ```
 
 > [!NOTE]
-> post-setup.sh does following setups,
+> [post-setup.sh](./downloads/target/var/local/post-setup.sh)
+> does following setups,
 >
 > * Disable ModemManager.service.
 > * Disable rpi-eeprom-update.service.
@@ -172,7 +173,7 @@ commands on emulated Raspberry Pi OS, and actions.
 |Command|qemu-system-aarch64 option|Action|kernel sequence|
 |---|---|---|---|
 |/sbin/init 0||Terminate|power off|
-|/sbin/reboot|-no-reboot (rpi2vm32.sh default)|Terminate|reboot|
+|/sbin/reboot|-no-reboot ([rpi2vm32.sh](./downloads/host/rpi2vm32.sh) default)|Terminate|reboot|
 |/sbin/reboot|without -no-reboot|Reboot|reboot|
 
 After updating kernel in emulated Raspberry Pi OS,
@@ -182,8 +183,8 @@ exit the QEMU emulation and run following command on the host PC.
 ./rpi2vm32-upkernel.sh
 ```
 
-`./rpi2vm32-upkernel.sh` updates bootfs/kernel7.img and bootfs/initramfs7
-by following steps.
+[`./rpi2vm32-upkernel.sh`](./downloads/host/rpi2vm32-upkernel.sh)
+updates bootfs/kernel7.img and bootfs/initramfs7 by following steps.
 
 * Extract bootfs (/boot/firmware) partition from the SDCard/eMMC ($SDFile) image.
 * Copy kernel7.img and initramfs7 files from the extracted
@@ -193,8 +194,8 @@ by following steps.
   * If compared files are same to the temporary files,
     do nothing and exit.
 * Backup current kernel7.img and initramfs7.
+  * The _$(uname -r)_ string is picked from current kernel7.img.
   * Copy the kernel7.img to kernel7-_$(uname -r)_.img.
   * Copy the initramfs7 to initramfs7-_$(uname -r)_.img.
-  * The _$(uname -r)_ string is picked from current kernel7.img.
 * Move the temporary files to kernel7.img and initramfs7.
   * If failed moving, try revert kernel7.img and initramfs7.
