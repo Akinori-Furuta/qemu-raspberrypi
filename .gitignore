@@ -6,3 +6,9 @@ rpi3vm64-common.sh
 rpi3vm64.conf
 rpi3vm64.sh
 rpi3vm64-upkernel.sh
+rpi2vm32-1st.sh
+rpi2vm32-2nd.sh
+rpi2vm32-common.sh
+rpi2vm32.conf
+rpi2vm32.sh
+rpi2vm32-upkernel.sh
