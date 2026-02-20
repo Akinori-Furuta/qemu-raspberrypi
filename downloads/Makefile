@@ -22,11 +22,7 @@ rpios64bit-host-kit.tar.gz: host/rpi3image.sh \
 	host/rpi3vm64-vnc.conf
 	( cd host; tar -zcvf ../$@ $(notdir $^) ) || rm $@
 
-rpios32bit-target-kit.tar.gz: target/etc/systemd/system.conf \
-	target/etc/systemd/system.conf.diff \
-	target/etc/systemd/system/lightdm.service \
-	target/etc/X11/xorg.conf.d/00-fbdev.conf \
-	target/etc/X11/xorg.conf.d/01-screen.conf \
+rpios32bit-target-kit.tar.gz: \
 	target/var/local/post-setup.sh \
 	target/var/local/raspi-config-qemu.sh
 	tar -C target -zcvf rpios32bit-target-kit.tar.gz .

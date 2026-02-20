@@ -25,22 +25,25 @@ then
 	source "${CommonFile}"
 fi
 
+[[ -z "${Append}" ]] && \
+Append="console=ttyAMA1,115200 console=tty1\
+ root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\
+ dwc_otg.fiq_fsm_enable=0\
+ bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\
+"
+
 qemu-system-aarch64 \
 -machine raspi3b \
 -kernel "${KernelFile}" \
 -initrd "${InitrdFile}" \
 -dtb "${DtbFile}" \
 -drive "${_DriveParam}" \
--append "console=ttyAMA1,115200 console=tty1\
- root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\
- dwc_otg.fiq_fsm_enable=0\
- bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\
-" \
+-append "${Append}" \
 -serial mon:stdio \
 -no-reboot \
 -device usb-kbd \
 -device usb-tablet \
--netdev "tap,br=${NicBridge},helper=/usr/lib/qemu/qemu-bridge-helper-suid,id=net0" \
+-netdev "${NetDevOption}" \
 -device "usb-net,netdev=net0,mac=${NicMac}" \
 -display "${DisplayOutput}" \
 "$@"

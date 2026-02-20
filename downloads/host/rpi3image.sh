@@ -55,6 +55,7 @@ ProbeCommand SYNC coreutils		/usr/bin/sync /bin/sync /usr/sbin/sync
 ProbeCommand SLEEP coreutils		/usr/bin/sleep /bin/sleep /usr/sbin/sleep
 ProbeCommand MOUNT mount		/usr/bin/mount /sbin/mount /bin/mount
 ProbeCommand UMOUNT mount		/usr/bin/umount /sbin/umount /bin/umount
+ProbeCommand DD coreutils		/usr/bin/dd /bin/dd /usr/sbin/dd
 ProbeCommand CP coreutils		/usr/bin/cp /bin/cp /usr/sbin/cp
 ProbeCommand LS coreutils		/usr/bin/ls /bin/ls /usr/sbin/ls
 ProbeCommand PWD coreutils		/usr/bin/pwd /bin/pwd /usr/sbin/pwd
@@ -68,14 +69,23 @@ ProbeCommand RM coreutils		/usr/bin/rm /bin/rm /usr/sbin/rm
 ProbeCommand GREP grep			/usr/bin/grep /bin/grep /usr/sbin/grep
 ProbeCommand SED sed			/usr/bin/sed /bin/sed /usr/sbin/sed
 ProbeCommand TR coreutils		/usr/bin/tr /bin/tr /usr/sbin/tr
+ProbeCommand WC coreutils		/usr/bin/wc /bin/wc /usr/sbin/wc
 ProbeCommand TAR tar			/usr/bin/tar /bin/tar /usr/sbin/tar
 ProbeCommand DTC device-tree-compiler	/usr/bin/dtc /bin/dtc /usr/sbin/dtc
-ProbeCommand AWK gawk			/usr/bin/awk /bin/awk /usr/bin/gawk /bin/gawk /usr/sbin/awk /sbin/awk
+ProbeCommand GAWK gawk			/usr/bin/gawk /bin/gawk /usr/bin/awk /bin/awk /usr/sbin/awk /sbin/awk
 ProbeCommand PATCH patch		/usr/bin/patch /bin/patch /usr/sbin/patch
 ProbeCommand TOUCH coreutils		/usr/bin/touch /bin/touch /usr/sbin/touch
 ProbeCommand CHMOD coreutils		/usr/bin/chmod /bin/chmod /usr/sbin/chmod
 ProbeCommand CHOWN coreutils		/usr/bin/chown /bin/chown /usr/sbin/chown
 ProbeCommand STAT coreutils		/usr/bin/stat /bin/stat /usr/sbin/stat
+ProbeCommand LN coreutils		/usr/bin/ln /bin/ln /usr/sbin/ln /sbin/ln
+# Will be use FATCAT, ZCAT, STRINGS, HEAD, CMP
+ProbeCommand FATCAT fatcat		/usr/bin/fatcat /bin/fatcat /usr/sbin/fatcat /sbin/fatcat
+ProbeCommand ZCAT gzip			/usr/bin/zcat /bin/zcat /usr/sbin/zcat /sbin/zcat
+ProbeCommand STRINGS binutils		/usr/bin/strings /bin/strings /usr/sbin/strings /sbin/strings
+ProbeCommand HEAD coreutils		/usr/bin/head /bin/head /usr/sbin/head /sbin/head
+ProbeCommand DATE coreutils		/usr/bin/date /bin/date /usr/sbin/date /sbin/date
+ProbeCommand CMP diffutils		/usr/bin/cmp /bin/cmp /usr/sbin/cmp /sbin/cmp
 
 if [[ -n "${BASENAME}" ]]
 then
@@ -94,6 +104,7 @@ then
 fi
 
 Pwd="$( "${PWD}" )"
+
 if [[ -n "${SUDO_UID}" ]]
 then
 	IdUser=${SUDO_UID}
@@ -107,12 +118,17 @@ then
 else
 	IdGroup="$( "${ID}" -g )"
 fi
+
 MyWhich="$( "${WHICH}" "$0" )"
+MyWhichPath="$( "${DIRNAME}" "${MyWhich}" )"
+MyWhichDir="$( "${DIRNAME}" "${MyWhichPath}" )"
 MyPath="$( "${READLINK}" -f "${MyWhich}" )"
 MyDir="$( "${DIRNAME}" "${MyPath}" )"
 MyBody="${MyBase%.*}"
 MyBodyNoSpace="$( echo -n ${MyBody} | "${TR}" -s '\000-\040' '_')"
 MyBodyNoSuffix="${MyBody%%-*}"
+
+Now="$( "${DATE}" +%y%m%d%H%M%S )"
 
 RaspiOSImagePrefix="raspios"
 
@@ -125,7 +141,7 @@ ${MyBase}: HELP:     [/dev/RaspberryPiMedia]
 ${MyBase}: HELP:
 ${MyBase}: HELP: -s number Image file size in Gibytes. It should be
 ${MyBase}: HELP:           power of 2 and larger or equal to
-${MyBase}: HELP            Raspberry PiOSmedia capacity.
+${MyBase}: HELP:           Raspberry PiOSmedia capacity.
 ${MyBase}: HELP:           Without this option, resize image file
 ${MyBase}: HELP:           size upto the smallest number of power
 ${MyBase}: HELP:           of 2 Gibytes size which is larger or equal
@@ -135,11 +151,16 @@ ${MyBase}: HELP:           media image.
 ${MyBase}: HELP:           Without this option, image file is stored
 ${MyBase}: HELP:           into current directory see more details in
 ${MyBase}: HELP:           following text.
+${MyBase}: HELP: -m        Migrate working SD card to qemu.
+${MyBase}: HELP:           Create qcow2 output image file.
+${MyBase}: HELP: -x [debug_specs,...] Specify debug options.
+${MyBase}: HELP:             debug: Print debug messages.
+${MyBase}: HELP:             copy_only: Do not modify image file.
 ${MyBase}: HELP: -f        Force overwrite existing file(s).
 ${MyBase}: HELP: -h        Show help.
 ${MyBase}: HELP:
 ${MyBase}: HELP: Copy the Raspberry Pi OS media at /dev/RaspberryPiMedia
-${MyBase}: HELP  to virtual machine image files.
+${MyBase}: HELP: to virtual machine image files.
 ${MyBase}: HELP: By default, files are stored into current directory.
 ${MyBase}: HELP: When the option -o ImagePath is specified. Outputs are
 ${MyBase}: HELP: stored according to ImagePath points to as flollows,
@@ -149,11 +170,11 @@ ${MyBase}: HELP:   * Store device tree blobs into
 ${MyBase}: HELP:     \$(dirname ImagePath)/bootfs
 ${MyBase}: HELP: * ImagePath is a directory
 ${MyBase}: HELP:   * Store Raspberry Pi OS image into
-${MyBase}: HELP:     ImagePath/${RaspiOSImagePrefix}-OSBits-SerialNumber.img
+${MyBase}: HELP:     ImagePath/${RaspiOSImagePrefix}-OSBits-SerialNumber.{img|qcow2}
 ${MyBase}: HELP:   * Store device tree blobs into ImagePath/bootfs
 ${MyBase}: HELP: * Not specified the -o option
 ${MyBase}: HELP:   * Store Raspberry Pi OS image into
-${MyBase}: HELP:     ./${RaspiOSImagePrefix}-OSBits-SerialNumber.img
+${MyBase}: HELP:     ./${RaspiOSImagePrefix}-OSBits-SerialNumber.{img|qcow2}
 ${MyBase}: HELP:   * Store device tree blobs into ./bootfs
 ${MyBase}: HELP:
 ${MyBase}: HELP: To find Raspberry Pi OS image media path,
@@ -163,8 +184,13 @@ EOF
 	exit 1
 }
 
+# 64bit virtual machine
 DtRpi3BName="bcm2710-rpi-3-b"
 DtRpi3BNameQemu="bcm2710-rpi-3-b-qemu"
+
+# 32bit virtual machine
+DtRpi2BName="bcm2709-rpi-2-b"
+DtRpi2BNameQemu="bcm2709-rpi-2-b-qemu"
 
 NBDDisconnectWait1=3
 NBDDisconnectWait2=5
@@ -187,10 +213,10 @@ MyTemp=""
 function PathIsMountPoint() {
 	if [[ -z "$1" ]]
 	then
-		echo "$0.PathIsMountPoint(): WARNING: No argument." 1>&2
+		echo "${MyBase}.PathIsMountPoint(): WARNING: No argument." 1>&2
 		return 1
 	fi
-	"${AWK}" '{print $2}' /proc/mounts  | while read
+	"${GAWK}" '{print $2}' /proc/mounts  | while read
 	do
 		if [[ "${REPLY}" == "$1" ]]
 		then
@@ -252,7 +278,7 @@ function TempDirectoryFind() {
 	do
 		if echo -n "${Temp}" | "${GREP}" -q '[[:space:]]'
 		then
-			echo "$0.TempDirectoryFind(): NOTICE: Skip using temporary directory which has one or more spaces \"${Temp}\"." 1>&2
+			echo "${MyBase}.TempDirectoryFind(): NOTICE: Skip using temporary directory which has one or more spaces \"${Temp}\"." 1>&2
 			continue
 		fi
 
@@ -273,16 +299,29 @@ function TempDirectoryFind() {
 function TempPathGen() {
 	local	my_body="${MyBodyNoSpace}"
 	local	my_temp
+	local	result
 
 	if [[ -z "${my_body}" ]]
 	then
 		my_body="rpi3image"
 	fi
-	if ! my_temp=$( "${MKTEMP}" -d -p "$( TempDirectoryFind )" "${my_body}-$$-XXXXXXXXXX" )
+
+	my_temp="$( "${MKTEMP}" -d -p "$( TempDirectoryFind )" "${my_body}-$$-XXXXXXXXXX" )"
+	result=$?
+	if (( ${result} != 0 ))
 	then
+		echo "${MyBase}.TempPathGen(): ERROR: Can not create temporary directory at \"${TempDirectoryFind}\"." 1>&2
 		return $?
 	fi
+
 	"${CHMOD}" 700 "${my_temp}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}.TempPathGen(): ERROR: Can not change \"${my_temp}\" mode to 700." 1>&2
+		return ${result}
+	fi
+
 	echo "${my_temp}"
 	return 0
 }
@@ -290,10 +329,23 @@ function TempPathGen() {
 OptionForce=""
 OptionSize=""
 OptionOutput=""
+OptionMigrate=""
 
-while getopts "fs:o:h" OPT
+if [[ -z "${Debug}" ]]
+then
+	if [[ -n "${debug}" ]]
+	then
+		# Defined debug environment value, use it.
+		Debug="${debug}"
+	else
+		Debug=""
+	fi
+fi
+DebugCopyOnly=""
+
+while getopts "fs:o:mx:h" OPT
 do
-	case ${OPT} in
+	case "${OPT}" in
 	(f)
 		OptionForce="yes"
 		;;
@@ -302,6 +354,26 @@ do
 		;;
 	(o)
 		OptionOutput="${OPTARG}"
+		;;
+	(m)
+		OptionMigrate="migrate"
+		;;
+	(x)
+		# Debug option
+		for debug_spec in ${OPTARG/,/}
+		do
+			case "${debug_spec}" in
+			(debug)
+				Debug="y"
+				;;
+			(copy_only)
+				DebugCopyOnly="y"
+				;;
+			(*)
+				echo "${MyBase}: WARNING: Unknown debug specifier \"${debug_spec}\"." 1>&2
+				;;
+			esac
+		done
 		;;
 	(h)
 		Help
@@ -372,16 +444,26 @@ if [[ -n "${OptionSize}" ]]
 then
 	OptionSizeNum=$( echo "${OptionSize}" | "${SED}" 's/[gG][iI]\{0,1\}$//' )
 	OptionSizeNumLog2=$( LogInt2Rup "${OptionSizeNum}" )
-	[[ -n "${debug}" ]] && echo "${MyBase}: DEBUG: Check log2 calculation log2(${OptionSizeNum})=${OptionSizeNumLog2}" 1>&2
+	[[ -n "${Debug}" ]] && echo "${MyBase}: DEBUG: Check log2 calculation log2(${OptionSizeNum})=${OptionSizeNumLog2}" 1>&2
 	if (( ${OptionSizeNum} != ( 1 << ${OptionSizeNumLog2} ) ))
 	then
-		echo "${MyBase}: The number of -s ${OptionSize} should be power of 2." 1>&2
+		echo "${MyBase}: ERROR: The number of -s ${OptionSize} should be power of 2." 1>&2
 		exit 1
 	fi
 fi
 
 OptionOutputDirectory=""
 OptionOutputBaseName=""
+if [[ -z "${OptionMigrate}" ]]
+then
+	OptionOutputFormat="raw"
+	OptionOutputExt="img"
+	OptionOutputCompression=""
+else
+	OptionOutputFormat="qcow2"
+	OptionOutputExt="qcow2"
+	OptionOutputCompression="-c"
+fi
 OptionOutputDirName=""
 
 if [[ -n "${OptionOutput}" ]]
@@ -400,11 +482,30 @@ then
 			echo "${MyBase}: NOTICE: Directory \"${OptionOutput}\" does not exist, will be created." 1>&2
 		else
 			OptionOutputBaseName="$( "${BASENAME}" "${OptionOutput}" )"
-			OptionOutputDirName="$( "${DIRNAME}"   "${OptionOutput}" )"
+			case "${OptionOutputBaseName@L}" in
+			(*img)
+				OptionOutputFormat="raw"
+				OptionOutputCompression=""
+				OptionOutputExt="${OptionOutputBaseName##*.}"
+				;;
+			(*qcow)
+				echo "${OptionOutput}: ERROR: Not supported qcow file format, it does not support resize." 1>&2
+				exit 1
+				;;
+			(*qcow2)
+				OptionOutputFormat="qcow2"
+				OptionOutputCompression="-c"
+				OptionOutputExt="qcow2"
+				;;
+			(*)
+				echo "${OptionOutput}: ERROR: Not supported file format." 1>&2
+				exit 1
+				;;
+			esac
+			OptionOutputDirName="$( "${DIRNAME}" "${OptionOutput}" )"
 			if [[ ! -d "${OptionOutputDirName}" ]]
 			then
 				echo "${MyBase}: NOTICE: Directory \"${OptionOutputDirName}\" does not exist, will be created." 1>&2
-
 			fi
 			OptionOutputDirectory="${OptionOutputDirName}"
 		fi
@@ -440,6 +541,18 @@ then
 	fi
 fi
 
+GitCloned=""
+
+if [[ -d "${MyDir}/.git" ]]
+then
+	GitCloned="${MyDir}"
+fi
+
+if [[ -z "${GitCloned}" && -d "${MyDir}/../../.git" ]]
+then
+	GitCloned="$( "${READLINK}" -f "${MyDir}/../../" )"
+fi
+
 # Check device is used as mount point
 # args path
 # echo none
@@ -447,10 +560,10 @@ fi
 function DeviceIsMounted() {
 	if [[ -z "$1" ]]
 	then
-		echo "$0.DeviceIsMounted(): WARNING: No argument." 1>&2
+		echo "${MyBase}.DeviceIsMounted(): WARNING: No argument." 1>&2
 		return 1
 	fi
-	"${AWK}" '{print $1}' /proc/mounts | while read
+	"${GAWK}" '{print $1}' /proc/mounts | while read
 	do
 		if [[ "${REPLY}" == "$1" ]]
 		then
@@ -474,7 +587,7 @@ echo "${MyBase}: INFO: Use temporary directory \"${MyTemp}\"." 1>&2
 BootFsFatPoint="${MyTemp}/bootfs"
 RootFsExt4Point="${MyTemp}/rootfs"
 
-"${MKDIR}" "${BootFsFatPoint}"
+"${MKDIR}" -m 700 "${BootFsFatPoint}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -482,7 +595,9 @@ then
 	exit ${result}
 fi
 
-"${MKDIR}" "${RootFsExt4Point}"
+echo "${MyBase}: INFO: Create bootfs mount point \"${BootFsFatPoint}\"." 1>&2
+
+"${MKDIR}" -m 700 "${RootFsExt4Point}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -490,6 +605,7 @@ then
 	exit ${result}
 fi
 
+echo "${MyBase}: INFO: Create root mount point \"${RootFsExt4Point}\"." 1>&2
 
 # Find available nbd node
 # echo nbdN
@@ -505,7 +621,7 @@ function NbdFindAvailableNode() {
 		return 1
 	fi
 	i=0
-	pushd /sys/block 1>&2
+	pushd /sys/block > /dev/null 2>&1
 	while (( ${i} < ${n} ))
 	do
 		nbd="nbd${i}"
@@ -517,12 +633,12 @@ function NbdFindAvailableNode() {
 		fi
 		i=$(( ${i} + 1 ))
 	done
-	popd 1>&2
+	popd > /dev/null 2>&1
 	return 1
 }
 
 function SizeKiMiGi() {
-	echo $1 | "${AWK}" -e '{
+	echo $1 | "${GAWK}" '{
 		i=0;
 		a=$1;
 		while (a > 1024) {
@@ -550,7 +666,7 @@ function SizeKiMiGi() {
 }
 
 function SizeKMG() {
-	echo $1 | "${AWK}" -e '{
+	echo $1 | "${GAWK}" '{
 		i=0;
 		a=$1;
 		while (a > 1000) {
@@ -620,7 +736,7 @@ function SizeOfBlockDevice() {
 
 	if [[ -z "$1" ]]
 	then
-		echo "$0.SizeOfBlockDevice(): ERROR: No block device path argument." 1>&2
+		echo "${MyBase}.SizeOfBlockDevice(): ERROR: No block device path argument." 1>&2
 		# no echo
 		return 1
 	fi
@@ -631,7 +747,7 @@ function SizeOfBlockDevice() {
 
 	if [[ ! -d "${sys_block}" ]]
 	then
-		echo "$0.SizeOfBlockDevice(): ERROR: Can not find device ${dev_base} in ${sys_block}" 1>&2
+		echo "${MyBase}.SizeOfBlockDevice(): ERROR: Can not find device ${dev_base} in ${sys_block}" 1>&2
 		# no echo
 		return 1
 	fi
@@ -639,7 +755,7 @@ function SizeOfBlockDevice() {
 	count=$( "${CAT}" "${sys_block}/size" )
 	if [[ -z "${count}" ]]
 	then
-		echo "$0.SizeOfBlockDevice(): ERROR: No block count in ${sys_block}/size" 1>&2
+		echo "${MyBase}.SizeOfBlockDevice(): ERROR: No block count in ${sys_block}/size" 1>&2
 		# no echo
 		return 1
 	fi
@@ -660,7 +776,7 @@ function BlkIdLabel() {
 	result=$?
 
 	echo -n "${label}"
-	[[ -n "${debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device label. dev=\"$1\", label=\"${label}\"" 1>&2
+	[[ -n "${Debug}" ]] && echo "${MyBase}.BlkIdLabel(): DEBUG: Read block device label. dev=\"$1\", label=\"${label}\"" 1>&2
 	return ${result}
 }
 
@@ -702,7 +818,7 @@ function BlkIdType() {
 	result=$?
 
 	echo -n "${type}"
-	[[ -n "${debug}" ]] && echo "$0.BlkIdLabel(): DEBUG: Read block device file system. dev=\"$1\", type=\"${type}\"" 1>&2
+	[[ -n "${Debug}" ]] && echo "${MyBase}.BlkIdLabel(): DEBUG: Read block device file system. dev=\"$1\", type=\"${type}\"" 1>&2
 
 	return ${result}
 }
@@ -732,6 +848,14 @@ function BlkPartIdType() {
 	return 1
 }
 
+# Count partitions on storage
+# args  path_to_block_device
+# echo  the number of partitons
+# return ==0: Success, !=0: Failed
+function BlockDevicePartitions() {
+	"${SUDO}" "${SFDISK}" -d "${dev_path}" | "${GREP}" '^/dev/' | "${WC}" -l
+}
+
 # Check block device may be Raspberry Pi OS media
 # args path_to_block_device
 # echo Not defined
@@ -746,7 +870,7 @@ function BlockDeviceIsRaspiOS() {
 
 	if [[ -z "$1" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): ERROR: Not argument." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): ERROR: No argument." 1>&2
 		return 1
 	fi
 
@@ -754,7 +878,7 @@ function BlockDeviceIsRaspiOS() {
 
 	if [[ ! -b "${dev_path}" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): ERROR: Not a block device \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): ERROR: Not a block device \"$1\"." 1>&2
 		return 1
 	fi
 
@@ -763,44 +887,49 @@ function BlockDeviceIsRaspiOS() {
 	if ! "${SUDO}" "${FILE}" -s "${dev_path}" | \
 	   "${GREP}" -q 'DOS/MBR.*1 : ID=0xc.*2 : ID=0x83'
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_label="$( BlkPartIdLabel "${dev_path}" 1 )"
 	if [[ ! "${part_label}"  == "bootfs" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Partition 1 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_type="$( BlkPartIdType "${dev_path}" 1 )"
 	if [[ ! "${part_type}"  == "vfat" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 1 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Partition 1 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_label="$(BlkPartIdLabel "${dev_path}" 2)"
 	if [[ ! "${part_label}"  == "rootfs" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Partition 2 is labeled \"${part_label}\", not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
 	part_type="$(BlkPartIdType "${dev_path}" 2)"
 	if [[ ! "${part_type}"  == "ext4" ]]
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: Partition 2 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
+		echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: Partition 2 is \"${part_type}\" file system, not a Raspberry Pi OS image media \"$1\"." 1>&2
 		return 1
 	fi
 
-	part_num=$( "${SUDO}" "${SFDISK}" -d "${dev_path}" | "${GREP}" '^/dev/' | wc -l )
+	part_num=$( BlockDevicePartitions "$1" )
 
 	if (( ${part_num} != 2 ))
 	then
-		echo "$0.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media \"$1\"." 1>&2
-		return 1
+		if [[ -z "${OptionMigrate}" ]]
+		then
+			echo "${MyBase}.BlockDeviceIsRaspiOS(): INFO: There are ${part_num} partitions, not a Raspberry Pi OS image media \"$1\"." 1>&2
+			return 1
+		else
+			echo "${MyBase}.BlockDeviceIsRaspiOS(): NOTICE: There are ${part_num} partitions in media \"$1\", may be added extra partition." 1>&2
+		fi
 	fi
 
 	return 0
@@ -823,7 +952,7 @@ function ConvertScsiDevToUSBDev() {
 	sys_block_path="/sys/block/${1}"
 	scsi_link="$( "${READLINK}" "${sys_block_path}/device" )"
 	scsi_hcil="$( "${BASENAME}" "${scsi_link}" )"
-	scsi_host="$( echo "${scsi_hcil}" | "${AWK}" -F ':' '{print $1}' )"
+	scsi_host="$( echo "${scsi_hcil}" | "${GAWK}" -F ':' '{print $1}' )"
 	if [[ -z "${scsi_host}" ]]
 	then
 		return 1
@@ -831,7 +960,7 @@ function ConvertScsiDevToUSBDev() {
 
 	sys_host_path="/sys/bus/scsi/devices/host${scsi_host}"
 	host_link="$( "${READLINK}" "${sys_host_path}" )"
-	if ! echo "${host_link}" | "${GREP}" -q "/usb"
+	if [[ "${host_link}" != */usb[0-9]* ]]
 	then
 		return 1
 	fi
@@ -903,56 +1032,46 @@ function ShowBlockDevice() {
 	return 0
 }
 
-# Unmount block device partition
-# args path_to_block_device partition_number
+# Unmount block device partition by fully qualified path
+# args path_to_block_device_part
 # echo   Not defined
 # exit   no
-# return 0
-function UmountBlockDevicePart() {
-	local	part_path
-
-	part_path="${1}${2}"
-	if DeviceIsMounted "${part_path}"
+# return ==0: Succes, !=0: Failed
+function UmountBlockDevicePartPath() {
+	if DeviceIsMounted "${1}"
 	then
-		[[ -n "${debug}" ]] && echo "$0.UmountBlockDevicePart().1: DEBUG: umount \"${part_path}\"" 1>&2
-		"${SUDO}" "${UMOUNT}" "${part_path}"
-		return $?
-	fi
-
-	part_path="${1}p${2}"
-	if DeviceIsMounted "${part_path}"
-	then
-		[[ -n "${debug}" ]] && echo "$0.UmountBlockDevicePart().2: DEBUG: umount \"${part_path}\"" 1>&2
-		"${SUDO}" "${UMOUNT}" "${part_path}"
+		[[ -n "${Debug}" ]] && echo "${MyBase}.UmountBlockDevicePart().1: DEBUG: umount \"${1}\"" 1>&2
+		"${SUDO}" "${UMOUNT}" "${1}"
 		return $?
 	fi
 
 	return 0
 }
 
-# Unmount Raspberry Pi OS media
+# Unmount whole partitions in block device
 # args path_to_block_device
 # echo   Not defined
 # exit   no
-# return 0
-function UmountRaspiOSMedia() {
+# return ==0: Success, !=0: Failed
+function UmountBlockDeviceWhole() {
+	local	part_path
 	local	result
 
 	if [[ -z "${1}" ]]
 	then
-		echo "$0.UmountRaspiOSMedia(): ERROR: Specify path_to_block_device." 1>&2
+		echo "${MyBase}.UmountBlockDeviceWhole(): ERROR: Specify path_to_block_device." 1>&2
 		return 1
 	fi
 
-	UmountBlockDevicePart "${1}" 1
-	result=$?
-	[[ -n "${debug}" ]] && echo "$0.UmountRaspiOSMedia().1: DEBUG: umount \"${1}\" partition 1, result=${result}" 1>&2
-	(( ${result} != 0 )) && return ${result}
-
-	UmountBlockDevicePart "${1}" 2
-	result=$?
-	[[ -n "${debug}" ]] && echo "$0.UmountRaspiOSMedia().2: DEBUG: umount \"${1}\" partition 2, result=${result}" 1>&2
-	(( ${result} != 0 )) && return ${result}
+	for part_path in $( "${SUDO}" "${SFDISK}" -d "${1}" | "${GREP}" '^/dev/' | "${GAWK}" '{print $1}' )
+	do
+		UmountBlockDevicePartPath "${part_path}"
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			return ${result}
+		fi
+	done
 
 	return 0
 }
@@ -998,7 +1117,7 @@ function FsckVolume() {
 	i=0
 	while (( ${i} < ${FSCK_TRIES} ))
 	do
-		echo "$0.FsckVolume().loop=$i: INFO: fsck -f -y \"${1}\"" 1>&2
+		echo "${MyBase}.FsckVolume().loop=$i: INFO: fsck -f -y \"${1}\"" 1>&2
 		"${SUDO}" "${FSCK}" -f -y "${1}" 1>&2
 		result=$?
 		(( ${result} == 0 )) && break
@@ -1012,20 +1131,28 @@ function FsckVolume() {
 # echo don't care
 # return ==0: Success, !=0: Failed
 function FsckPart() {
-	local	part_path
+	local	part_path_scsi
+	local	part_path_nbd
 
-	part_path="${1}${2}"
-	if [[ -b "${part_path}" ]]
+	part_path_scsi="${1}${2}"
+	part_path_nbd="${1}p${2}"
+
+	if [[ -b "${part_path_nbd}" ]]
 	then
-		FsckVolume "${part_path}"
+		[[ -n "${Debug}" ]] && echo "${MyBase}.FsckPart(): DEBUG: Find partition \"${part_path_nbd}\"."
+		FsckVolume "${part_path_nbd}"
 		return $?
+	else
+		[[ -n "${Debug}" ]] && echo "${MyBase}.FsckPart(): DEBUG: Not found partition \"${part_path_nbd}\"."
 	fi
 
-	part_path="${1}p${2}"
-	if [[ -b "${part_path}" ]]
+	if [[ -b "${part_path_scsi}" ]]
 	then
-		FsckVolume "${part_path}"
+		[[ -n "${Debug}" ]] && echo "${MyBase}.FsckPart(): DEBUG: Find partition \"${part_path_scsi}\"."
+		FsckVolume "${part_path_scsi}"
 		return $?
+	else
+		[[ -n "${Debug}" ]] && echo "${MyBase}.FsckPart(): DEBUG: Not found partition \"${part_path_scsi}\"."
 	fi
 
 	return 1
@@ -1051,7 +1178,8 @@ function FsckRaspiOSMedia() {
 
 function GrowPartRaspiOSMedia() {
 	local	result
-	local	part_path
+	local	part_path_scsi
+	local	part_path_nbd
 	local	do_resize
 
 	result=1
@@ -1062,25 +1190,26 @@ function GrowPartRaspiOSMedia() {
 	result=$?
 	(( ${result} != 0 )) && return ${result}
 
-	part_path="${1}2"
-	if [[ -b "${part_path}" ]]
+	part_path_scsi="${1}2"
+	part_path_nbd="${1}p2"
+
+	if [[ -b "${part_path_nbd}" ]]
 	then
-		do_resize="-2"
-		"${SUDO}" "${RESIZE2FS}" "${part_path}"
+		do_resize="-p2"
+		"${SUDO}" "${RESIZE2FS}" "${part_path_nbd}"
 		return $?
 	fi
 
-	part_path="${1}p2"
-	if [[ -b "${part_path}" ]]
+	if [[ -b "${part_path_scsi}" ]]
 	then
-		do_resize="-p2"
-		"${SUDO}" "${RESIZE2FS}" "${part_path}"
+		do_resize="-2"
+		"${SUDO}" "${RESIZE2FS}" "${part_path_scsi}"
 		return $?
 	fi
 
 	if [[ -z "${do_resize}" ]]
 	then
-		echo "$0.GrowPartRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition(s)." 1>&2
+		echo "${MyBase}.GrowPartRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition(s)." 1>&2
 	fi
 
 	return 1
@@ -1106,16 +1235,6 @@ function MountRaspiOSMedia() {
 
 	do_mount=""
 
-	part_path="${1}1"
-	if [[ -b "${part_path}" ]]
-	then
-		do_mount="${do_mount}-1"
-		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${BootFsFatPoint}"
-		then
-			result=$?
-		fi
-	fi
-
 	part_path="${1}p1"
 	if [[ -b "${part_path}" ]]
 	then
@@ -1126,23 +1245,23 @@ function MountRaspiOSMedia() {
 		fi
 	fi
 
-	if [[ -z "${do_mount}" ]]
+	part_path="${1}1"
+	if [[ -z "${do_mount}" ]] && [[ -b "${part_path}" ]]
 	then
-		echo "$0.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 1." 1>&2
-		return 1
-	fi
-
-	do_mount=""
-
-	part_path="${1}2"
-	if [[ -b "${part_path}" ]]
-	then
-		do_mount="${do_mount}-2"
-		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${RootFsExt4Point}"
+		do_mount="${do_mount}-1"
+		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${BootFsFatPoint}"
 		then
 			result=$?
 		fi
 	fi
+
+	if [[ -z "${do_mount}" ]]
+	then
+		echo "${MyBase}.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 1." 1>&2
+		return 1
+	fi
+
+	do_mount=""
 
 	part_path="${1}p2"
 	if [[ -b "${part_path}" ]]
@@ -1154,9 +1273,19 @@ function MountRaspiOSMedia() {
 		fi
 	fi
 
+	part_path="${1}2"
+	if [[ -z "${do_mount}" ]] && [[ -b "${part_path}" ]]
+	then
+		do_mount="${do_mount}-2"
+		if ! "${SUDO}" "${MOUNT}" -o "${mount_opt}" "${part_path}" "${RootFsExt4Point}"
+		then
+			result=$?
+		fi
+	fi
+
 	if [[ -z "${do_mount}" ]]
 	then
-		echo "$0.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 2." 1>&2
+		echo "${MyBase}.MountRaspiOSMedia(): ERROR: Device \"${1}\" does not have partition 2." 1>&2
 		return 1
 	fi
 
@@ -1183,7 +1312,7 @@ then
 	exit ${found}
 fi
 
-if [ ! -d "/sys/module/nbd" ]
+if [[ ! -d "/sys/module/nbd" ]]
 then
 	echo "${MyBase}: INFO: Probe nbd kernel module." 1>&2
 	"${SUDO}" "${MODPROBE}" nbd
@@ -1211,6 +1340,8 @@ then
 fi
 
 TargetKit=""
+TargetKitPostSetup=""
+TargetKitRaspiConfigQemu=""
 
 # note: Currently We use one target kit rpios32bit-target-kit.tar.gz
 #       to both 32bit and 64bit.
@@ -1232,19 +1363,56 @@ do
 	fi
 done
 
-if [[ -z "${TargetKit}" ]]
-then
-	echo "${MyBase}: ERROR: Can not found target kit tar.gz, rpios32bit-target-kit.tar.gz or rpios64bit-target-kit.tar.gz" 1>&2
-	exit 1
-fi
+TargetKitFilesExec=( \
+	/var/local/post-setup.sh \
+	/var/local/raspi-config-qemu.sh \
+)
 
-[[ -n "${debug}" ]] && echo "${MyBase}: DEBUG: Found target kit tar.gz. TargetKit=\"${TargetKit}\"." 1>&2
+TargetKitFilesDkmsTrixie=( \
+	/usr/src/bcm2835-power-off-dkms-1.0/bcm2835_power_off.c \
+	/usr/src/bcm2835-power-off-dkms-1.0/dkms.conf \
+	/usr/src/bcm2835-power-off-dkms-1.0/Makefile \
+)
+
+TargetKitFilesAll=( \
+	${TargetKitFilesExec[*]} \
+	${TargetKitFilesDkmsTrixie[*]} \
+)
+
+TargetKitFrom="${GitCloned}/downloads/target"
+TargetKitFromGit="yes"
+
+for f in ${TargetKitFilesAll[*]}
+do
+	f_from="${TargetKitFrom}${f}"
+	if [[ ! -f "${f_from}" ]]
+	then
+		echo "${MyBase}: NOTICE: Can not find target kit file \"${f_from}\"." 1>&2
+		TargetKitFromGit=""
+	fi
+done
+
+if [[ -z "${DebugCopyOnly}" ]]
+then
+	if [[ -n "${TargetKitFromGit}" ]]
+	then
+		echo "${MyBase}: INFO: Use git cloned target kit." 1>&2
+	else
+		if [[ -n "${TargetKit}" ]]
+		then
+			echo "${MyBase}: INFO: Use target kit \"${TargetKit}\"." 1>&2
+		else
+			echo "${MyBase}: ERROR: Can not find target kit .tar.gz or files." 1>&2
+			exit 1
+		fi
+	fi
+fi
 
 echo "${MyBase}: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
 "${SYNC}"
 
-while ! UmountRaspiOSMedia "${RaspiMediaDev}"
+while ! UmountBlockDeviceWhole "${RaspiMediaDev}"
 do
 	echo "${MyBase}: NOTICE: Retry umount \"${RaspiMedia}\"." 1>&2
 	sleep 5
@@ -1252,26 +1420,27 @@ done
 
 if [[ ! -d "${OptionOutputDirectory}" ]]
 then
-	"${MKDIR}" -p "${OptionOutputDirectory}"
+	"${MKDIR}" -m 700 -p "${OptionOutputDirectory}"
 	result=$?
 	if (( ${result} != 0 ))
 	then
 		echo "${MyBase}: ERROR: Can not create directory \"${OptionOutputDirectory}\"." 1>&2
 		exit ${result}
 	fi
-	chmod 700 "${OptionOutputDirectory}"
+
+	"${SUDO}" "${CHOWN}" "${IdUser}:${IdGroup}" "${OptionOutputDirectory}"
 	result=$?
 	if (( ${result} != 0 ))
 	then
-		echo "${MyBase}: ERROR: Can not change \"${OptionOutputDirectory}\" access mode into 700." 1>&2
+		echo "${MyBase}: ERROR: Can not change \"${OptionOutputDirectory}\" owner to \"${IdUser}:${IdGroup}\"." 1>&2
 		exit ${result}
 	fi
 fi
 
 RaspiOSImagePreviewReady=""
-RaspiOSImagePreview="$( "${MKTEMP}" -p "${OptionOutputDirectory}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.img" )"
+RaspiOSImagePreview="$( "${MKTEMP}" -p "${OptionOutputDirectory}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.${OptionOutputExt}" )"
 
-${CHMOD} 600 "${RaspiOSImagePreview}"
+"${CHMOD}" 600 "${RaspiOSImagePreview}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1282,7 +1451,7 @@ fi
 # convert Raspberry Pi OS image media to file.
 
 echo "${MyBase}: INFO: Copy Raspberry Pi OS image media \"${RaspiMedia}\" to \"${RaspiOSImagePreview}\"." 1>&2
-"${SUDO}" "${QEMU_IMG}" convert -p -f raw -O raw  "${RaspiMedia}" "${RaspiOSImagePreview}"
+"${SUDO}" "${QEMU_IMG}" convert -p -f raw -O ${OptionOutputFormat} ${OptionOutputCompression} "${RaspiMedia}" "${RaspiOSImagePreview}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1291,7 +1460,10 @@ then
 fi
 RaspiOSImagePreviewReady="yes"
 
-RaspiOSImageSizeConverted=$( ${STAT} -c "%s" "${RaspiOSImagePreview}" )
+RaspiOSImageSizeConverted=$( "${SUDO}" "${QEMU_IMG}" info "${RaspiOSImagePreview}" \
+	| "${GREP}" -i '^virtual[[:space:]]*size' \
+	| "${SED}" 's/^.*(\([0-9]\+\).*).*$/\1/'
+)
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1318,7 +1490,7 @@ fi
 
 echo "${MyBase}: INFO: Resize Raspberry Pi OS image file \"${RaspiOSImagePreview}\" into ${RaspiOSImageSizeAligned}G" 1>&2
 
-"${QEMU_IMG}" resize -f raw "${RaspiOSImagePreview}" "${RaspiOSImageSizeAligned}G"
+"${SUDO}" "${QEMU_IMG}" resize -f ${OptionOutputFormat} "${RaspiOSImagePreview}" "${RaspiOSImageSizeAligned}G"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1344,7 +1516,7 @@ do
 
 	NbdDev="/dev/${NbdNode}"
 
-	if "${SUDO}" "${QEMU_NBD}" -f raw -c "${NbdDev}" "${RaspiOSImagePreview}" 1>&2
+	if "${SUDO}" "${QEMU_NBD}" -f ${OptionOutputFormat} -c "${NbdDev}" "${RaspiOSImagePreview}" 1>&2
 	then
 		break
 	fi
@@ -1381,14 +1553,20 @@ then
 	exit ${result}
 fi
 
-echo "${MyBase}: INFO: Grow rootfs partition (device \"${NbdDev}\" partition 2)." 1>&2
-
-GrowPartRaspiOSMedia "${NbdDev}"
-result=$?
-if (( ${result} != 0 ))
+if [[ -z "${OptionMigrate}" ]]
 then
-	echo "${MyBase}: ERROR: Can not grow rootfs partition." 1>&2
-	exit ${result}
+	echo "${MyBase}: INFO: Grow rootfs partition (device \"${NbdDev}\" partition 2)." 1>&2
+
+	GrowPartRaspiOSMedia "${NbdDev}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not grow rootfs partition." 1>&2
+		exit ${result}
+	fi
+else
+	echo "${MyBase}: NOTICE: Keep rootfs partition (device \"${NbdDev}\" partition 2) size." 1>&2
+	echo "${MyBase}: NOTICE: If you want to resize partition, resize or move partitions in virtual machine." 1>&2
 fi
 
 echo "${MyBase}: INFO: Mount partitions in Raspberry Pi OS image." 1>&2
@@ -1403,9 +1581,17 @@ fi
 
 RaspiOSArch=$( "${FILE}" "${RootFsExt4Point}/usr/bin/[" | "${SED}" 's!^.*ld-linux-\(.*\)[.]so[.].*$!\1!' )
 
-echo "${MyBase}: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
+RaspiOsReleaseBookworm=12
+RaspiOsReleaseTrixie=13
 
-RaspiOSImageTemp=$( "${MKTEMP}" -p "${OptionOutputDirectory}" ${RaspiOSImagePrefix}-XXXXXXXXXX.img )
+RaspiOsReleaseNo=$( "${GREP}" 'VERSION_ID' "${RootFsExt4Point}/etc/os-release" \
+	| "${GAWK}" 'BEGIN {FS="="} {print $2}' \
+	| "${TR}" -d '"' )
+
+echo "${MyBase}: INFO: Raspberry Pi OS image architecture is \"${RaspiOSArch}\"." 1>&2
+echo "${MyBase}: INFO: Raspberry Pi OS image release is \"${RaspiOsReleaseNo}\"." 1>&2
+
+RaspiOSImageTemp=$( "${MKTEMP}" -p "${OptionOutputDirectory}" ${RaspiOSImagePrefix}-XXXXXXXXXX.${OptionOutputExt} )
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1415,17 +1601,17 @@ fi
 
 if [[ -z "${OptionOutputBaseName}" ]]
 then
-	RaspiOSImage="${OptionOutputDirectory}/rpios-0000.img"
+	RaspiOSImage="${OptionOutputDirectory}/rpios-0000.${OptionOutputExt}"
 	RaspiOSImageSn=0
 
 	while (( ${RaspiOSImageSn} <= 9999 ))
 	do
 		case "${RaspiOSArch}" in
 		(aarch64)
-			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-64-$(printf "%04d" ${RaspiOSImageSn}).img"
+			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-64-$(printf "%04d" ${RaspiOSImageSn}).${OptionOutputExt}"
 			;;
 		(*)
-			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-32-$(printf "%04d" ${RaspiOSImageSn}).img"
+			RaspiOSImage="${OptionOutputDirectory}/${RaspiOSImagePrefix}-32-$(printf "%04d" ${RaspiOSImageSn}).${OptionOutputExt}"
 			;;
 		esac
 		if [[ ! -f "${RaspiOSImage}" ]]
@@ -1457,7 +1643,7 @@ fi
 
 echo "${MyBase}: INFO: Copy bootfs files." 1>&2
 
-"${SUDO}" "${CP}" -r "${BootFsFatPoint}" "${OptionOutputDirectory}/"
+"${CP}" -r "${BootFsFatPoint}" "${OptionOutputDirectory}/"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1465,46 +1651,225 @@ then
 	exit ${result}
 fi
 
-"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${OptionOutputDirectory}/bootfs"
-result=$?
-if (( ${result} != 0 ))
+UserDataFile="${OptionOutputDirectory}/bootfs/user-data"
+if [[ -f "${UserDataFile}" ]]
 then
-	echo "${MyBase}: ERROR: Can not change owner bootfs directory and files." 1>&2
-	exit ${result}
+	echo "${MyBase}: INFO: Change \"${UserDataFile}\" mode to 700." 1>&2
+	"${SUDO}" "${CHMOD}" 600 "${UserDataFile}"
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not change \"${UserDataFile}\" mode." 1>&2
+		exit ${result}
+	fi
 fi
 
-echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
-
-"${CHMOD}" 600 "${OptionOutputDirectory}/bootfs/firstrun.sh"
-result=$?
-if (( ${result} != 0 ))
+if [[ -z "${OptionMigrate}" ]]
 then
-	echo "${MyBase}: ERROR: Can not change mode bootfs/firstrun.sh." 1>&2
-	exit ${result}
+	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
+
+	FirstRunMountBootfs="${OptionOutputDirectory}/bootfs/firstrun.sh"
+
+	if [[ -f "${FirstRunMountBootfs}" ]]
+	then
+		"${SUDO}" "${CHMOD}" 600 "${FirstRunMountBootfs}"
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not change mode \"{FirstRunMountBootfs}\"." 1>&2
+			exit ${result}
+		fi
+	else
+		echo "${MyBase}: NOTICE: Not found \"${FirstRunMountBootfs}\", skip changing mode." 1>&2
+	fi
 fi
 
 echo "${MyBase}: INFO: Modify device tree." 1>&2
 
-"${DTC}" -I dtb -O dts -o "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not disassemble device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb\"." 1>&2
-	exit ${result}
-fi
-
 DtRpi3BNameQemuSource="${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dts"
-DtRpi3BNameQemuBlob="${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dtb"
+DtRpi2BNameQemuSource="${OptionOutputDirectory}/bootfs/${DtRpi2BNameQemu}.dts"
 
-"${CP}" -p "${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" "${DtRpi3BNameQemuSource}"
-result=$?
-if (( ${result} != 0 ))
+DtRpiCycle=4
+DtRpiOrigBlob=0
+DtRpiDisasm=1
+DtRpiMod=2
+DtRpiQemuBlob=3
+
+# List[ ( Index % 4 ) == 0 ] := Device Tree blob from Original Raspberry Pi OS image
+# List[ ( Index % 4 ) == 1 ] := Device Tree source disassembled above
+# List[ ( Index % 4 ) == 2 ] := Device Tree source modified above
+# List[ ( Index % 4 ) == 3 ] := Device Tree blob assembled above
+
+DtRpiBlobSourceList=( \
+	"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dtb" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts" \
+	"${DtRpi3BNameQemuSource}" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi3BNameQemu}.dtb" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi2BName}.dtb" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi2BName}.dts" \
+	"${DtRpi2BNameQemuSource}" \
+	"${OptionOutputDirectory}/bootfs/${DtRpi2BNameQemu}.dtb" \
+)
+DtRpiBlobSourceListNum=${#DtRpiBlobSourceList[*]}
+
+
+i=0
+while (( i < ${DtRpiBlobSourceListNum} ))
+do
+	dtb_orig="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiOrigBlob} ))]}";
+	dts_orig="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiDisasm}   ))]}";
+	dts_qemu="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiMod}      ))]}";
+
+	if [[ -f "${dtb_orig}" ]]
+	then
+		if ! "${DTC}" -I dtb -O dts -o "${dts_orig}" "${dtb_orig}"
+		then
+			echo "${MyBase}: ERROR: Can not disassemble device tree blob \"${dtb_orig}\"." 1>&2
+			exit 1
+		fi
+
+		if ! "${CP}" -p "${dts_orig}" "${dts_qemu}"
+		then
+			echo "${MyBase}: ERROR: Can not copy device tree source \"${dts_orig}\" to \"{dts_qemu}\"." 1>&2
+			exit 1
+		fi
+	fi
+
+	i=$(( ${i} + ${DtRpiCycle} ))
+done
+
+if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
 then
-	echo "${MyBase}: ERROR: Can not copy device tree blob \"${OptionOutputDirectory}/bootfs/${DtRpi3BName}.dts\"." 1>&2
-	exit ${result}
-fi
+	# Trixie or later
+	#  64bit virtual machine
+	#  Disable bluetooth serial interface
+	#  Disable watchdog and also power off device (may be PMIC).
+	#  Disable WiFi on SDIO bus.
+	[[ ! -f "${DtRpi3BNameQemuSource}" ]] || "${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
+--- bcm2710-rpi-3-b.dts	2025-12-25 10:51:23.364072307 +0900
++++ bcm2710-rpi-3-b-qemu.dts	2025-12-30 22:38:54.216640118 +0900
+@@ -567,7 +567,7 @@
+ 				shutdown-gpios = <0x0b 0x00 0x00>;
+ 				local-bd-address = [00 00 00 00 00 00];
+ 				fallback-bd-address;
+-				status = "okay";
++				status = "disabled";
+ 				phandle = <0x3a>;
+ 			};
+ 		};
+@@ -868,14 +868,19 @@
+ 		};
+ 
+ 		watchdog@7e100000 {
+-			compatible = "brcm,bcm2835-pm\0brcm,bcm2835-pm-wdt";
++			compatible = "brcm,bcm2835-pm-power-off";
+ 			#power-domain-cells = <0x01>;
+ 			#reset-cells = <0x01>;
+-			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
+-			reg-names = "pm\0asb";
++			/* PM, ASB, DWC-USB-OTG IP block addresses and sizes.
++			 * The address and size of DWC-USB-OTG is
++			 * aliased with usb@7e980000.
++			 */
++			reg = <0x7e100000 0x114 0x7e00a000 0x24 0x7e980000 0x10000>;
++			reg-names = "pm\0asb\0usb0base";
+ 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
+ 			clock-names = "v3d\0peri_image\0h264\0isp";
+ 			system-power-controller;
++			status = "okay";
+ 			phandle = <0x2c>;
+ 		};
+ 
+@@ -991,7 +996,7 @@
+ 			dma-names = "rx-tx";
+ 			brcm,overclock-50 = <0x00>;
+ 			non-removable;
+-			status = "okay";
++			status = "disabled";
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <0x1b>;
+ 			bus-width = <0x04>;
+@@ -1002,6 +1007,7 @@
+ 			wifi@1 {
+ 				reg = <0x01>;
+ 				compatible = "brcm,bcm4329-fmac";
++				status = "disabled";
+ 				phandle = <0x8a>;
+ 			};
+ 		};
+@@ -1091,7 +1097,7 @@
+ 				compatible = "brcm,bcm2835-virtgpio";
+ 				gpio-controller;
+ 				#gpio-cells = <0x02>;
+-				status = "okay";
++				status = "disabled";
+ 				phandle = <0x3e>;
+ 			};
+ 		};
+EOF
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch trixie to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+		exit ${result}
+	fi
 
-"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
+	#  32bit virtual machine
+	#  Disable watchdog and also power off device (may be PMIC).
+	[[ ! -f "${DtRpi2BNameQemuSource}" ]] || "${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+--- bcm2709-rpi-2-b.dts	2026-01-24 19:00:46.298018427 +0900
++++ bcm2709-rpi-2-b-qemu.dts	2026-01-24 21:28:15.520371422 +0900
+@@ -530,11 +530,12 @@
+ 			interrupts = <0x02 0x18>;
+ 			clocks = <0x08 0x14>;
+ 			status = "okay";
+-			dmas = <0x09 0x2000000d>;
+-			dma-names = "rx-tx";
++			brcm,force-pio = <0x01>;
++			/* dmas = <0x09 0x2000000d>; */
++			/* dma-names = "rx-tx"; */
+ 			bus-width = <0x04>;
+ 			brcm,overclock-50 = <0x00>;
+-			brcm,pio-limit = <0x01>;
++			brcm,pio-limit = <0x7fffffff>;
+ 			firmware = <0x06>;
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <0x0a>;
+@@ -808,15 +809,20 @@
+ 		};
+ 
+ 		watchdog@7e100000 {
+-			compatible = "brcm,bcm2835-pm\0brcm,bcm2835-pm-wdt";
++			compatible = "brcm,bcm2835-pm-power-off";
+ 			#power-domain-cells = <0x01>;
+ 			#reset-cells = <0x01>;
+-			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
+-			reg-names = "pm\0asb";
++			/* PM, ASB, DWC-USB-OTG IP block addresses and sizes.
++			 * The address and size of DWC-USB-OTG is
++			 * aliased with usb@7e980000.
++			 */
++			reg = <0x7e100000 0x114 0x7e00a000 0x24 0x7e980000 0x10000>;
++			reg-names = "pm\0asb\0usb0base";
+ 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
+ 			clock-names = "v3d\0peri_image\0h264\0isp";
+ 			system-power-controller;
+ 			phandle = <0x27>;
++			status = "okay";
+ 		};
+ 
+ 		rng@7e104000 {
+EOF
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch trixie to device tree source \"${DtRpi2BNameQemuSource}\"." 1>&2
+		exit ${result}
+	fi
+else
+	# Bookworm or earlier
+	#  Disable bluetooth serial interface
+	"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
 --- bcm2710-rpi-3-b.dts	2025-03-10 02:10:31.929049869 +0900
 +++ bcm2710-rpi-3-b-qemu.dts	2025-03-10 02:10:31.931049840 +0900
 @@ -567,7 +567,7 @@
@@ -1517,30 +1882,362 @@ fi
  			};
  		};
 EOF
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch bookworm to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+		exit ${result}
+	fi
+fi
 
+i=0
+while (( i < ${DtRpiBlobSourceListNum} ))
+do
+	dts_qemu="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiMod}      ))]}";
+	dtb_qemu="${DtRpiBlobSourceList[$(( ${i} + ${DtRpiQemuBlob} ))]}";
+
+	if [[ -f "${dts_qemu}" ]]
+	then
+		if ! "${DTC}" -I dts -O dtb -o "${dtb_qemu}" "${dts_qemu}"
+		then
+			echo "${MyBase}: ERROR: Can not assemble device tree \"${dts_qemu}\"." 1>&2
+			exit 1
+		fi
+
+		if ! "${CHMOD}" "644" "${dts_qemu}" "${dtb_qemu}"
+		then
+			echo "${MyBase}: ERROR: Can not change mode \"${dts_qemu}\" or \"${dtb_qemu}\"." 1>&2
+			exit 1
+		fi
+
+		echo "${MyBase}: INFO: Created device tree file \"${dtb_qemu}\"." 1>&2
+	fi
+
+	i=$(( ${i} + ${DtRpiCycle} ))
+done
+
+"${SUDO}" "${CHOWN}" -R "${IdUser}:${IdGroup}" "${OptionOutputDirectory}/bootfs"
 result=$?
 if (( ${result} != 0 ))
 then
-	echo "${MyBase}: ERROR: Can not patch device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+	echo "${MyBase}: ERROR: Can not change owner directory \"${OptionOutputDirectory}/bootfs\" and files." 1>&2
 	exit ${result}
 fi
 
-"${DTC}" -I dts -O dtb -o "${DtRpi3BNameQemuBlob}" "${DtRpi3BNameQemuSource}"
-result=$?
-if (( ${result} != 0 ))
+if [[ -z "${DebugCopyOnly}" ]]
 then
-	echo "${MyBase}: ERROR: Can not compile device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
-	exit ${result}
-fi
+	echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
 
-echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
+	if [[ -n "${TargetKitFromGit}" ]]
+	then
+		if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
+		then
+			# Trixie or later
+			TargetKitFiles=( \
+				${TargetKitFilesExec[*]} \
+				${TargetKitFilesDkmsTrixie[*]} \
+			)
+		else
+			# Bookworm or earlier
+			TargetKitFiles=( \
+				${TargetKitFilesExec[*]} \
+			)
+		fi
 
-"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
-result=$?
-if (( ${result} != 0 ))
-then
-	echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
-	exit ${result}
+		for f in ${TargetKitFiles[*]}
+		do
+			f_from="${TargetKitFrom}${f}"
+			f_to="${RootFsExt4Point}${f}"
+			d_to="${f_to%/*}"
+
+			echo "${MyBase}: INFO: Copy file \"${f_from}\" to \"${f_to}\"." 1>&2
+
+			if [[ ! -d "${d_to}" ]]
+			then
+				"${SUDO}" "${MKDIR}" -p "${d_to}"
+
+				result=$?
+				if (( ${result} != 0 ))
+				then
+					echo "${MyBase}: ERROR: Can not create directory \"${d_to}\"." 1>&2
+					exit ${result}
+				fi
+			fi
+
+			"${SUDO}" "${CP}" --preserve=timestamps,mode "${f_from}" "${f_to}"
+
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not copy file \"${f_from}\" to \"${f_to}\"." 1>&2
+				exit ${result}
+			fi
+		done
+
+		for f in ${TargetKitFilesExec[*]}
+		do
+			f_to="${RootFsExt4Point}${f}"
+
+			echo "${MyBase}: INFO: Set execute mode bit \"${f_to}\"." 1>&2
+
+			"${SUDO}" "${CHMOD}" 755 "${f_to}"
+
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not set execute mode bit \"${f_to}\"." 1>&2
+				exit ${result}
+			fi
+		done
+	else
+		if [[ -n "${TargetKit}" ]]
+		then
+			"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
+
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
+				exit ${result}
+			fi
+		fi
+	fi
+
+	SystemConf="/etc/systemd/system.conf"
+	SystemConfMountEtc="${RootFsExt4Point}${SystemConf}"
+
+	echo "${MyBase}: INFO: modify \"${SystemConfMountEtc}\"." 1>&2
+
+	"${SUDO}" "${PATCH}" "${SystemConfMountEtc}" << EOF
+--- system.conf.orig 2024-10-11 02:40:53.000000000 +0900
++++ system.conf 2025-01-21 11:40:15.555694259 +0900
+@@ -43,11 +43,11 @@
+ #DefaultTimerAccuracySec=1min
+ #DefaultStandardOutput=journal
+ #DefaultStandardError=inherit
+-#DefaultTimeoutStartSec=90s
++DefaultTimeoutStartSec=400s
+ #DefaultTimeoutStopSec=90s
+ #DefaultTimeoutAbortSec=
+-#DefaultDeviceTimeoutSec=90s
+-#DefaultRestartSec=100ms
++DefaultDeviceTimeoutSec=400s
++DefaultRestartSec=2000ms
+ #DefaultStartLimitIntervalSec=10s
+ #DefaultStartLimitBurst=5
+ #DefaultEnvironment=
+EOF
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch \"${SystemConfMountEtc}\"." 1>&2
+		exit ${result}
+	fi
+
+	LightdmService="/etc/systemd/system/lightdm.service"
+	LightdmServiceMountEtc="${RootFsExt4Point}${LightdmService}"
+	LightdmServiceMountLib="${RootFsExt4Point}${LightdmService/etc/lib}"
+
+	echo "${MyBase}: INFO: Place modified systemd unit file \"${LightdmServiceMountEtc}\"." 1>&2
+
+	"${SUDO}" "${CP}" "${LightdmServiceMountLib}" "${LightdmServiceMountEtc}"
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not copy \"${LightdmServiceMountLib}\" to \"${LightdmServiceMountEtc}\"." 1>&2
+		exit ${result}
+	fi
+
+	"${SUDO}" "${CHMOD}" 644 "${LightdmServiceMountEtc}"
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not change \"${LightdmServiceMountEtc}\" mode to 644." 1>&2
+		exit ${result}
+	fi
+
+	"${SUDO}" "${PATCH}" "${LightdmServiceMountEtc}" << EOF
+--- /lib/systemd/system/lightdm.service	2025-03-15 00:02:00.000000000 +0900
++++ /etc/systemd/system/lightdm.service	2025-11-25 13:14:40.222838504 +0900
+@@ -1,8 +1,10 @@
+ [Unit]
+ Description=Light Display Manager
+ Documentation=man:lightdm(1)
+-After=systemd-user-sessions.service dev-dri-card0.device dev-dri-renderD128.device
+-Wants=dev-dri-card0.device dev-dri-renderD128.device
++#After=systemd-user-sessions.service dev-dri-card0.device dev-dri-renderD128.device
++#Wants=dev-dri-card0.device dev-dri-renderD128.device
++After=systemd-user-sessions.service
++Wants=
+ 
+ # replaces plymouth-quit since lightdm quits plymouth on its own
+ Conflicts=plymouth-quit.service
+EOF
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch \"${LightdmServiceMountEtc}\"." 1>&2
+		exit ${result}
+	fi
+
+	LightdmConf="/etc/lightdm/lightdm.conf"
+	LightdmConfMountEtc="${RootFsExt4Point}${LightdmConf}"
+
+	echo "${MyBase}: INFO: Modify lightdm configuration file \"${LightdmConfMountEtc}\"." 1>&2
+	if  (( ${RaspiOsReleaseNo}" >= "${RaspiOsReleaseTrixie} ))
+	then
+		# Follow Trixie changes.
+		# Touch up lightdm.conf
+		"${SUDO}" "${PATCH}" "${LightdmConfMountEtc}" << EOF
+--- lightdm-orig.conf	2025-11-24 11:09:51.162401933 +0900
++++ lightdm-qemu.conf	2025-12-05 18:42:20.684060125 +0900
+@@ -26,7 +26,7 @@
+ #lock-memory=true
+ #user-authority-in-system-dir=false
+ #guest-account-script=guest-account
+-#logind-check-graphical=true
++logind-check-graphical=false
+ #log-directory=/var/log/lightdm
+ #run-directory=/var/run/lightdm
+ #cache-directory=/var/cache/lightdm
+@@ -99,12 +99,12 @@
+ #xdmcp-manager=
+ #xdmcp-port=177
+ #xdmcp-key=
+-greeter-session=pi-greeter-labwc
++greeter-session=pi-greeter-x
+ greeter-hide-users=false
+ #greeter-allow-guest=true
+ #greeter-show-manual-login=false
+ #greeter-show-remote-login=true
+-user-session=rpd-labwc
++user-session=rpd-x
+ #allow-user-switching=true
+ #allow-guest=true
+ #guest-session=
+@@ -120,7 +120,7 @@
+ autologin-user=rpi-first-boot-wizard
+ #autologin-user-timeout=0
+ #autologin-in-background=false
+-autologin-session=rpd-labwc
++autologin-session=rpd-x
+ #exit-on-failure=false
+ 
+ #
+EOF
+	else
+		# Bookworm or earlier.
+		# Touch up lightdm.conf
+		"${SUDO}" "${PATCH}" "${LightdmConfMountEtc}" << EOF
+--- lightdm.conf.orig	2025-12-20 02:01:00.245755276 +0900
++++ lightdm.conf	2025-12-20 02:08:24.677867337 +0900
+@@ -108,12 +108,12 @@
+ #xdmcp-key=
+ #unity-compositor-command=unity-system-compositor
+ #unity-compositor-timeout=60
+-greeter-session=pi-greeter-labwc
++greeter-session=pi-greeter
+ greeter-hide-users=false
+ #greeter-allow-guest=true
+ #greeter-show-manual-login=false
+ #greeter-show-remote-login=true
+-user-session=LXDE-pi-labwc
++user-session=LXDE-pi-x
+ #allow-user-switching=true
+ #allow-guest=true
+ #guest-session=
+@@ -129,7 +129,7 @@
+ autologin-user=rpi-first-boot-wizard
+ #autologin-user-timeout=0
+ #autologin-in-background=false
+-autologin-session=LXDE-pi-labwc
++autologin-session=LXDE-pi-x
+ #exit-on-failure=false
+ #fallback-test=
+ #fallback-session=
+EOF
+	fi
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not apply patch to \"${LightdmConfMountEtc}\"." 1>&2
+		exit ${result}
+	fi
+
+	XorgConf="/etc/X11/xorg.conf.d/00-fbdev.conf"
+	XorgConfMountEtc="${RootFsExt4Point}${XorgConf}"
+
+	echo "${MyBase}: INFO: Create Xorg configuration file \"${XorgConfMountEtc}\"." 1>&2
+
+	# Place 00-fbdev.conf with file configured trixie ready.
+	"${SUDO}" "${DD}" "of=${XorgConfMountEtc}" << EOF
+Section "Device"
+	Identifier "Card0"
+	Driver "fbdev"
+EndSection
+
+Section "ServerLayout"
+	Identifier	"ServerLayout0"
+	Screen	0 "QEMUFB"
+EndSection
+
+Section	"Screen"
+	Identifier	"QEMUFB"
+	Device		"Card0"
+	Monitor		"QEMUFBPanel"
+	DefaultDepth	24
+	SubSection	"Display"
+		Depth	24
+	EndSubSection
+EndSection
+
+Section	"Monitor"
+	Identifier	"QEMUFBPanel"
+	VertRefresh	60
+EndSection
+EOF
+
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not place Xorg configuration file \"${XorgConfMountEtc}\"." 1>&2
+		exit ${result}
+	fi
+
+	"${SUDO}" "${CHMOD}" 644 "${XorgConfMountEtc}"
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not change \"${XorgConfMountEtc}\" mode to 644." 1>&2
+		exit ${result}
+	fi
+
+	for f in \
+		"${RootFsExt4Point}/etc/systemd/system/multi-user.target.wants/rpi-eeprom-update.service" \
+		"${RootFsExt4Point}/etc/systemd/system/multi-user.target.wants/ModemManager.service" \
+		"${RootFsExt4Point}/etc/systemd/system/dev-serial1.device.wants/hciuart.service" \
+		"${RootFsExt4Point}/etc/systemd/system/sysinit.target.wants/rpi-resize.service"
+	do
+		if [[ -f "${f}" || -h "${f}" ]]
+		then
+			echo "${MyBase}: INFO: Disable Raspberry Pi OS service \"${f##*/}\"." 1>&2
+			"${SUDO}" "${RM}" "${f}"
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not remove \"${f}\"." 1>&2
+				exit ${result}
+			fi
+		else
+			[[ -n "${Debug}" ]] && "${MyBase}: DEBUG: Not found \"${f}\"." 1>&2
+		fi
+	done
+else
+	echo "${MyBase}: DEBUG: Skip modifying rootfs." 1>&2
 fi
 
 echo "${MyBase}: INFO: Remount with read-only mode Raspberry Pi OS image." 1>&2
@@ -1566,7 +2263,7 @@ fi
 
 echo "${MyBase}: INFO: Unmount Raspberry Pi OS image." 1>&2
 
-UmountRaspiOSMedia "${NbdDev}"
+UmountBlockDeviceWhole "${NbdDev}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1591,7 +2288,7 @@ fi
 
 echo "${MyBase}: INFO: Rename Raspberry Pi OS image file." 1>&2
 
-"${MV}" -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
+"${SUDO}" "${MV}" -f "${RaspiOSImagePreview}" "${RaspiOSImage}"
 result=$?
 if (( ${result} != 0 ))
 then
@@ -1608,8 +2305,91 @@ then
 fi
 
 echo "${MyBase}: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 1>&2
-if [[ "${RaspiOSArch}" == "aarch64" ]]
+
+if (( ${RaspiOsReleaseNo} < ${RaspiOsReleaseTrixie} ))
 then
-	echo "${MyBase}: INFO: Created Raspberry Pi Model 3B device tree file \"${DtRpi3BNameQemuBlob}\"." 1>&2
+	Rpi3vm641StConf="${MyDir}/rpi3vm64-1st.conf"
+
+	if [[ -f "${Rpi3vm641StConf}" ]]
+	then
+		Rpi3vm641StConfBackup="${MyWhichDir}/rpi3vm64-1st-${Now}.conf.backup"
+		echo "${MyBase}: INFO: Backup configuration file \"${Rpi3vm641StConf}\" to \"${Rpi3vm641StConfBackup}\"." 1>&2
+		"${MV}" --backup=t "${Rpi3vm641StConf}" "${Rpi3vm641StConfBackup}"
+	fi
+
+	echo "${MyBase}: INFO: Create configuration file \"${Rpi3vm641StConf}\" to run bookworm release." 1>&2
+	"${CAT}" > "${Rpi3vm641StConf}" << EOF
+Append="console=ttyAMA1,115200 console=tty1\\
+ root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\\
+ dwc_otg.fiq_fsm_enable=0\\
+ bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\\
+ init=/usr/lib/raspberrypi-sys-mods/firstboot\\
+ systemd.run=/boot/firstrun.sh\\
+ systemd.run_success_action=reboot\\
+ systemd.unit=kernel-command-line.target\\
+"
+EOF
+	result=$?
+	if (( $? != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not create configuration file \"${Rpi3vm641StConf}\" ." 1>&2
+		exit ${result}
+	fi
+
+	Rpi3vm641StConfLinkFrom="${MyWhichDir}/rpi3vm64-1st.conf"
+
+	if ! "${LN}" -s "${Rpi3vm641StConf}" "${Rpi3vm641StConfLinkFrom}"
+	then
+		echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm641StConfLinkFrom}\" to configuration file \"${Rpi3vm641StConf}\" ." 1>&2
+		exit ${result}
+	fi
+
+	Rpi3vm642ndConf="${MyDir}/rpi3vm64-2nd.conf"
+
+	if [[ -f "${Rpi3vm642ndConf}" ]]
+	then
+		Rpi3vm642ndConfBackup="${MyWhichDir}/rpi3vm64-2nd-${Now}.conf.backup"
+		echo "${MyBase}: INFO: Backup configuration file \"${Rpi3vm642ndConf}\" to \"${Rpi3vm642ndConfBackup}\"." 1>&2
+		"${MV}" --backup=t "${Rpi3vm642ndConf}" "${Rpi3vm642ndConfBackup}"
+	fi
+
+	echo "${MyBase}: INFO: Create configuration file \"${Rpi3vm642ndConf}\" to run bookworm release." 1>&2
+	"${CAT}" > "${Rpi3vm642ndConf}" << EOF
+Append="console=ttyAMA1,115200 console=tty1\\
+ root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\\
+ dwc_otg.fiq_fsm_enable=0\\
+ bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\\
+ systemd.run=/boot/firmware/firstrun.sh\\
+ systemd.run_success_action=reboot\\
+ systemd.unit=kernel-command-line.target\\
+"
+EOF
+	result=$?
+	if (( $? != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not create configuration file \"${Rpi3vm642ndConf}\" ." 1>&2
+		exit ${result}
+	fi
+
+	Rpi3vm642ndConfLinkFrom="${MyWhichDir}/rpi3vm64-2nd.conf"
+
+	if ! "${LN}" -s "${Rpi3vm641StConf}" "${Rpi3vm642ndConfLinkFrom}"
+	then
+		echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm642ndConfLinkFrom}\" to configuration file \"${Rpi3vm642ndConf}\" ." 1>&2
+		exit ${result}
+	fi
 fi
+
+case "${MyBase}" in
+(rpi3*)
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
+	;;
+(rpi2*)
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi2vm32-1st.sh\" ." 1>&2
+	;;
+(*)
+	echo "${MyBase}: INFO: Done convert media image to file." 1>&2
+	;;
+esac
+
 exit 0
