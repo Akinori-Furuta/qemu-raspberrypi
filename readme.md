@@ -174,7 +174,8 @@ sudo /sbin/init 0
 ```
 
 > [!NOTE]
-> post-setup.sh does following setups,
+> [post-setup.sh](./downloads/target/var/local/post-setup.sh)
+> does following setups,
 >
 > * Disable ModemManager.service.
 > * Disable rpi-eeprom-update.service.
@@ -213,7 +214,7 @@ following table.
 |Command|qemu-system-aarch64 option|Action|kernel sequence|
 |---|---|---|---|
 |/sbin/init 0||Terminate|power off|
-|/sbin/reboot|-no-reboot (rpi3vm64.sh default)|Terminate|reboot|
+|/sbin/reboot|-no-reboot ([rpi3vm64.sh](./downloads/host/rpi3vm64.sh) default)|Terminate|reboot|
 |/sbin/reboot|without -no-reboot|Reboot|reboot|
 
 ## After Updating Kernel
