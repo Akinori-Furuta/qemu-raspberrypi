@@ -17,7 +17,7 @@ The following table shows Requirements.
 |CPU bits|64||
 |CPU clock|>= 3.0GHz|Using a i5-4440 4C/4T 3.1GHz host CPU, the host CPU load achieves 40-60% when running a terminal on the GUI desktop.|
 |Memory|>= 6Gibytes|A process emulating Raspberry Pi OS uses 4.4Gibytes.|
-|Storage size|>= MediaSize+|At one virtual machine, see [Appendex](#appendex-required-free-storage-size)|
+|Storage size|>= MediaSize+|At one virtual machine, see [Appendix](#appendix-required-free-storage-size)|
 |OS|Ubuntu 24.04 or later|Include delivered distributions, need QEMU 8.2.2 or later version package|
 
 [^2]: nC/mT = n Cores, m Threads
