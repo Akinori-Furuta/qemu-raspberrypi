@@ -20,7 +20,7 @@ Raspberry Pi imager with parameters as following table.
 |Pi device|Raspberry Pi 2||emulate model 2B on QEMU|
 |Operating System|Raspbery Pi OS (32-bit)||Debian release 13 (trixie)|
 |host name|rpi2b-trixie32|_PiHostName_|Network host name. To resolve network address by name, use _PiHostName_.local and bridge interface|
-|Capital city|City of your location||Now matter what this selection, initial system locale (the LANG environment value) is fixed to en_GB.UTF-8|
+|Capital city|City of your location||No matter what this selection, initial system locale (the LANG environment value) is fixed to en_GB.UTF-8|
 |Time zone|Time zone to use||Automatically selected by "Capital city"|
 |Keyboard layout|Same as host keyboard|||
 |Username|pi|_PiUserName_||
