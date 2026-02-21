@@ -1815,7 +1815,10 @@ EOF
 	fi
 
 	#  32bit virtual machine
+	#  At MMC host, Use PIO transfer instead of DMA controller.
+	#    Using DMA on QEMU emulator may corrupt rootfile system.
 	#  Disable watchdog and also power off device (may be PMIC).
+	#    Attach QEMU dedicated power off and reboot driver.
 	[[ ! -f "${DtRpi2BNameQemuSource}" ]] || "${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
 --- bcm2709-rpi-2-b.dts	2026-01-24 19:00:46.298018427 +0900
 +++ bcm2709-rpi-2-b-qemu.dts	2026-01-24 21:28:15.520371422 +0900
@@ -1888,6 +1891,26 @@ EOF
 		echo "${MyBase}: ERROR: Can not patch bookworm to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
 		exit ${result}
 	fi
+
+	#  32bit virtual machine
+	#  At MMC host, Use PIO transfer instead of DMA controller.
+	#    Using DMA on QEMU emulator may corrupt rootfile system.
+	"${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+--- bcm2709-rpi-2-b.dts	2026-02-21 17:39:22.990832131 +0900
++++ bcm2709-rpi-2-b-qemu.dts	2026-02-21 20:21:27.001388898 +0900
+@@ -530,8 +530,9 @@
+ 			interrupts = <0x02 0x18>;
+ 			clocks = <0x08 0x14>;
+ 			status = "okay";
+-			dmas = <0x09 0x2000000d>;
+-			dma-names = "rx-tx";
++			bcrm,force-pio = <0x01>;
++			/* dmas = <0x09 0x2000000d>; */
++			/* dma-names = "rx-tx"; */
+ 			bus-width = <0x04>;
+ 			brcm,overclock-50 = <0x00>;
+ 			brcm,pio-limit = <0x01>;
+EOF
 fi
 
 i=0
