@@ -2277,11 +2277,11 @@ if (( ${RaspiOsReleaseNo} < ${RaspiOsReleaseTrixie} ))
 then
 	Rpi3vm641StConf="${MyDir}/rpi3vm64-1st.conf"
 
-	if [[ -f "${Rpi3vm641StConf}" ]]
+	if [[ -f "${Rpi3vm641StConf}" || -h "${Rpi3vm641StConf}" ]]
 	then
 		Rpi3vm641StConfBackup="${MyWhichDir}/rpi3vm64-1st-${Now}.conf.backup"
 		echo "${MyBase}: INFO: Backup configuration file \"${Rpi3vm641StConf}\" to \"${Rpi3vm641StConfBackup}\"." 1>&2
-		"${MV}" --backup=t "${Rpi3vm641StConf}" "${Rpi3vm641StConfBackup}"
+		"${CP}" --backup=t "${Rpi3vm641StConf}" "${Rpi3vm641StConfBackup}"
 	fi
 
 	echo "${MyBase}: INFO: Create configuration file \"${Rpi3vm641StConf}\" to run bookworm release." 1>&2
@@ -2313,11 +2313,11 @@ EOF
 
 	Rpi3vm642ndConf="${MyDir}/rpi3vm64-2nd.conf"
 
-	if [[ -f "${Rpi3vm642ndConf}" ]]
+	if [[ -f "${Rpi3vm642ndConf}" || -h "${Rpi3vm642ndConf}" ]]
 	then
 		Rpi3vm642ndConfBackup="${MyWhichDir}/rpi3vm64-2nd-${Now}.conf.backup"
 		echo "${MyBase}: INFO: Backup configuration file \"${Rpi3vm642ndConf}\" to \"${Rpi3vm642ndConfBackup}\"." 1>&2
-		"${MV}" --backup=t "${Rpi3vm642ndConf}" "${Rpi3vm642ndConfBackup}"
+		"${CP}" --backup=t "${Rpi3vm642ndConf}" "${Rpi3vm642ndConfBackup}"
 	fi
 
 	echo "${MyBase}: INFO: Create configuration file \"${Rpi3vm642ndConf}\" to run bookworm release." 1>&2
