@@ -1339,30 +1339,6 @@ then
 	exit 1
 fi
 
-TargetKit=""
-TargetKitPostSetup=""
-TargetKitRaspiConfigQemu=""
-
-# note: Currently We use one target kit rpios32bit-target-kit.tar.gz
-#       to both 32bit and 64bit.
-
-# search target kit tar.gz from current directory 
-# and git cloned repository.
-
-for target_kit in "${Pwd}/rpios64bit-target-kit.tar.gz" \
-		  "${OptionOutputDirectory}/rpios64bit-target-kit.tar.gz" \
-		  "${MyDir}/../downloads/rpios64bit-target-kit.tar.gz" \
-		  "${Pwd}/rpios32bit-target-kit.tar.gz" \
-		  "${OptionOutputDirectory}/rpios32bit-target-kit.tar.gz" \
-		  "${MyDir}/../downloads/rpios32bit-target-kit.tar.gz"
-do
-	if [[ -f "${target_kit}" ]]
-	then
-		TargetKit="${target_kit}"
-		break
-	fi
-done
-
 TargetKitFilesExec=( \
 	/var/local/post-setup.sh \
 	/var/local/raspi-config-qemu.sh \
@@ -1380,33 +1356,16 @@ TargetKitFilesAll=( \
 )
 
 TargetKitFrom="${GitCloned}/downloads/target"
-TargetKitFromGit="yes"
 
 for f in ${TargetKitFilesAll[*]}
 do
 	f_from="${TargetKitFrom}${f}"
 	if [[ ! -f "${f_from}" ]]
 	then
-		echo "${MyBase}: NOTICE: Can not find target kit file \"${f_from}\"." 1>&2
-		TargetKitFromGit=""
+		echo "${MyBase}: ERROR: Can not find target kit file \"${f_from}\"." 1>&2
+		exit 1
 	fi
 done
-
-if [[ -z "${DebugCopyOnly}" ]]
-then
-	if [[ -n "${TargetKitFromGit}" ]]
-	then
-		echo "${MyBase}: INFO: Use git cloned target kit." 1>&2
-	else
-		if [[ -n "${TargetKit}" ]]
-		then
-			echo "${MyBase}: INFO: Use target kit \"${TargetKit}\"." 1>&2
-		else
-			echo "${MyBase}: ERROR: Can not find target kit .tar.gz or files." 1>&2
-			exit 1
-		fi
-	fi
-fi
 
 echo "${MyBase}: INFO: Unmount \"${RaspiMedia}\"." 1>&2
 
@@ -1951,80 +1910,65 @@ if [[ -z "${DebugCopyOnly}" ]]
 then
 	echo "${MyBase}: INFO: Apply target kit to rootfs." 1>&2
 
-	if [[ -n "${TargetKitFromGit}" ]]
+	if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
 	then
-		if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
-		then
-			# Trixie or later
-			TargetKitFiles=( \
-				${TargetKitFilesExec[*]} \
-				${TargetKitFilesDkmsTrixie[*]} \
-			)
-		else
-			# Bookworm or earlier
-			TargetKitFiles=( \
-				${TargetKitFilesExec[*]} \
-			)
-		fi
-
-		for f in ${TargetKitFiles[*]}
-		do
-			f_from="${TargetKitFrom}${f}"
-			f_to="${RootFsExt4Point}${f}"
-			d_to="${f_to%/*}"
-
-			echo "${MyBase}: INFO: Copy file \"${f_from}\" to \"${f_to}\"." 1>&2
-
-			if [[ ! -d "${d_to}" ]]
-			then
-				"${SUDO}" "${MKDIR}" -p "${d_to}"
-
-				result=$?
-				if (( ${result} != 0 ))
-				then
-					echo "${MyBase}: ERROR: Can not create directory \"${d_to}\"." 1>&2
-					exit ${result}
-				fi
-			fi
-
-			"${SUDO}" "${CP}" --preserve=timestamps,mode "${f_from}" "${f_to}"
-
-			result=$?
-			if (( ${result} != 0 ))
-			then
-				echo "${MyBase}: ERROR: Can not copy file \"${f_from}\" to \"${f_to}\"." 1>&2
-				exit ${result}
-			fi
-		done
-
-		for f in ${TargetKitFilesExec[*]}
-		do
-			f_to="${RootFsExt4Point}${f}"
-
-			echo "${MyBase}: INFO: Set execute mode bit \"${f_to}\"." 1>&2
-
-			"${SUDO}" "${CHMOD}" 755 "${f_to}"
-
-			result=$?
-			if (( ${result} != 0 ))
-			then
-				echo "${MyBase}: ERROR: Can not set execute mode bit \"${f_to}\"." 1>&2
-				exit ${result}
-			fi
-		done
+		# Trixie or later
+		TargetKitFiles=( \
+			${TargetKitFilesExec[*]} \
+			${TargetKitFilesDkmsTrixie[*]} \
+		)
 	else
-		if [[ -n "${TargetKit}" ]]
+		# Bookworm or earlier
+		TargetKitFiles=( \
+			${TargetKitFilesExec[*]} \
+		)
+	fi
+
+	for f in ${TargetKitFiles[*]}
+	do
+		f_from="${TargetKitFrom}${f}"
+		f_to="${RootFsExt4Point}${f}"
+		d_to="${f_to%/*}"
+
+		echo "${MyBase}: INFO: Copy file \"${f_from}\" to \"${f_to}\"." 1>&2
+
+		if [[ ! -d "${d_to}" ]]
 		then
-			"${SUDO}" "${TAR}" -C "${RootFsExt4Point}" --no-same-owner --no-overwrite-dir -xvf "${TargetKit}"
+			"${SUDO}" "${MKDIR}" -p "${d_to}"
 
 			result=$?
 			if (( ${result} != 0 ))
 			then
-				echo "${MyBase}: ERROR: Can not apply target kit to rootfs." 1>&2
+				echo "${MyBase}: ERROR: Can not create directory \"${d_to}\"." 1>&2
 				exit ${result}
 			fi
 		fi
-	fi
+
+		"${SUDO}" "${CP}" --preserve=timestamps,mode "${f_from}" "${f_to}"
+
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not copy file \"${f_from}\" to \"${f_to}\"." 1>&2
+			exit ${result}
+		fi
+	done
+
+	for f in ${TargetKitFilesExec[*]}
+	do
+		f_to="${RootFsExt4Point}${f}"
+
+		echo "${MyBase}: INFO: Set execute mode bit \"${f_to}\"." 1>&2
+
+		"${SUDO}" "${CHMOD}" 755 "${f_to}"
+
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not set execute mode bit \"${f_to}\"." 1>&2
+			exit ${result}
+		fi
+	done
 
 	SystemConf="/etc/systemd/system.conf"
 	SystemConfMountEtc="${RootFsExt4Point}${SystemConf}"
