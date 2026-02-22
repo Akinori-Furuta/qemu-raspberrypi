@@ -2304,11 +2304,15 @@ EOF
 	fi
 
 	Rpi3vm641StConfLinkFrom="${MyWhichDir}/rpi3vm64-1st.conf"
+	Rpi3vm641StConfLinkTo="downloads/host/rpi3vm64-1st.conf"
 
-	if ! "${LN}" -s "${Rpi3vm641StConf}" "${Rpi3vm641StConfLinkFrom}"
+	if [[ ! -e "${Rpi3vm641StConfLinkFrom}" ]]
 	then
-		echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm641StConfLinkFrom}\" to configuration file \"${Rpi3vm641StConf}\" ." 1>&2
-		exit ${result}
+		if ! "${LN}" -s "${Rpi3vm641StConfLinkTo}" "${Rpi3vm641StConfLinkFrom}"
+		then
+			echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm641StConfLinkFrom}\" to configuration file \"${Rpi3vm641StConfLinkTo}\" ." 1>&2
+			exit ${result}
+		fi
 	fi
 
 	Rpi3vm642ndConf="${MyDir}/rpi3vm64-2nd.conf"
@@ -2339,11 +2343,15 @@ EOF
 	fi
 
 	Rpi3vm642ndConfLinkFrom="${MyWhichDir}/rpi3vm64-2nd.conf"
+	Rpi3vm642ndConfLinkTo="downloads/host/rpi3vm64-2nd.conf"
 
-	if ! "${LN}" -s "${Rpi3vm641StConf}" "${Rpi3vm642ndConfLinkFrom}"
+	if [[ ! -e "${Rpi3vm642ndConfLinkFrom}" ]]
 	then
-		echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm642ndConfLinkFrom}\" to configuration file \"${Rpi3vm642ndConf}\" ." 1>&2
-		exit ${result}
+		if ! "${LN}" -s "${Rpi3vm642ndConfLinkTo}" "${Rpi3vm642ndConfLinkFrom}"
+		then
+			echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm642ndConfLinkFrom}\" to configuration file \"${Rpi3vm642ndConfLinkTo}\" ." 1>&2
+			exit ${result}
+		fi
 	fi
 fi
 
