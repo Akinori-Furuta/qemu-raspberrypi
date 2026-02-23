@@ -2275,18 +2275,35 @@ echo "${MyBase}: INFO: Created Raspberry Pi OS image file \"${RaspiOSImage}\"." 
 
 if (( ${RaspiOsReleaseNo} < ${RaspiOsReleaseTrixie} ))
 then
-	Rpi3vm641StConf="${MyDir}/rpi3vm64-1st.conf"
+	case "${RaspiOSArch}" in
+	(aarch64)
+		RpiConf1stName="rpi3vm64-1st.conf"
+		RpiConf2ndName="rpi3vm64-2nd.conf"
+		RpiConf1stBackupName="rpi3vm64-1st-${Now}.conf.backup"
+		RpiConf2ndBackupName="rpi3vm64-2nd-${Now}.conf.backup"
+		ConsoleTty="ttyAMA1"
+		;;
+	(*)
+		RpiConf1stName="rpi2vm32-1st.conf"
+		RpiConf2ndName="rpi2vm32-2nd.conf"
+		RpiConf1stBackupName="rpi2vm32-1st-${Now}.conf.backup"
+		RpiConf2ndBackupName="rpi2vm32-2nd-${Now}.conf.backup"
+		ConsoleTty="ttyAMA0"
+		;;
+	esac
 
-	if [[ -f "${Rpi3vm641StConf}" || -h "${Rpi3vm641StConf}" ]]
+	RpiConf1stPath="${MyDir}/${RpiConf1stName}"
+
+	if [[ -f "${RpiConf1stPath}" || -h "${RpiConf1stPath}" ]]
 	then
-		Rpi3vm641StConfBackup="${MyWhichDir}/rpi3vm64-1st-${Now}.conf.backup"
-		echo "${MyBase}: INFO: Backup configuration file \"${Rpi3vm641StConf}\" to \"${Rpi3vm641StConfBackup}\"." 1>&2
-		"${CP}" --backup=t "${Rpi3vm641StConf}" "${Rpi3vm641StConfBackup}"
+		Rpi3vm641StConfBackup="${MyWhichDir}/${RpiConf1stBackupName}"
+		echo "${MyBase}: INFO: Backup configuration file \"${RpiConf1stPath}\" to \"${Rpi3vm641StConfBackup}\"." 1>&2
+		"${CP}" --backup=t "${RpiConf1stPath}" "${Rpi3vm641StConfBackup}"
 	fi
 
-	echo "${MyBase}: INFO: Create configuration file \"${Rpi3vm641StConf}\" to run bookworm release." 1>&2
-	"${CAT}" > "${Rpi3vm641StConf}" << EOF
-Append="console=ttyAMA1,115200 console=tty1\\
+	echo "${MyBase}: INFO: Create configuration file \"${RpiConf1stPath}\" to run bookworm release." 1>&2
+	"${CAT}" > "${RpiConf1stPath}" << EOF
+Append="console=${ConsoleTty},115200 console=tty1\\
  root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\\
  dwc_otg.fiq_fsm_enable=0\\
  bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\\
@@ -2299,34 +2316,34 @@ EOF
 	result=$?
 	if (( $? != 0 ))
 	then
-		echo "${MyBase}: ERROR: Can not create configuration file \"${Rpi3vm641StConf}\" ." 1>&2
+		echo "${MyBase}: ERROR: Can not create configuration file \"${RpiConf1stPath}\" ." 1>&2
 		exit ${result}
 	fi
 
-	Rpi3vm641StConfLinkFrom="${MyWhichDir}/rpi3vm64-1st.conf"
-	Rpi3vm641StConfLinkTo="downloads/host/rpi3vm64-1st.conf"
+	RpiConf1stLinkFrom="${MyWhichDir}/${RpiConf1stName}"
+	RpiConf1stLinkTo="downloads/host/${RpiConf1stName}"
 
-	if [[ ! -e "${Rpi3vm641StConfLinkFrom}" ]]
+	if [[ ! -e "${RpiConf1stLinkFrom}" ]]
 	then
-		if ! "${LN}" -s "${Rpi3vm641StConfLinkTo}" "${Rpi3vm641StConfLinkFrom}"
+		if ! "${LN}" -s "${RpiConf1stLinkTo}" "${RpiConf1stLinkFrom}"
 		then
-			echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm641StConfLinkFrom}\" to configuration file \"${Rpi3vm641StConfLinkTo}\" ." 1>&2
+			echo "${MyBase}: ERROR: Can not create link from \"${RpiConf1stLinkFrom}\" to configuration file \"${RpiConf1stLinkTo}\" ." 1>&2
 			exit ${result}
 		fi
 	fi
 
-	Rpi3vm642ndConf="${MyDir}/rpi3vm64-2nd.conf"
+	RpiConf2ndPath="${MyDir}/${RpiConf2ndName}"
 
-	if [[ -f "${Rpi3vm642ndConf}" || -h "${Rpi3vm642ndConf}" ]]
+	if [[ -f "${RpiConf2ndPath}" || -h "${RpiConf2ndPath}" ]]
 	then
-		Rpi3vm642ndConfBackup="${MyWhichDir}/rpi3vm64-2nd-${Now}.conf.backup"
-		echo "${MyBase}: INFO: Backup configuration file \"${Rpi3vm642ndConf}\" to \"${Rpi3vm642ndConfBackup}\"." 1>&2
-		"${CP}" --backup=t "${Rpi3vm642ndConf}" "${Rpi3vm642ndConfBackup}"
+		RpiConf2ndConfBackup="${MyWhichDir}/${RpiConf2ndBackupName}"
+		echo "${MyBase}: INFO: Backup configuration file \"${RpiConf2ndPath}\" to \"${RpiConf2ndConfBackup}\"." 1>&2
+		"${CP}" --backup=t "${RpiConf2ndPath}" "${RpiConf2ndConfBackup}"
 	fi
 
-	echo "${MyBase}: INFO: Create configuration file \"${Rpi3vm642ndConf}\" to run bookworm release." 1>&2
-	"${CAT}" > "${Rpi3vm642ndConf}" << EOF
-Append="console=ttyAMA1,115200 console=tty1\\
+	echo "${MyBase}: INFO: Create configuration file \"${RpiConf2ndPath}\" to run bookworm release." 1>&2
+	"${CAT}" > "${RpiConf2ndPath}" << EOF
+Append="console=${ConsoleTty},115200 console=tty1\\
  root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait\\
  dwc_otg.fiq_fsm_enable=0\\
  bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\\
@@ -2338,18 +2355,18 @@ EOF
 	result=$?
 	if (( $? != 0 ))
 	then
-		echo "${MyBase}: ERROR: Can not create configuration file \"${Rpi3vm642ndConf}\" ." 1>&2
+		echo "${MyBase}: ERROR: Can not create configuration file \"${RpiConf2ndPath}\" ." 1>&2
 		exit ${result}
 	fi
 
-	Rpi3vm642ndConfLinkFrom="${MyWhichDir}/rpi3vm64-2nd.conf"
-	Rpi3vm642ndConfLinkTo="downloads/host/rpi3vm64-2nd.conf"
+	RpiConf2ndConfLinkFrom="${MyWhichDir}/${RpiConf2ndName}"
+	RpiConf2ndConfLinkTo="downloads/host/${RpiConf2ndName}"
 
-	if [[ ! -e "${Rpi3vm642ndConfLinkFrom}" ]]
+	if [[ ! -e "${RpiConf2ndConfLinkFrom}" ]]
 	then
-		if ! "${LN}" -s "${Rpi3vm642ndConfLinkTo}" "${Rpi3vm642ndConfLinkFrom}"
+		if ! "${LN}" -s "${RpiConf2ndConfLinkTo}" "${RpiConf2ndConfLinkFrom}"
 		then
-			echo "${MyBase}: ERROR: Can not create link from \"${Rpi3vm642ndConfLinkFrom}\" to configuration file \"${Rpi3vm642ndConfLinkTo}\" ." 1>&2
+			echo "${MyBase}: ERROR: Can not create link from \"${RpiConf2ndConfLinkFrom}\" to configuration file \"${RpiConf2ndConfLinkTo}\" ." 1>&2
 			exit ${result}
 		fi
 	fi
