@@ -2320,18 +2320,6 @@ EOF
 		exit ${result}
 	fi
 
-	RpiConf1stLinkFrom="${MyWhichDir}/${RpiConf1stName}"
-	RpiConf1stLinkTo="downloads/host/${RpiConf1stName}"
-
-	if [[ ! -e "${RpiConf1stLinkFrom}" ]]
-	then
-		if ! "${LN}" -s "${RpiConf1stLinkTo}" "${RpiConf1stLinkFrom}"
-		then
-			echo "${MyBase}: ERROR: Can not create link from \"${RpiConf1stLinkFrom}\" to configuration file \"${RpiConf1stLinkTo}\" ." 1>&2
-			exit ${result}
-		fi
-	fi
-
 	RpiConf2ndPath="${MyDir}/${RpiConf2ndName}"
 
 	if [[ -f "${RpiConf2ndPath}" || -h "${RpiConf2ndPath}" ]]
@@ -2359,17 +2347,31 @@ EOF
 		exit ${result}
 	fi
 
-	RpiConf2ndConfLinkFrom="${MyWhichDir}/${RpiConf2ndName}"
-	RpiConf2ndConfLinkTo="downloads/host/${RpiConf2ndName}"
+	link_from_to_list=(
+		"${MyWhichDir}/${RpiConf1stName}"
+		"downloads/host/${RpiConf1stName}"
+		"${MyWhichDir}/${RpiConf2ndName}"
+		"downloads/host/${RpiConf2ndName}"
+	)
 
-	if [[ ! -e "${RpiConf2ndConfLinkFrom}" ]]
-	then
-		if ! "${LN}" -s "${RpiConf2ndConfLinkTo}" "${RpiConf2ndConfLinkFrom}"
+	i=0
+	while [[ -n "${link_from_to_list[${i}]}" ]]
+	do
+		link_from="${link_from_to_list[$(( ${i} + 0 ))]}"
+		link_to="${link_from_to_list[$(( ${i} + 1 ))]}"
+
+		if [[ ! -e "${link_from}" ]]
 		then
-			echo "${MyBase}: ERROR: Can not create link from \"${RpiConf2ndConfLinkFrom}\" to configuration file \"${RpiConf2ndConfLinkTo}\" ." 1>&2
-			exit ${result}
+			"${LN}" -s "${link_to}" "${link_from}"
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not create link from \"${link_from}\" to configuration file \"${link_to}\" ." 1>&2
+				exit ${result}
+			fi
 		fi
-	fi
+		i=$(( ${i} + 2 ))
+	done
 fi
 
 case "${MyBase}" in
