@@ -2376,10 +2376,10 @@ fi
 
 case "${MyBase}" in
 (rpi3*)
-	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\" ." 1>&2
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi3vm64-1st.sh\"." 1>&2
 	;;
 (rpi2*)
-	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi2vm32-1st.sh\" ." 1>&2
+	echo "${MyBase}: INFO: Next, run \"${MyDir}/rpi2vm32-1st.sh\"." 1>&2
 	;;
 (*)
 	echo "${MyBase}: INFO: Done convert media image to file." 1>&2
