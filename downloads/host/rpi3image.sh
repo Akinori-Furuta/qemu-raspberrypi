@@ -91,7 +91,7 @@ if [[ -n "${BASENAME}" ]]
 then
 	MyBase="$( "${BASENAME}" "$0" )"
 else
-	MyBase="$0"
+	MyBase="${0##*/}"
 fi
 
 if (( ${#ReqPackageList[@]} > 0 ))
