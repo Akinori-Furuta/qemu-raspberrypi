@@ -18,7 +18,7 @@ for f in "downloads/host/rpi3image.sh" \
 	 "downloads/host/rpi3vm64.sh" \
 	 "downloads/host/rpi3vm64-upkernel.sh"
 do
-	if [[ ! -f "${f}" ]]
+	if [[ ( ! -f "${f}" ) && ( ! -h "${f}" ) ]]
 	then
 		echo "$0: ERROR: Can not find \"${f}\"."
 		exit 1
@@ -26,7 +26,11 @@ do
 	link_from="${f##*/}"
 	if [[ ( ! -h "${link_from}" ) && ( ! -f "${link_from}" ) ]]
 	then
-		ln -s "${f}" "${link_from}"
+		if ! ln -s "${f}" "${link_from}"
+		then
+			echo "$0: ERROR: Can not create symbolic-links. from=\"${link_from}\", to=\"${f}\"" 1>&2
+			exit 1
+		fi
 	fi
 done
 
@@ -35,7 +39,11 @@ for link_from in "rpi3vm64-1st.sh" "rpi3vm64-2nd.sh"
 do
 	if [[ ( ! -h "${link_from}" ) && ( ! -f "${link_from}" )  ]]
 	then
-		ln -s "${link_to}" "${link_from}"
+		if ! ln -s "${link_to}" "${link_from}"
+		then
+			echo "$0: ERROR: Can not create stater symbolic-links. from=\"${link_from}\", to=\"${link_to}\"" 1>&2
+			exit 1
+		fi
 	fi
 done
 

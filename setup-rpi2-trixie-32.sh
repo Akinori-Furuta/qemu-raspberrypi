@@ -16,7 +16,11 @@ imager="downloads/host/rpi3image.sh"
 	link_from="rpi2image.sh"
 	if [[ ( ! -h "${link_from}" ) && ( ! -f "${link_from}" ) ]]
 	then
-		ln -s "${imager}" "${link_from}"
+		if ! ln -s "${imager}" "${link_from}"
+		then
+			echo "$0: ERROR: Can not create imager symbolic-link. from=\"${link_from}\", to=\"${imager}\"" 1>&2
+			exit 1
+		fi
 	fi
 
 for f in "downloads/host/rpi2vm32.conf" \
@@ -24,7 +28,7 @@ for f in "downloads/host/rpi2vm32.conf" \
 	 "downloads/host/rpi2vm32.sh" \
 	 "downloads/host/rpi2vm32-upkernel.sh"
 do
-	if [[ ! -f "${f}" ]]
+	if [[ ( ! -f "${f}" ) && ( ! -h "${f}" ) ]]
 	then
 		echo "$0: ERROR: Can not find \"${f}\"."
 		exit 1
@@ -32,7 +36,11 @@ do
 	link_from="${f##*/}"
 	if [[ ( ! -h "${link_from}" ) && ( ! -f "${link_from}" ) ]]
 	then
-		ln -s "${f}" "${link_from}"
+		if ! ln -s "${f}" "${link_from}"
+		then
+			echo "$0: ERROR: Can not create symbolic-links. from=\"${link_from}\", to=\"${f}\"" 1>&2
+			exit 1
+		fi
 	fi
 done
 
@@ -41,7 +49,11 @@ for link_from in "rpi2vm32-1st.sh" "rpi2vm32-2nd.sh"
 do
 	if [[ ( ! -h "${link_from}" ) && ( ! -f "${link_from}" )  ]]
 	then
-		ln -s "${link_to}" "${link_from}"
+		if ! ln -s "${link_to}" "${link_from}"
+		then
+			echo "$0: ERROR: Can not create stater symbolic-links. from=\"${link_from}\", to=\"${link_to}\"" 1>&2
+			exit 1
+		fi
 	fi
 done
 
