@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: BSD-2-Clause
+
 
 for f in "downloads/host/rpi3image.sh" \
 	 "downloads/host/rpi3vm64.conf" \

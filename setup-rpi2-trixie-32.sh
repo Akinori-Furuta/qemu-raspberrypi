@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: BSD-2-Clause
+
 
 imager="downloads/host/rpi3image.sh"
 	link_from="rpi2image.sh"
