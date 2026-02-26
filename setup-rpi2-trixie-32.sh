@@ -1,6 +1,16 @@
 #!/bin/bash
 # SPDX-License-Identifier: BSD-2-Clause
 
+PATH=/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin
+
+MyWhich="$( which "$0" )"
+MyPath="$( readlink -f "${MyWhich}" )"
+MyDir="$( dirname "${MyPath}" )"
+MyDirArg0="$( dirname "$0" )"
+MyDirArg0Absolute="$( readlink -f "${MyDirArg0}" )"
+MyBase="$( basename "$0" )"
+MyBody="${MyBase%.*}"
+MyBodyNoSuffix="${MyBody%%-*}"
 
 imager="downloads/host/rpi3image.sh"
 	link_from="rpi2image.sh"
