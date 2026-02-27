@@ -61,8 +61,21 @@ QEMU emulator.
 ### Run 32bit Raspberry Pi OS Trixie
 
 If you are interested in running 32bit version of Raspberry Pi OS,
-follow link to
-[Run Raspberry Pi OS trixie 32bit on emulated Raspberry Pi 2 model B](./readme-trixie32.md).
+see following page,
+
+* [Run Raspberry Pi OS Trixie 32bit on emulated Raspberry Pi 2 model B](./readme-trixie32.md)
+
+It supports running Raspberry Pi OS Trixie 32bit experimentally.
+
+### Run 32bit/64bit Raspberry Pi OS Bookworm (Debian 12)
+
+If you are interested in running 32bit/64bit version of
+Raspberry Pi OS Bookworm (Debian 12), see following pages,
+
+* [Run Raspberry Pi OS Bookworm 32bit on emulated Raspberry Pi 2 model B](./readme-bookworm32.md)
+* [Run Raspberry Pi OS Bookworm 64bit on emulated Raspberry Pi 3 model B](./readme-bookworm64.md)
+
+They support running Raspberry Pi OS Bookworm experimentally.
 
 ## Install Required Packages
 
