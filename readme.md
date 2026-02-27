@@ -3,7 +3,8 @@
 ## Introduction
 
 This repository contains scripts and driver to run
-Raspberry Pi OS Trixie 64bit[^1] on Linux QEMU emulator.
+Raspberry Pi OS Trixie (Debian 13) 64bit[^1] on
+Linux QEMU emulator.
 
 [^1]: 32bit version is supported experimentally.
 
@@ -47,11 +48,12 @@ QEMU emulator.
 * [Clone Git Repository](#clone-git-repository)
 * [Copy Image From Bootable Media](#copy-image-from-bootable-media)
   * Requires root (privileged) account
-* [Initial Setup](#raspberry-pi-os-initial-setup)
+* [Initial Setup](#initial-setup-raspberry-pi-os)
   * Run virtual machine twice
     * Setup host name, account, and initial services.
     * Setup a dkms driver to run on QEMU emulator.
 * [Run Normally](#run-normally)
+* [Exit Emulation](#exit-emulation)
 * [After Updating Kernel](#after-updating-kernel)
   * Reflect updated kernel and initramfs image files to
     host files.
@@ -120,7 +122,7 @@ the node which is attached Raspberry Pi OS image media.
 ./rpi3image.sh /dev/sdX
 ```
 
-## Raspberry Pi OS Initial Setup
+## Initial Setup Raspberry Pi OS
 
 ### First Step
 
@@ -199,14 +201,16 @@ runs on QEMU.
 > [!NOTE]
 > There are some restrictions on QEMU emulator.
 >
-> * Disable watchdog timer.
-> * Disable Bluetooth interface via serial port.
-> * Disable Wifi device on SDIO bus.
->   * Also disable SDIO contoller which connected to
+> * Disabled watchdog timer.
+> * Disabled Bluetooth interface via serial port.
+> * Disabled Wifi device on SDIO bus.
+>   * Also disabled SDIO contoller which connected to
 >     the WiFi device.
-> * Fix graphical screen resolution to 1024x768.
-> * Disable rpi-eeprom-update.service
-> * Disable virtgpio driver
+> * Fixed graphical screen resolution to 1024x768.
+> * Disabled rpi-eeprom-update.service
+> * Disabled virtgpio driver
+
+## Exit Emulation
 
 To exit Raspberry Pi OS emulation,type command described in
 following table.

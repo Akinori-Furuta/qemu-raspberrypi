@@ -1,4 +1,4 @@
-# Create Raspberry Pi OS image media
+# Create a Raspberry Pi OS Image Media
 
 ## Introduction
 

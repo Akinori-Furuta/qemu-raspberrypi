@@ -1,24 +1,25 @@
-# Run Raspberry Pi OS trixie 32bit on emulated Raspberry Pi 2 model B
+# Run Raspberry Pi OS Trixie 32bit on emulated Raspberry Pi 2 model B
 
 ## Introduction
 
 Raspberry Pi OS Trixie 32bit runs on QEMU emulated
-Raspberry Pi 2 model B. Now experimental release,
-may be unstable and slower than [emulating 64bit OS](./readme.md).
+Raspberry Pi 2 model B. It's experimentally supported.
+You may see some "timeout" and "network connection lost".
 
 To try running Raspberry Pi OS Trixie 32bit on QEMU,
 follow steps as bellow.
 
-## Create a Raspberry Pi OS 32bit image media
+## Create a Raspberry Pi OS 32bit Image Media
 
 Create a Raspberry Pi OS 32bit image media by
-Raspberry Pi imager with parameters as following table.
+the [Raspberry Pi imager](https://www.raspberrypi.com/software/)
+with parameters as following table.
 
 |Item|Choice or Example|Referred as|Note|
 |----|----|----|----|
 |Media capacity|8Gbytes or more||Initial rootfs uses 4.1Gibytes spaces|
 |Pi device|Raspberry Pi 2||emulate model 2B on QEMU|
-|Operating System|Raspbery Pi OS (32-bit)||Debian release 13 (trixie)|
+|Operating System|Raspbery Pi OS (32-bit)||Debian release 13 (Trixie)|
 |host name|rpi2b-trixie32|_PiHostName_|Network host name. To resolve network address by name, use _PiHostName_.local and bridge interface|
 |Capital city|City of your location||No matter what this selection, initial system locale (the LANG environment value) is fixed to en_GB.UTF-8|
 |Time zone|Time zone to use||Automatically selected by "Capital city"|
@@ -31,7 +32,7 @@ Raspberry Pi imager with parameters as following table.
 |Authentication mechanism|Use password authentication|||
 |Enable Raspberry Pi Connect|Off|||
 
-## Install required packages
+## Install Required Packages
 
 Install packages to run scripts.
 
@@ -43,9 +44,9 @@ sudo apt install git bridge-utils uml-utilities \
  device-tree-compiler gawk fatcat gzip binutils diffutils
 ```
 
-## Run commands to emulate Raspberry Pi OS trixie 32bit
+## Clone Git Repository
 
-Clone git repository.
+Clone git repository from github.
 
 ```bash
 git clone https://github.com/Akinori-Furuta/qemu-raspberrypi.git
@@ -60,6 +61,8 @@ Setup symbolic links to scripts.
 
 > [!NOTE]
 > It's similar to 64bit support version `./setup-rpi3-trixie-64.sh`
+
+## Copy Image From Bootable Media
 
 Attach a Raspberry Pi OS image media to PC.
 Find Raspberry Pi OS image media path.
@@ -96,6 +99,10 @@ the node which is attached Raspberry Pi OS image media.
 ./rpi2image.sh /dev/sdX
 ```
 
+## Raspberry Pi OS Initial Setup
+
+### First Step
+
 First step configuration.
 
 ```bash
@@ -116,6 +123,8 @@ You will see reboot kernel log as follows,
 ```
 
 Type **[CTRL]-[a]** **[x]** to terminate the QEMU emulator.
+
+### Second Step
 
 Second step configuration.
 
@@ -149,23 +158,27 @@ sudo /sbin/init 0
 > * Disable rpi-eeprom-update.service.
 > * Install power-off and reboot dkms driver bcm2835_power_off.
 
+## Run Normally
+
 Now, ready to run the Raspberry Pi OS on the QEMU emulator.
 
 ```bash
 ./rpi2vm32.sh
 ```
 
-Currently, the Raspberry Pi OS "trixie" 32bit graphical desktop
+Currently, the Raspberry Pi OS Trixie 32bit graphical desktop
 runs on QEMU.
 
 > [!NOTE]
 > There are some restrictions on QEMU emulator.
 >
-> * Disable eMMC/SDCard I/O DMA transfer
+> * Disabled eMMC/SDCard I/O DMA transfer
 >   * Use PIO transfer to prevent corrupting rootfs filesystem.
-> * Disable watchdog timer.
-> * Fix graphical screen resolution to 1024x768.
-> * Disable rpi-eeprom-update.service
+> * Disabled watchdog timer.
+> * Fixed graphical screen resolution to 1024x768.
+> * Disabled rpi-eeprom-update.service
+
+## Exit Emulation
 
 To exit the Raspberry Pi OS emulation, following tables shows
 commands on emulated Raspberry Pi OS, and actions.
@@ -175,6 +188,8 @@ commands on emulated Raspberry Pi OS, and actions.
 |/sbin/init 0||Terminate|power off|
 |/sbin/reboot|-no-reboot ([rpi2vm32.sh](./downloads/host/rpi2vm32.sh) default)|Terminate|reboot|
 |/sbin/reboot|without -no-reboot|Reboot|reboot|
+
+## After Updating Kernel
 
 After updating kernel in emulated Raspberry Pi OS,
 exit the QEMU emulation and run following command on the host PC.
