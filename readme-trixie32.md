@@ -170,7 +170,7 @@ runs on QEMU.
 To exit the Raspberry Pi OS emulation, following tables shows
 commands on emulated Raspberry Pi OS, and actions.
 
-|Command|qemu-system-aarch64 option|Action|kernel sequence|
+|Command|qemu-system-arm option|Action|kernel sequence|
 |---|---|---|---|
 |/sbin/init 0||Terminate|power off|
 |/sbin/reboot|-no-reboot ([rpi2vm32.sh](./downloads/host/rpi2vm32.sh) default)|Terminate|reboot|
