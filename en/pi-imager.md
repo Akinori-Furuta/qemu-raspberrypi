@@ -24,7 +24,7 @@ Prepare following items.
 * A removable storage media
   * All data on storage media will be erased
   * 8Gbytes or more capacity
-    * Raspberry Pi OS uses about 6Gbytes of rootfs partition.
+    * Raspberry Pi OS uses about 4.7Gbytes of rootfs partition.
   * Micro SD cards, SD cards, or Thumb USB memories
     * May use other kind of USB connected storage devices
 

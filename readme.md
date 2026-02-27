@@ -27,7 +27,7 @@ The following table shows Requirements.
 |Item|Requires|Note|
 |----|--------|----|
 |Media|SD, Micro SD, USB thumb Memories, and Removable drives|Create a bootable Raspberry Pi OS image|
-|Media size|> 8Gbytes|Raspberry Pi OS files uses 6Gbytes space|
+|Media size|> 8Gbytes|Raspberry Pi OS files uses 4.7Gbytes spaces|
 
 ## Index
 
