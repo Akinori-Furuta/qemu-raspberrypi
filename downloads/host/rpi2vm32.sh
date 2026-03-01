@@ -61,6 +61,8 @@ Append="console=ttyAMA0,115200 console=tty1\
  bcm2708_fb.fbwidth=1024 bcm2708_fb.fbheight=768\
 "
 
+echo "$0: INFO: Append=${Append}"
+
 qemu-system-arm \
 -machine raspi2b \
 -kernel "${KernelFile}" \
