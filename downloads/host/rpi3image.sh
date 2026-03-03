@@ -153,6 +153,8 @@ ${MyBase}: HELP:           into current directory see more details in
 ${MyBase}: HELP:           following text.
 ${MyBase}: HELP: -m        Migrate working SD card to qemu.
 ${MyBase}: HELP:           Create qcow2 output image file.
+${MyBase}: HELP: -p [patch_specs,...] Specify plus more options.
+${MyBase}: HELP:             dist-upgrade: Patch to prepare dist-upgrade.
 ${MyBase}: HELP: -x [debug_specs,...] Specify debug options.
 ${MyBase}: HELP:             debug: Print debug messages.
 ${MyBase}: HELP:             copy_only: Do not modify image file.
@@ -342,8 +344,9 @@ then
 	fi
 fi
 DebugCopyOnly=""
+DistUpgrade=""
 
-while getopts "fs:o:mx:h" OPT
+while getopts "fs:o:mp:x:h" OPT
 do
 	case "${OPT}" in
 	(f)
@@ -358,6 +361,19 @@ do
 	(m)
 		OptionMigrate="migrate"
 		;;
+	(p)
+		for plus_spec in ${OPTARG/,/}
+		do
+			case "${plus_spec}" in
+			(dist-upgrade | dist_upgrade)
+				DistUpgrade="y"
+				;;
+			(*)
+				echo "${MyBase}: WARNING: Unknown plus specifier \"${plus_spec}\"." 1>&2
+				;;
+			esac
+		done
+		;;
 	(x)
 		# Debug option
 		for debug_spec in ${OPTARG/,/}
@@ -366,7 +382,7 @@ do
 			(debug)
 				Debug="y"
 				;;
-			(copy_only)
+			(copy_only | copy-only)
 				DebugCopyOnly="y"
 				;;
 			(*)
@@ -1847,8 +1863,48 @@ EOF
 	result=$?
 	if (( ${result} != 0 ))
 	then
-		echo "${MyBase}: ERROR: Can not patch bookworm to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+		echo "${MyBase}: ERROR: Can not patch bookworm bluetooth work around to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
 		exit ${result}
+	fi
+
+	if [[ -n "${DistUpgrade}" ]]
+	then
+		# Try dist-upgrade
+		# Disable watchdog
+		"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
+--- bcm2710-rpi-3-b-qemu.dts	2026-03-01 22:02:57.425865316 +0900
++++ bcm2710-rpi-3-b-qemu-nowdt.dts	2026-03-03 22:27:18.467726718 +0900
+@@ -868,15 +868,20 @@
+ 		};
+ 
+ 		watchdog@7e100000 {
+-			compatible = "brcm,bcm2835-pm\0brcm,bcm2835-pm-wdt";
++			compatible = "brcm,bcm2835-pm-power-off";
+ 			#power-domain-cells = <0x01>;
+ 			#reset-cells = <0x01>;
+-			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
+-			reg-names = "pm\0asb";
++			/* PM, ASB, DWC-USB-OTG IP block addresses and sizes.
++			 * The address and size of DWC-USB-OTG is
++			 * aliased with usb@7e980000.
++			 */
++			reg = <0x7e100000 0x114 0x7e00a000 0x24 0x7e980000 0x10000>;
++			reg-names = "pm\0asb\0usb0base";
+ 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
+ 			clock-names = "v3d\0peri_image\0h264\0isp";
+ 			system-power-controller;
+ 			phandle = <0x2c>;
++			status = "okay";
+ 		};
+ 
+ 		rng@7e104000 {
+EOF
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not patch bookworm watchdog work around to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
+			exit ${result}
+		fi
 	fi
 
 	#  32bit virtual machine
@@ -1919,9 +1975,17 @@ then
 		)
 	else
 		# Bookworm or earlier
-		TargetKitFiles=( \
-			${TargetKitFilesExec[*]} \
-		)
+		if [[ -z "${DistUpgrade}" ]]
+		then
+			TargetKitFiles=( \
+				${TargetKitFilesExec[*]} \
+			)
+		else
+			TargetKitFiles=( \
+				${TargetKitFilesExec[*]} \
+				${TargetKitFilesDkmsTrixie[*]} \
+			)
+		fi
 	fi
 
 	for f in ${TargetKitFiles[*]}
