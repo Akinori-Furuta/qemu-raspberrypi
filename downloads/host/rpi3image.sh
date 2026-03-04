@@ -1909,7 +1909,7 @@ EOF
 
 	#  32bit virtual machine
 	#  At MMC host, Use PIO transfer instead of DMA controller.
-	#    Using DMA on QEMU emulator may corrupt rootfile system.
+	#    Using DMA on QEMU emulator may corrupts root file system.
 	"${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
 --- bcm2709-rpi-2-b.dts	2026-02-21 17:39:22.990832131 +0900
 +++ bcm2709-rpi-2-b-qemu.dts	2026-02-21 20:21:27.001388898 +0900
