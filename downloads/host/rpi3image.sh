@@ -2204,6 +2204,13 @@ EOF
  
  #
 EOF
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not apply trixie patch to \"${LightdmConfMountEtc}\"." 1>&2
+			exit ${result}
+		fi
+
 	else
 		# Bookworm or earlier.
 		# Touch up lightdm.conf
@@ -2235,13 +2242,35 @@ EOF
  #fallback-test=
  #fallback-session=
 EOF
-	fi
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not apply bookworm patch to \"${LightdmConfMountEtc}\"." 1>&2
+			exit ${result}
+		fi
 
-	result=$?
-	if (( ${result} != 0 ))
-	then
-		echo "${MyBase}: ERROR: Can not apply patch to \"${LightdmConfMountEtc}\"." 1>&2
-		exit ${result}
+		if [[ -n "${OptionDistUpgrade}" ]]
+		then
+			"${SUDO}" "${PATCH}" "${LightdmConfMountEtc}" << EOF
+--- lightdm-utx.conf	2026-03-04 20:59:49.831093632 +0900
++++ lightdm.conf	2026-03-04 21:01:42.107216403 +0900
+@@ -26,7 +26,7 @@
+ #lock-memory=true
+ #user-authority-in-system-dir=false
+ #guest-account-script=guest-account
+-#logind-check-graphical=false
++logind-check-graphical=false
+ #log-directory=/var/log/lightdm
+ #run-directory=/var/run/lightdm
+ #cache-directory=/var/cache/lightdm
+EOF
+			result=$?
+			if (( ${result} != 0 ))
+			then
+				echo "${MyBase}: ERROR: Can not apply dist-upgrade patch to \"${LightdmConfMountEtc}\"." 1>&2
+				exit ${result}
+			fi
+		fi
 	fi
 
 	XorgConf="/etc/X11/xorg.conf.d/00-fbdev.conf"
