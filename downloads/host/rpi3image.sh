@@ -1936,7 +1936,7 @@ EOF
 	then
 		# Try dist-upgrade
 		# Disable watchdog
-		[[ ! -e "${DtRpi2BNameQemuSource}" ]] ||"${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+		[[ ! -e "${DtRpi2BNameQemuSource}" ]] || "${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
 --- bcm2709-rpi-2-b-qemu.dts	2026-02-28 15:26:36.604071408 +0900
 +++ bcm2709-rpi-2-b-qemu-nowdt.dts	2026-03-04 11:40:43.310637387 +0900
 @@ -809,14 +809,19 @@
