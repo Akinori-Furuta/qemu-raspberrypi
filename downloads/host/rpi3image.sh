@@ -344,7 +344,7 @@ then
 	fi
 fi
 DebugCopyOnly=""
-DistUpgrade=""
+OptionDistUpgrade=""
 
 while getopts "fs:o:mp:x:h" OPT
 do
@@ -366,7 +366,7 @@ do
 		do
 			case "${plus_spec}" in
 			(dist-upgrade | dist_upgrade)
-				DistUpgrade="y"
+				OptionDistUpgrade="y"
 				;;
 			(*)
 				echo "${MyBase}: WARNING: Unknown plus specifier \"${plus_spec}\"." 1>&2
@@ -1867,7 +1867,7 @@ EOF
 		exit ${result}
 	fi
 
-	if [[ -n "${DistUpgrade}" ]]
+	if [[ -n "${OptionDistUpgrade}" ]]
 	then
 		# Try dist-upgrade
 		# Disable watchdog
@@ -1932,7 +1932,7 @@ EOF
 		exit ${result}
 	fi
 
-	if [[ -n "${DistUpgrade}" ]]
+	if [[ -n "${OptionDistUpgrade}" ]]
 	then
 		# Try dist-upgrade
 		# Disable watchdog
@@ -2019,7 +2019,7 @@ then
 		)
 	else
 		# Bookworm or earlier
-		if [[ -z "${DistUpgrade}" ]]
+		if [[ -z "${OptionDistUpgrade}" ]]
 		then
 			TargetKitFiles=( \
 				${TargetKitFilesExec[*]} \
