@@ -1925,6 +1925,51 @@ EOF
  			brcm,overclock-50 = <0x00>;
  			brcm,pio-limit = <0x01>;
 EOF
+	result=$?
+	if (( ${result} != 0 ))
+	then
+		echo "${MyBase}: ERROR: Can not patch bookworm eMMC-PIO work around to device tree source \"${DtRpi2BNameQemuSource}\"." 1>&2
+		exit ${result}
+	fi
+
+	if [[ -n "${DistUpgrade}" ]]
+	then
+		# Try dist-upgrade
+		# Disable watchdog
+		"${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+--- bcm2709-rpi-2-b-qemu.dts	2026-02-28 15:26:36.604071408 +0900
++++ bcm2709-rpi-2-b-qemu-nowdt.dts	2026-03-04 11:40:43.310637387 +0900
+@@ -809,14 +809,19 @@
+ 		};
+ 
+ 		watchdog@7e100000 {
+-			compatible = "brcm,bcm2835-pm\0brcm,bcm2835-pm-wdt";
++			compatible = "brcm,bcm2835-pm-power-off";
+ 			#power-domain-cells = <0x01>;
+ 			#reset-cells = <0x01>;
+-			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
+-			reg-names = "pm\0asb";
++			/* PM, ASB, DWC-USB-OTG IP block addresses and sizes.
++			 * The address and size of DWC-USB-OTG is
++			 * aliased with usb@7e980000.
++			 */
++			reg = <0x7e100000 0x114 0x7e00a000 0x24 0x7e980000 0x10000>;
++			reg-names = "pm\0asb\0usb0base";
+ 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
+ 			clock-names = "v3d\0peri_image\0h264\0isp";
+ 			system-power-controller;
++			status = "okay";
+ 			phandle = <0x27>;
+ 		};
+ 
+EOF
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not patch bookworm watchdog work around to device tree source \"${DtRpi2BNameQemuSource}\"." 1>&2
+			exit ${result}
+		fi
+	fi
 fi
 
 i=0
