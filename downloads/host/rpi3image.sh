@@ -1909,7 +1909,7 @@ EOF
 	#  32bit virtual machine
 	#  At MMC host, Use PIO transfer instead of DMA controller.
 	#    Using DMA on QEMU emulator may corrupts root file system.
-	"${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+	[[ ! -e "${DtRpi2BNameQemuSource}" ]] || "${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
 --- bcm2709-rpi-2-b.dts	2026-02-21 17:39:22.990832131 +0900
 +++ bcm2709-rpi-2-b-qemu.dts	2026-02-21 20:21:27.001388898 +0900
 @@ -530,8 +530,9 @@
@@ -1936,7 +1936,7 @@ EOF
 	then
 		# Try dist-upgrade
 		# Disable watchdog
-		"${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+		[[ ! -e "${DtRpi2BNameQemuSource}" ]] ||"${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
 --- bcm2709-rpi-2-b-qemu.dts	2026-02-28 15:26:36.604071408 +0900
 +++ bcm2709-rpi-2-b-qemu-nowdt.dts	2026-03-04 11:40:43.310637387 +0900
 @@ -809,14 +809,19 @@
