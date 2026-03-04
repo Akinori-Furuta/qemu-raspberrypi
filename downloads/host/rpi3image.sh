@@ -1873,8 +1873,8 @@ EOF
 		# Disable watchdog
 		"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
 --- bcm2710-rpi-3-b-qemu.dts	2026-03-01 22:02:57.425865316 +0900
-+++ bcm2710-rpi-3-b-qemu-nowdt.dts	2026-03-03 22:27:18.467726718 +0900
-@@ -868,15 +868,20 @@
++++ bcm2710-rpi-3-b-qemu-nowdt.dts	2026-03-04 11:44:15.911814226 +0900
+@@ -868,14 +868,19 @@
  		};
  
  		watchdog@7e100000 {
@@ -1893,11 +1893,10 @@ EOF
  			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
  			clock-names = "v3d\0peri_image\0h264\0isp";
  			system-power-controller;
- 			phandle = <0x2c>;
 +			status = "okay";
+ 			phandle = <0x2c>;
  		};
  
- 		rng@7e104000 {
 EOF
 		result=$?
 		if (( ${result} != 0 ))
