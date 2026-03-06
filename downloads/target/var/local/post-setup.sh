@@ -72,8 +72,17 @@ echo "$0: INFO: Disable rpi-eeprom-update."
 sudo systemctl disable rpi-eeprom-update.service
 
 BCM2835PowerOffDkms="/usr/src/bcm2835-power-off-dkms-1.0"
+BCM2835PowerOffDkmsModule="bcm2835-power-off-dkms/1.0"
 BCM2835PowerOff="bcm2835_power_off"
 ModuleBaseDir="/lib/modules"
+
+function KernelSymbolCrc() {
+	grep -w "$2" "$1" | awk '{print $1}'
+}
+
+function ModuleSymbolCrc() {
+	modprobe --show-modversions "$1" | grep -w "${2}" | awk '{print $1}'
+}
 
 if [[ -d "${BCM2835PowerOffDkms}" ]]
 then
@@ -102,23 +111,64 @@ then
 			continue
 		fi
 
-		dkms_ready="yes"
-
-		build_link="/lib/modules/${REPLY}/build"
+		build_link="${ModuleBaseDir}/${REPLY}/build"
 		if [[ ! -e "${build_link}" ]]
 		then
 			echo "$0: NOTICE: No headers to build a dkms driver. kernel_version=\"${REPLY}\"."
 			continue
 		fi
 
-		BCM2835PowerOffKo="/lib/modules/${REPLY}/updates/dkms/${BCM2835PowerOff}.ko.xz"
+		dkms_ready="yes"
+
 		kernel_arch="${REPLY}/${arch}"
+
+		BCM2835PowerOffKo="${ModuleBaseDir}/${REPLY}/updates/dkms/${BCM2835PowerOff}.ko"
+		if [[ ! -f "${BCM2835PowerOffKo}" ]]
+		then
+			for comp in .xz .gz .zst
+			do
+				ko_comp="${BCM2835PowerOffKo}${comp}"
+				if [[ -f "${ko_comp}" ]]
+				then
+					BCM2835PowerOffKo="${ko_comp}"
+					break
+				fi
+			done
+		fi
+
+		if [[ -f "${BCM2835PowerOffKo}" ]]
+		then
+			# Kernel module .ko exist.
+
+			symvers_file="${ModuleBaseDir}/${REPLY}/build/Module.symvers"
+			kcrc_dev_info="0xffffffff"
+			kcrc_of_find_property="0xffffffff"
+			if [[ -f "${symvers_file}" ]]
+			then
+				kcrc_dev_info="$( KernelSymbolCrc "${symvers_file}" "_dev_info" )"
+				kcrc_of_find_property="$( KernelSymbolCrc "${symvers_file}" "of_find_property" )"
+			fi
+
+			modcrc_dev_info="$( ModuleSymbolCrc "${BCM2835PowerOffKo}" "_dev_info" )"
+			modcrc_of_find_property="$( ModuleSymbolCrc "${BCM2835PowerOffKo}" "of_find_property" )"
+			if [[ ( "${kcrc_dev_info}" != "${modcrc_dev_info}" ) ||
+			      ( "${kcrc_of_find_property}" != "${modcrc_of_find_property}" )
+			]]
+			then
+				# Symbol CRC value(s) is(are) not match.
+				# So called, "disagrees about version of symbol" or
+				# "Invalid argument" at modprobe.
+				# Remove .ko, and will rebuild it.
+				echo "$0: INFO: Remove dkms driver \"${BCM2835PowerOffDkms}\" from ${kernel_arch}."
+				sudo dkms remove "${BCM2835PowerOffDkmsModule}" -k "${kernel_arch}"
+			fi
+		fi
 
 		if [[ ! -f "${BCM2835PowerOffKo}" ]]
 		then
 			echo "$0: INFO: Install dkms driver \"${BCM2835PowerOffDkms}\" to ${kernel_arch}."
-			sudo dkms build bcm2835-power-off-dkms/1.0 -k "${kernel_arch}" || dkms_ready=""
-			sudo dkms install bcm2835-power-off-dkms/1.0 -k "${kernel_arch}" || dkms_ready=""
+			sudo dkms build "${BCM2835PowerOffDkmsModule}" -k "${kernel_arch}" || dkms_ready=""
+			sudo dkms install "${BCM2835PowerOffDkmsModule}" -k "${kernel_arch}" || dkms_ready=""
 			sync
 		else
 			echo "$0: NOTICE: Already installed dkms driver \"${BCM2835PowerOffDkms}\" to ${kernel_arch}."
