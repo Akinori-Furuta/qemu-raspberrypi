@@ -17,6 +17,27 @@ rm -f /boot/firmware/firstrun.sh
 # Lock user rpi-first-boot-wizard
 sudo usermod -L rpi-first-boot-wizard
 
+# Switch Window system to X Window System
+
+LightdmConf=/etc/lightdm/lightdm.conf
+window_system=""
+
+if grep -q -i '=.*-labwc' "${LightdmConf}"
+then
+	window_system="labwc"
+else
+	if grep -q -i '=.*-x' "${LightdmConf}"
+	then
+		window_system="x"
+	fi
+fi
+
+if [[ "${window_system}" != x ]]
+then
+	echo "$0: INFO: Configure 6/A6/W1 X11: Openbox window manager with X11 backend."
+	/usr/bin/sudo /usr/bin/raspi-config nonint do_wayland W1
+fi
+
 # Disable services, they don't work well on emulator.
 
 linux_headers_pkg=""
