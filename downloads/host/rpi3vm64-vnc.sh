@@ -77,8 +77,9 @@ else
 	then
 		# Accept VNC connection on UNIX domain socket.
 		# Place socket beside this script.
-		VncDisplay="unix:/${MyDir}/${MyBody}.sock"
-		echo "$0: INFO: VNC URI is \"vnc+unix://${MyDir}/${MyBody}.sock\""
+		socket_path="$( readlink -f "${MyDirArg0}/${MyBody}.sock" )"
+		VncDisplay="unix:/${socket_path}"
+		echo "$0: INFO: VNC URI is \"vnc+unix://${socket_path}\""
 		echo "$0: INFO: Some apps can't recognize above URI, you may arrange it."
 	else
 		if [[ "${VncDisplay}" == unix:/* ]]
