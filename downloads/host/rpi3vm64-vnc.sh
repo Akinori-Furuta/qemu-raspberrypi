@@ -130,5 +130,5 @@ qemu-system-aarch64 \
 -device usb-tablet \
 -netdev "${NetDevOption}" \
 -device "usb-net,netdev=net0,mac=${NicMac}" \
--vnc "${VncDisplay}" \
+-vnc "${VncDisplay}" -audiodev none,id=audio0 \
 "$@"
