@@ -57,6 +57,7 @@ QEMU emulator.
 * [After Updating Kernel](#after-updating-kernel)
   * Reflect updated kernel and initramfs image files to
     host files.
+* [rpi3vm64.conf Configuration File](./en/rpi3vm64.conf.md)
 
 ### Run 32bit Raspberry Pi OS Trixie
 
