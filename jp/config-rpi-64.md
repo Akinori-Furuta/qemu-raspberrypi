@@ -1,5 +1,9 @@
 # Raspberry Pi OS 64bit の初期設定を行う
 
+> [!NOTE]
+> このページは Raspberry Pi OS Trixe release 以降に対応した
+> 修正は行われていません。[英語版のページを参照](../readme.md)して下さい。
+
 このページは次の設定と作業を済ませた続きとして書かれています。
 
 + [Network Bridge を QEMU 向けに構成する](bridge.md)

@@ -1,5 +1,9 @@
 # QEMU で実行する Rasiberry Pi イメージファイルをスクリプトを使って作る
 
+> [!NOTE]
+> このページは Raspberry Pi OS Trixe release 以降に対応した
+> 修正は行われていません。[英語版のページを参照](../readme.md)して下さい。
+
 ## はじめに
 
 Linux の QEMU で実行する Raspberry Pi イメージファイルをスクリプトを使って作ります。Super Speed USB 接続の USB card reader を使い 8Gbyte の SD Card イメージから作った場合、おおよそ 5 分ほどで完了します。
