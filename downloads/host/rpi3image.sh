@@ -1629,7 +1629,7 @@ fi
 UserDataFile="${OptionOutputDirectory}/bootfs/user-data"
 if [[ -f "${UserDataFile}" ]]
 then
-	echo "${MyBase}: INFO: Change \"${UserDataFile}\" mode to 700." 1>&2
+	echo "${MyBase}: INFO: Change \"${UserDataFile}\" mode to 600." 1>&2
 	"${SUDO}" "${CHMOD}" 600 "${UserDataFile}"
 	result=$?
 	if (( ${result} != 0 ))
