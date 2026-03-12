@@ -1646,43 +1646,30 @@ then
 	exit ${result}
 fi
 
-"${CAT}" | while read
+
+BootfsChmod600Files=( \
+	"${OptionOutputDirectory}/bootfs/user-data" \
+	"${OptionOutputDirectory}/bootfs/network-config" \
+	"${OptionOutputDirectory}/bootfs/firstrun.sh" \
+)
+
+i=0
+while [[ -n ${BootfsChmod600Files[${i}]} ]]
 do
-	if [[ -f "${REPLY}" ]]
+	f="${BootfsChmod600Files[${i}]}"
+	if [[ -f "${f}" ]]
 	then
-		echo "${MyBase}: INFO: Change \"${REPLY}\" mode to 600." 1>&2
-		"${SUDO}" "${CHMOD}" 600 "${REPLY}"
+		echo "${MyBase}: INFO: Change \"${f}\" mode to 600." 1>&2
+		"${SUDO}" "${CHMOD}" 600 "${f}"
 		result=$?
 		if (( ${result} != 0 ))
 		then
-			echo "${MyBase}: ERROR: Can not change \"${UserDataFile}\" mode." 1>&2
+			echo "${MyBase}: ERROR: Can not change \"${f}\" mode." 1>&2
 			exit ${result}
 		fi
 	fi
-done << EOF
-${OptionOutputDirectory}/bootfs/user-data
-${OptionOutputDirectory}/bootfs/network-config
-EOF
-
-if [[ -z "${OptionMigrate}" ]]
-then
-	echo "${MyBase}: INFO: Set bootfs/firstrun.sh permission." 1>&2
-
-	FirstRunMountBootfs="${OptionOutputDirectory}/bootfs/firstrun.sh"
-
-	if [[ -f "${FirstRunMountBootfs}" ]]
-	then
-		"${SUDO}" "${CHMOD}" 600 "${FirstRunMountBootfs}"
-		result=$?
-		if (( ${result} != 0 ))
-		then
-			echo "${MyBase}: ERROR: Can not change mode \"{FirstRunMountBootfs}\"." 1>&2
-			exit ${result}
-		fi
-	else
-		echo "${MyBase}: NOTICE: Not found \"${FirstRunMountBootfs}\", skip changing mode." 1>&2
-	fi
-fi
+	i=$(( ${i} + 1 ))
+done
 
 echo "${MyBase}: INFO: Modify device tree." 1>&2
 
