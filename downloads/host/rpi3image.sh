@@ -1393,24 +1393,44 @@ do
 	sleep 5
 done
 
-if [[ ! -d "${OptionOutputDirectory}" ]]
-then
-	"${MKDIR}" -m 700 -p "${OptionOutputDirectory}"
+Chmod700Directories=( \
+	"${OptionOutputDirectory}" \
+	"${OptionOutputDirectory}/bootfs" \
+)
+
+i=0
+while [[ -n "${Chmod700Directories[${i}]}" ]]
+do
+	d="${Chmod700Directories[${i}]}"
+
+	if [[ ! -d "${d}" ]]
+	then
+		"${MKDIR}" -m 700 -p "${d}"
+		result=$?
+		if (( ${result} != 0 ))
+		then
+			echo "${MyBase}: ERROR: Can not create directory \"${d}\"." 1>&2
+			exit ${result}
+		fi
+	fi
+
+	"${SUDO}" "${CHOWN}" "${IdUser}:${IdGroup}" "${d}"
 	result=$?
 	if (( ${result} != 0 ))
 	then
-		echo "${MyBase}: ERROR: Can not create directory \"${OptionOutputDirectory}\"." 1>&2
+		echo "${MyBase}: ERROR: Can not change \"${d}\" owner to \"${IdUser}:${IdGroup}\"." 1>&2
 		exit ${result}
 	fi
 
-	"${SUDO}" "${CHOWN}" "${IdUser}:${IdGroup}" "${OptionOutputDirectory}"
+	"${SUDO}" "${CHMOD}" 700 "${d}"
 	result=$?
 	if (( ${result} != 0 ))
 	then
-		echo "${MyBase}: ERROR: Can not change \"${OptionOutputDirectory}\" owner to \"${IdUser}:${IdGroup}\"." 1>&2
+		echo "${MyBase}: ERROR: Can not change \"${d}\" mode to 700." 1>&2
 		exit ${result}
 	fi
-fi
+	i=$(( ${i} + 1 ))
+done
 
 RaspiOSImagePreviewReady=""
 RaspiOSImagePreview="$( "${MKTEMP}" -p "${OptionOutputDirectory}" "${RaspiOSImagePrefix}-$$-XXXXXXXXXX.${OptionOutputExt}" )"
