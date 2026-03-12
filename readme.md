@@ -48,6 +48,7 @@ QEMU emulator.
 * [Clone Git Repository](#clone-git-repository)
 * [Copy Image From Bootable Media](#copy-image-from-bootable-media)
   * Requires root (privileged) account
+  * [rip3image.sh Command Line](./en/rpi3image.md)
 * [Initial Setup](#initial-setup-raspberry-pi-os)
   * Run virtual machine twice
     * Setup host name, account, and initial services.
