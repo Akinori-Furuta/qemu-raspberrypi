@@ -1312,7 +1312,9 @@ if [[ -n "${RequestFind}" ]]
 then
 	found=1 # means exit with error.
 
-	for blk in $( "${LS}" /dev/sd* | "${GREP}" -v '[0-9]$' )
+	for blk in $( 2>/dev/null \
+		      "${LS}" /dev/sd*     | "${GREP}" -v '[0-9]$' ; \
+		      "${LS}" /dev/mmcblk* | "${GREP}" -v 'p[0-9]\+$' )
 	do
 		if [[ ! -b "${blk}" ]]
 		then
