@@ -92,6 +92,9 @@ the node which is attached Raspberry Pi OS image media.
 ./rpi3image.sh /dev/sdX
 ```
 
+> [!NOTE]
+> More `rpi3image.sh` details in [rpi3image.md](./en/rpi3image.md).
+
 ## Initial Setup Raspberry Pi OS
 
 ### First Step

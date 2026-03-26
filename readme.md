@@ -79,6 +79,10 @@ Raspberry Pi OS Bookworm (Debian 12), see following pages,
 
 They support running Raspberry Pi OS Bookworm experimentally.
 
+### Migrate a Bootable Media Runs on Real Board
+
+See [Notes for Migrate Bootable Media Runs on Real Board to Virtual Machine - migrate.md](./en/migrate.md).
+
 ## Install Required Packages
 
 To install required packages, run following command.
@@ -136,6 +140,9 @@ the node which is attached Raspberry Pi OS image media.
 ```bash
 ./rpi3image.sh /dev/sdX
 ```
+
+> [!NOTE]
+> More `rpi3image.sh` details in [rpi3image.md](./en/rpi3image.md).
 
 ## Initial Setup Raspberry Pi OS
 

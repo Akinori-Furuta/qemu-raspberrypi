@@ -100,8 +100,10 @@ results.
   media size and equal to 2^i (exist i).
 + `-m`<br>
   Specify migrate a bootable media used in real machine
-  into a image file runs on QEMU emulator. This option
-  changes following actions while converting
+  into a image file runs on QEMU emulator.
+  More details in [Notes for Migrate Bootable Media Runs
+  on Real Board to Virtual Machine - migrate.md](./migrate.md).
+  This option changes following actions while converting
   a bootable media,
   + Do not check the number of partitions in
     bootable media.
