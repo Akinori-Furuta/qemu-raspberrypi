@@ -12,7 +12,7 @@ follow steps as bellow.
 
 ## Create a Raspberry Pi OS Bookworm 64bit Image Media
 
-Create a Raspberry Pi OS 32bit image media by
+Create a Raspberry Pi OS 64bit image media by
 the [Raspberry Pi imager](https://www.raspberrypi.com/software/)
 with parameters as following table.
 
