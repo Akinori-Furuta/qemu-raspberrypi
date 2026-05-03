@@ -1729,12 +1729,21 @@ done
 
 if (( ${RaspiOsReleaseNo} >= ${RaspiOsReleaseTrixie} ))
 then
+	result=0
 	# Trixie or later
 	#  64bit virtual machine
 	#  Disable bluetooth serial interface
 	#  Disable watchdog and also power off device (may be PMIC).
 	#  Disable WiFi on SDIO bus.
-	[[ ! -f "${DtRpi3BNameQemuSource}" ]] || "${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
+	if [[ -f "${DtRpi3BNameQemuSource}" ]]
+	then
+		if "${GREP}" -q 'pm\\0' "${DtRpi3BNameQemuSource}"
+		then
+			# Old device tree compiler.
+			# String lists will be disassembled into NUL
+			# separated string.
+
+			"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
 --- bcm2710-rpi-3-b.dts	2025-12-25 10:51:23.364072307 +0900
 +++ bcm2710-rpi-3-b-qemu.dts	2025-12-30 22:38:54.216640118 +0900
 @@ -567,7 +567,7 @@
@@ -1796,7 +1805,73 @@ then
  			};
  		};
 EOF
-	result=$?
+			result=$?
+		else
+			# Smart device tree compiler.
+			# String lists will be disassembled into comma
+			# separated strings.
+
+			"${PATCH}" "${DtRpi3BNameQemuSource}" << EOF
+--- bcm2710-rpi-3-b-qemu.dts.orig	2026-05-03 12:11:27.548421138 +0900
++++ bcm2710-rpi-3-b-qemu.dts	2026-05-04 02:29:45.366882758 +0900
+@@ -567,7 +567,7 @@
+ 				shutdown-gpios = <0x0b 0x00 0x00>;
+ 				local-bd-address = [00 00 00 00 00 00];
+ 				fallback-bd-address;
+-				status = "okay";
++				status = "disabled";
+ 				phandle = <0x3a>;
+ 			};
+ 		};
+@@ -868,11 +868,15 @@
+ 		};
+ 
+ 		watchdog@7e100000 {
+-			compatible = "brcm,bcm2835-pm", "brcm,bcm2835-pm-wdt";
++			compatible = "brcm,bcm2835-pm-power-off";
+ 			#power-domain-cells = <0x01>;
+ 			#reset-cells = <0x01>;
+-			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
+-			reg-names = "pm", "asb";
++			/* PM, ASB, DWC-USB-OTG IP block addresses and sizes.
++			 * The address and size of DWC-USB-OTG is
++			 * aliased with usb@7e980000.
++			 */
++			reg = <0x7e100000 0x114 0x7e00a000 0x24 0x7e980000 0x10000>;
++			reg-names = "pm", "asb", "usb0base";
+ 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
+ 			clock-names = "v3d", "peri_image", "h264", "isp";
+ 			system-power-controller;
+@@ -991,7 +995,7 @@
+ 			dma-names = "rx-tx";
+ 			brcm,overclock-50 = <0x00>;
+ 			non-removable;
+-			status = "okay";
++			status = "disabled";
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <0x1b>;
+ 			bus-width = <0x04>;
+@@ -1002,6 +1006,7 @@
+ 			wifi@1 {
+ 				reg = <0x01>;
+ 				compatible = "brcm,bcm4329-fmac";
++				status = "disabled";
+ 				phandle = <0x8a>;
+ 			};
+ 		};
+@@ -1091,7 +1096,7 @@
+ 				compatible = "brcm,bcm2835-virtgpio";
+ 				gpio-controller;
+ 				#gpio-cells = <0x02>;
+-				status = "okay";
++				status = "disabled";
+ 				phandle = <0x3e>;
+ 			};
+ 		};
+EOF
+			result=$?
+		fi
+	fi
 	if (( ${result} != 0 ))
 	then
 		echo "${MyBase}: ERROR: Can not patch trixie to device tree source \"${DtRpi3BNameQemuSource}\"." 1>&2
