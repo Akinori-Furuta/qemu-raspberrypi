@@ -204,8 +204,6 @@ sudo /sbin/init 0
 > * Disable ModemManager.service.
 > * Disable rpi-eeprom-update.service.
 > * Install power-off and reboot dkms driver bcm2835_power_off.
-> * Disable ModemManager.service.
-> * Disable rpi-eeprom-update.service.
 
 ## Run Normally
 
