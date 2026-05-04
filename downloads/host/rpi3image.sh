@@ -1878,12 +1878,21 @@ EOF
 		exit ${result}
 	fi
 
+	result=0;
 	#  32bit virtual machine
 	#  At MMC host, Use PIO transfer instead of DMA controller.
 	#    Using DMA on QEMU emulator may corrupt rootfile system.
 	#  Disable watchdog and also power off device (may be PMIC).
 	#    Attach QEMU dedicated power off and reboot driver.
-	[[ ! -f "${DtRpi2BNameQemuSource}" ]] || "${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+	if [[ -f "${DtRpi2BNameQemuSource}" ]]
+	then
+		if "${GREP}" -q 'pm\\0' "${DtRpi2BNameQemuSource}"
+		then
+			# Old device tree compiler.
+			# String lists will be disassembled into NUL
+			# separated string.
+
+			 "${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
 --- bcm2709-rpi-2-b.dts	2026-01-24 19:00:46.298018427 +0900
 +++ bcm2709-rpi-2-b-qemu.dts	2026-01-24 21:28:15.520371422 +0900
 @@ -530,11 +530,12 @@
@@ -1927,6 +1936,54 @@ EOF
  
  		rng@7e104000 {
 EOF
+			result=$?
+		else
+			# Smart device tree compiler.
+			# String lists will be disassembled into comma
+			# separated strings.
+
+			 "${PATCH}" "${DtRpi2BNameQemuSource}" << EOF
+--- bcm2709-rpi-2-b.dts	2026-05-04 10:00:17.607487444 +0900
++++ bcm2709-rpi-2-b-qemu.dts	2026-05-04 10:01:54.863015449 +0900
+@@ -530,11 +530,12 @@
+ 			interrupts = <0x02 0x18>;
+ 			clocks = <0x08 0x14>;
+ 			status = "okay";
+-			dmas = <0x09 0x2000000d>;
+-			dma-names = "rx-tx";
++			brcm,force-pio = <0x01>;
++			/* dmas = <0x09 0x2000000d>; */
++			/* dma-names = "rx-tx"; */
+ 			bus-width = <0x04>;
+ 			brcm,overclock-50 = <0x00>;
+-			brcm,pio-limit = <0x01>;
++			brcm,pio-limit = <0x7fffffff>;
+ 			firmware = <0x06>;
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <0x0a>;
+@@ -808,11 +809,15 @@
+ 		};
+ 
+ 		watchdog@7e100000 {
+-			compatible = "brcm,bcm2835-pm", "brcm,bcm2835-pm-wdt";
++			compatible = "brcm,bcm2835-pm-power-off";
+ 			#power-domain-cells = <0x01>;
+ 			#reset-cells = <0x01>;
+-			reg = <0x7e100000 0x114 0x7e00a000 0x24>;
+-			reg-names = "pm", "asb";
++			/* PM, ASB, DWC-USB-OTG IP block addresses and sizes.
++			 * The address and size of DWC-USB-OTG is
++			 * aliased with usb@7e980000.
++			 */
++			reg = <0x7e100000 0x114 0x7e00a000 0x24 0x7e980000 0x10000>;
++			reg-names = "pm", "asb", "usb0base";
+ 			clocks = <0x08 0x15 0x08 0x1d 0x08 0x17 0x08 0x16>;
+ 			clock-names = "v3d", "peri_image", "h264", "isp";
+ 			system-power-controller;
+EOF
+			result=$?
+		fi
+	fi
 	result=$?
 	if (( ${result} != 0 ))
 	then
