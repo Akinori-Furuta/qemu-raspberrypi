@@ -297,3 +297,17 @@ to boot Raspberry Pi OS. These Files are,
   * Initial: 300kibytes
 * Document and misc files
   * Initial: 4Mibytes
+
+## Appendix: How about run on the machine raspi4b (Raspberry Pi 4 model B)
+
+The QEMU virtual machine raspi4b available from the Ubuntu 26.04
+release. It supports 2Gibytes of RAM, but Raspberry Pi OS recognize only
+(1Gbytes - 64Mbytes) of them. Even if with the QEMU command line
+option "-m 2048".
+
+The QEMU emulator overwrites Device Tree Blob at
+[hw/arm/raspi4b.c](https://github.com/qemu/qemu/blob/master/hw/arm/raspi4b.c)
+raspi4_modify_dtb(). It overwrites the "reg" property in the
+"memory@0" node by hard corded memory size (1Gbytes - 64Mbytes).
+Raspberry Pi OS takes the over written "reg" property value and
+also ignores the kernel parameter "mem".
